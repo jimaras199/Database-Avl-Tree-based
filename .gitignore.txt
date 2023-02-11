@@ -1,8 +1,0 @@
-*/
-*.cpp
-*.log
-*.txt
-*.sln
-*.vcxproj
-*.filters
-*.user
