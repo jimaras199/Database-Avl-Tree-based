@@ -1,8 +1,8 @@
-!ITF_lib/interfacetxt.h
-!ITF_lib/AVLHashTable.h
-!ITF_lib/AVL.h
-!ITF_lib/allFactStructure.h
-!*/interfacetxt.h
-!*/AVLHashTable.h
-!*/AVL.h
-!*/allFactStructure.h
+*/
+*.cpp
+*.log
+*.txt
+*.sln
+*.vcxproj
+*.filters
+*.user
