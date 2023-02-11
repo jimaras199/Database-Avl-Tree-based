@@ -2,3 +2,7 @@
 !ITF_lib/AVLHashTable.h
 !ITF_lib/AVL.h
 !ITF_lib/allFactStructure.h
+!*/interfacetxt.h
+!*/AVLHashTable.h
+!*/AVL.h
+!*/allFactStructure.h
