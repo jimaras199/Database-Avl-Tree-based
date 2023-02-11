@@ -5726,3 +5726,4 @@ public:
 	
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 };
+
