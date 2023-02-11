@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+
+# Additionally
+*.txt
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.cpp
+*.log
+
+# Manually ignoring
+.editorconfig
+.vs/
+Debug/
+x64/
