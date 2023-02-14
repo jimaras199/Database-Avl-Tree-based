@@ -1,4 +1,4 @@
-
+//95 line
 #pragma once
 #include "AVL.h"
 #include "allFactStructure.h"
@@ -1485,576 +1485,171 @@ GeneralFact* makeInstanceOf(string inputline)
 	pos += ALine.length();
 	subl = inputline.substr(++pos, inputline.length() - pos); // ++pos getting after the first  parenthesis
 
-	if (ALine == "type_def")
+	string ch = inputline.substr(0, inputline.find(1, 0));
+	const char* sh = ch.c_str();
+	switch (*sh)
 	{
-		int				q, e, t, u, i, o;
-		string			w, r, y;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		o = stoi(ALine);
-		return new type_def(q, e, t, u, i, o, w, r, y);
-	}
-	else if (ALine == "op_def")
+	case 'a':
 	{
-		int				q, r, t, y, u;
-		string			w, e;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		u = stoi(ALine);
-		return new op_def(q, r, t, y, u, w, e);
-	}
-	else if (ALine == "hierarchy_part")
-	{
-		int				q, e, t, y, u;
-		string			w, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		u = stoi(ALine);
-		return new hierarchy_part(q, e, t, y, u, w, r);
-	}
-	else if (ALine == "data_stmt")
-	{
-		int				e, r;
-		string			q, w, t, y;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size()-1);
-		y = ALine;
-		return new data_stmt(e, r, q, w, t, y);
-	}
-	else if (ALine == "prog_stmt")
-	{
-		int				w, e, r, t, y, u, i;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		i = stoi(ALine);
-		return new prog_stmt(w, e, r, t, y, u, i, q);
-	}
-	else if (ALine == "joint_stmt")
-	{
-		int				w, e, r, t, y;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		y = stoi(ALine);
-		return new joint_stmt(w, e, r, t, y, q);
-	}
-	else if (ALine == "call_stmt")
-	{
-		vq.clear();
-		int					w, e;
-		string				q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos); // getting after the coma
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length() + 1;			// +1 to get ahead of the first bracket
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
+		if (ALine == "added_aux_call_ios")
 		{
-			brpos = subl.find(brcl, 0);	
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, brpos);
-			vq.push_back(stoi(ALine));
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			w = stoi(ALine);
+
+			return new added_aux_call_ios(q, w);
 		}
-		return new call_stmt(w, e, q, vq);
-		//for (int i : vq)
-		//	cout << i << co;
-	}
-	else if (ALine == "compo_stmt")
-	{
-		vq.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
+		else if (ALine == "added_aux_call_ios1")
 		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, brpos);
-			vq.push_back(stoi(ALine));
-		}
-		return new compo_stmt(w, q, vq);
-	}
-	else if (ALine == "rec_stmt")
-	{
-		vq.clear();
-		int				w;
-		string			q;
+			int				w, e;
+			string			q;
 
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
 
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length() + 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
 
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, brpos);
-			vq.push_back(stoi(ALine));
-		}
-		return new rec_stmt(w, q, vq);
-	}
-	else if (ALine == "special_op")
-	{
-		int				w, r, t, y, i, o, p;
-		string			q, e, u;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		o = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		p = stoi(ALine);
-		return new special_op(w, r, t, y, i, o, p, q, e, u);
-	}
-	else if (ALine == "special_dt")
-	{
-		int				w, r;
-		string			q, e, t, y, u;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		u = ALine;
-		return new special_dt(w, r, q, e, t, y, u);
-	}
-	else if (ALine == "local_object")
-	{
-		int				w, i, t;
-		string			q, e, r, y, u, o;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		o = ALine;
-		return new local_object(t, w, i, q, e, y, u, r, o);
-	}
-	else if (ALine == "state_node")
-	{
-		vq.clear();
-		int				w, e, r;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(pa, 0));
-		pos += ALine.size() + 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-		if (ALine == "subprogram_call") 
-		{
-			//vector
-			if ((subl.find(brcl, 0)) != 0)
-			{
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
-				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					vq.push_back(stoi(ALine));
-					pos += ALine.length();
-					subl = inputline.substr(++pos, inputline.length() - pos);
-					brpos -= ALine.length();
-					brpos--;
-				}
-				ALine = subl.substr(0, subl.find(brcl,0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length() + 1;		// getting after bracket
-				subl = inputline.substr(++pos, inputline.length() - pos);
-			}
-			else subl = inputline.substr(++++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.find(pacl, 0));
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
 			e = stoi(ALine);
-			return new subprogram_call(e, vq, w, q);
-		}
-		else if (ALine == "dataflow")
-		{
-			//vector
-			if ((subl.find(brcl, 0)) != 0)
-			{
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
-				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					vq.push_back(stoi(ALine));
-					pos += ALine.length();
-					subl = inputline.substr(++pos, inputline.length() - pos);
-					brpos -= ALine.length();
-					brpos--;
-				}
-				ALine = subl.substr(0, subl.find(brcl, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length() + 1;		// getting after bracket
-				subl = inputline.substr(++pos, inputline.length() - pos);
-			}
-			else subl = inputline.substr(++++pos, inputline.length() - pos);
 
-			ALine = subl.substr(0, subl.find(pacl, 0));
+			return new added_aux_call_ios1(q, w, e);
+		}
+		else if (ALine == "added_aux_call_signals")
+		{
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			w = stoi(ALine);
+
+			return new added_aux_call_signals(q, w);
+		}
+		else if (ALine == "added_verilog_aux_call_outputs")
+		{
+			int				w;
+			string			q, e;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			ALine.resize(ALine.size() - 1);
+			e = ALine;
+
+			return new added_verilog_aux_call_outputs(q, w, e);
+		}
+		break;
+	}
+	case 'b':
+	{
+
+		break;
+	}
+	case 'c':
+	{
+		if (ALine == "cac_mode")
+		{
+			int				q;
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			q = stoi(ALine);
+
+			return new cac_mode(q);
+		}
+		else if (ALine == "call_ios_have_been_reset")
+		{
+			string			q;
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			ALine.resize(ALine.size() - 1);
+			q = ALine;
+
+			return new call_ios_have_been_reset(q);
+		}
+		else if (ALine == "call_stmt")
+		{
+			int					w, e;
+			string				q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos); // getting after the coma
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
 			e = stoi(ALine);
-			return new dataflow(e, vq, w, q);
+			pos += ALine.length() + 1;			// +1 to get ahead of the first bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			//vector
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vq.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, brpos);
+				vq.push_back(stoi(ALine));
+			}
+			return new call_stmt(w, e, q, vq);
+			//for (int i : vq)
+			//	cout << i << co;
 		}
-		else if (ALine == "ifthen")
+		else if (ALine == "calls_list")
 		{
-			vw.clear();
-			ve.clear();
-			
+			int				w, e;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length() + 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
 			//vector
 			if ((subl.find(brcl, 0)) != 0)
 			{
@@ -2070,52 +1665,97 @@ GeneralFact* makeInstanceOf(string inputline)
 				}
 				ALine = subl.substr(0, subl.find(brcl, 0));
 				vq.push_back(stoi(ALine));
-				pos += ALine.length() + 2;		// getting after bracket
-				subl = inputline.substr(++pos, inputline.length() - pos);
 			}
-			else subl = inputline.substr(++++++pos, inputline.length() - pos);
+			return new calls_list(q, w, e, vq);
+		}
+		else if (ALine == "cessor")
+		{
+			int				w, e;
+			string			q;
 
-			//vector2
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			e = stoi(ALine);
+			return new cessor(w, e, q);
+		}
+		else if (ALine == "cessor_kind")
+		{
+			vq.clear();
+			int				e, r;
+			string			q, w, t, y;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = ALine;
+			pos += ALine.length() + 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			//vector
 			if ((subl.find(brcl, 0)) != 0)
 			{
 				brpos = subl.find(brcl, 0);
 				while (subl.find(co, 0) < brpos)
 				{
 					ALine = subl.substr(0, subl.find(co, 0));
-					vw.push_back(stoi(ALine));
+					vq.push_back(stoi(ALine));
 					pos += ALine.length();
 					subl = inputline.substr(++pos, inputline.length() - pos);
 					brpos -= ALine.length();
 					brpos--;
 				}
 				ALine = subl.substr(0, subl.find(brcl, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length() + 2;		// getting after bracket
-				subl = inputline.substr(++pos, inputline.length() - pos);
+				vq.push_back(stoi(ALine));
 			}
-			else subl = inputline.substr(++++++pos, inputline.length() - pos);
+			return new cessor_kind(e, r, q, w, t, y, vq);
+		}
+		else if (ALine == "cf_previous_op")
+		{
+			int				w, e, r;
+			string			q;
 
-			//vector3
-			if ((subl.find(brcl, 0)) != 0)
-			{
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
-				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					ve.push_back(stoi(ALine));
-					pos += ALine.length();
-					subl = inputline.substr(++pos, inputline.length() - pos);
-					brpos -= ALine.length();
-					brpos--;
-				}
-				ALine = subl.substr(0, subl.find(brcl, 0));
-				ve.push_back(stoi(ALine));
-				pos += ALine.length() + 1;		// getting after bracket
-				subl = inputline.substr(++pos, inputline.length() - pos);
-			}
-			else subl = inputline.substr(++++pos, inputline.length() - pos);
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
 
-			subl = inputline.substr(pos, inputline.length() - pos);
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
 			ALine = subl.substr(0, subl.find(co, 0));
 			e = stoi(ALine);
 			pos += ALine.length();
@@ -2123,3057 +1763,1850 @@ GeneralFact* makeInstanceOf(string inputline)
 
 			ALine = subl.substr(0, subl.rfind(pacl, 0));
 			r = stoi(ALine);
-			pos += ALine.length();
-			return new ifthen(e, r, vq, vw, ve, w, q);
+
+			return new cf_previous_op(q, w, e, r);
 		}
-		else if (ALine == "jump")
+		else if (ALine == "cf_previous_state")
 		{
+			int				w, e, r;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			r = stoi(ALine);
+
+			return new cf_previous_state(q, w, e, r);
+		}
+		else if (ALine == "change_op_number")
+	{
+	int				w, e;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+
+	return new change_op_number(e, w, q);
+	}
+		else if (ALine == "checkstyle")
+		{
+		string			q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		ALine.resize(ALine.size() - 1);
+		q = ALine;
+
+		return new checkstyle(q);
+		}
+		else if (ALine == "combo")
+	{
+	int				q, e;
+	string			w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+
+	return new combo(q, w, e);
+	}
+		else if (ALine == "complex_next_state_operation_depth")
+		{
+		int				q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		q = stoi(ALine);
+
+		return new complex_next_state_operation_depth(q);
+		}
+		else if (ALine == "compo_stmt")
+	{
+	vq.clear();
+	int				w;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, brpos);
+		vq.push_back(stoi(ALine));
+	}
+	return new compo_stmt(w, q, vq);
+	}
+		else if (ALine == "composites_list")
+	{
+	vq.clear();
+	int				w;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+	}
+	return new composites_list(q, w, vq);
+	}
+		else if (ALine == "conditional_incomplete")
+	{
+	int				e, r, a, s, d, f, g, h, j, k, l, z, x;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector2
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vw.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vw.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector3
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			ve.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		ve.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector4
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vr.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vr.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector5
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vt.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vt.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector6
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vy.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vy.push_back(stoi(ALine));
+		pos += ALine.length() + 1;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	a = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	s = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	d = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	f = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	g = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	h = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	j = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	k = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	l = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	z = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	x = stoi(ALine);
+
+	return new conditional_incomplete(q, w, e, r, vq, vw, ve, vr, vt, vy, a, s, d, f, g, h, j, k, l, z, x);
+	}
+		else if (ALine == "conditional_operations")
+	{
+	int				e, r;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector2
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vw.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vw.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+
+	//vector3
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			ve.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		ve.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+
+	//vector4
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vr.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vr.push_back(stoi(ALine));
+	}
+
+	return new conditional_operations(q, w, e, r, vq, vw, ve, vr);
+	}
+		else if (ALine == "conditional_transitions")
+	{
+	int				e, r, t, y, u, i;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	u = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	i = stoi(ALine);
+
+	return new conditional_transitions(q, w, e, r, t, y, u, i);
+	}
+		else if (ALine == "consecutive_106")
+	{
+	string			q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	q = ALine;
+
+	return new consecutive_106(q);
+	}
+		else if (ALine == "current_hdl_style")
+		{
+		string			q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		ALine.resize(ALine.size() - 1);
+		q = ALine;
+
+		return new current_hdl_style(q);
+		}
+		else if (ALine == "current_module")
+	{
+	string			q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	q = ALine;
+
+	return new current_module(q);
+	}
+		else if (ALine == "current_total_max_order_entry")
+	{
+	int				q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	q = stoi(ALine);
+
+	return new current_total_max_order_entry(q);
+	}
+		break;
+	}
+	case 'd':
+	{
+	if (ALine == "data_stmt")
+	{
+	int				e, r;
+	string			q, w, t, y;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	y = ALine;
+	return new data_stmt(e, r, q, w, t, y);
+	}
+	else if (ALine == "debug_mode")
+	{
+		int				q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		q = stoi(ALine);
+
+		return new debug_mode(q);
+	}
+
+		break;
+	}
+	case 'e':
+	{
+		if (ALine == "end_if")
+	{
+	vq.clear();
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+	}
+	return new end_if(q, vq);
+	}
+
+		break;
+	}
+	case 'f':
+	{
+		if (ALine == "for_loop")
+		{
+			int				q, e, r, t, y, u, i, o, p, a, s, d;
+			string			w;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			u = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			i = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			o = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			p = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			a = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			s = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			d = stoi(ALine);
+
+			return new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d);
+		}
+		else if (ALine == "found_call_operator")
+		{
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			w = stoi(ALine);
+
+			return new found_call_operator(q, w);
+		}
+
+
+		break;
+	}
+	case 'g':
+	{
+		if (ALine == "global_declarations")
+		{
+			vobj.clear();
+			bool			flag2 = 1;
+			int				w, t, i, p;
+			string			q, r, e, y, u, o;
+
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
 			//vector
 			if ((subl.find(brcl, 0)) != 0)
 			{
 				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				while (flag2)
 				{
+					ALine = subl.substr(13, subl.find(co, 0) - 13); // 14 because   global_declerations(<<[local_object>>("linedraw",1,"constant
+					q = ALine;
+					pos += ALine.length() + 13;
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
 					ALine = subl.substr(0, subl.find(co, 0));
-					vq.push_back(stoi(ALine));
+					w = stoi(ALine);
 					pos += ALine.length();
 					subl = inputline.substr(++pos, inputline.length() - pos);
-					brpos -= ALine.length();
-					brpos--;
+
+					ALine = subl.substr(0, subl.find(co, 0));
+					e = ALine;
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					ALine = subl.substr(0, subl.find(co, 0));
+					r = ALine;
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					ALine = subl.substr(0, subl.find(co, 0));
+					t = stoi(ALine);
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					ALine = subl.substr(0, subl.find(co, 0));
+					y = ALine;
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					ALine = subl.substr(0, subl.find(co, 0));
+					u = ALine;
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					ALine = subl.substr(0, subl.find(co, 0));
+					i = stoi(ALine);
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if (inputline.find(co, pos) < brpos)
+					{
+						ALine = subl.substr(0, subl.find(co, 0));
+						ALine.resize(ALine.size() - 1);
+						o = ALine;
+						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						pos += ALine.length() + 1;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+					else
+					{
+						flag2 = 0;
+						ALine = subl.substr(0, subl.find(brcl, 0));
+						ALine.resize(ALine.size() - 1);
+						o = ALine;
+						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						pos += ALine.length();
+						subl = inputline.substr(++++++pos, inputline.length() - pos); // getting after »)],« 
+					}
 				}
-				ALine = subl.substr(0, subl.find(brcl, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length() + 1;		// getting after bracket
-				subl = inputline.substr(++pos, inputline.length() - pos);
 			}
 			else subl = inputline.substr(++++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.find(pacl, 0));
-			e = stoi(ALine);
-			return new jump(e, vq, w, q);
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			p = stoi(ALine);
+			vobj.shrink_to_fit();
+			return new global_declarations(vobj, p);
 		}
-		else if (ALine == "return")
+		else if (ALine == "global_nils")
 		{
+			vector<nil_node>	vnil;
+			nil_node			nn(0, "");
+			bool			flag2 = 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
 			//vector
 			if ((subl.find(brcl, 0)) != 0)
 			{
 				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				while (flag2)
 				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					vq.push_back(stoi(ALine));
-					pos += ALine.length();
+
+					ALine = subl.substr(9, subl.find(co, 0) - 9);
+					nn.q = stoi(ALine);
+					pos += ALine.length() + 9;
 					subl = inputline.substr(++pos, inputline.length() - pos);
-					brpos -= ALine.length();
-					brpos--;
+
+					if (subl.find(co, 0) < brpos)
+					{
+						ALine = subl.substr(0, subl.find(co, 0));
+						ALine.resize(ALine.size() - 1);
+						nn.w = ALine;
+						vnil.push_back(nn);
+						pos += ALine.length() + 1;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+					else
+					{
+						flag2 = 0;
+						subl.resize(subl.size() - 3);
+						nn.w = subl;
+						vnil.push_back(nn);
+					}
 				}
+			}
+			return new global_nils(vnil);
+		}
+		else if (ALine == "global_resource")
+	{
+	int				q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	q = stoi(ALine);
+
+	return new global_resource(q);
+	}
+		else if (ALine == "guard_cond")
+	{
+	int				w, e;
+	string			q, r;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	r = ALine;
+
+	return new guard_cond(w, e, q, r);
+	}
+		else if (ALine == "guard_pair")
+	{
+	int				w, e;
+	string			q, r;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	r = ALine;
+
+	return new guard_pair(w, e, q, r);
+	}
+
+		break;
+	}
+	case 'h':
+	{
+		if (ALine == "hdl_io_pass")
+		{
+			int				q;
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			q = stoi(ALine);
+
+			return new hdl_io_pass(q);
+		}
+		else if (ALine == "hdl_style")
+		{
+			string			q;
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			ALine.resize(ALine.size() - 1);
+			q = ALine;
+
+			return new hdl_style(q);
+		}
+		else if (ALine == "hierarchy_part")
+		{
+			int				q, e, t, y, u;
+			string			w, r;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			u = stoi(ALine);
+			return new hierarchy_part(q, e, t, y, u, w, r);
+		}
+
+		break;
+	}
+	case 'i':
+	{
+		if (ALine == "incomplete_links")
+		{
+			int			q, w, e, r, t, y, u, i, o, p;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			u = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			i = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			o = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			p = stoi(ALine);
+
+			return new incomplete_links(q, w, e, r, t, y, u, i, o, p);
+		}
+		else if (ALine == "it_includes_conditional_targeting")
+		{
+			int				w, e;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			e = stoi(ALine);
+
+			return new it_includes_conditional_targeting(q, w, e);
+		}
+		else if (ALine == "it_includes_ifthen")
+		{
+			int				w, e;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			e = stoi(ALine);
+
+			return new it_includes_ifthen(q, w, e);
+		}
+
+		break;
+	}
+	case 'j':
+	{
+		if (ALine == "joint_stmt")
+		{
+			int				w, e, r, t, y;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			y = stoi(ALine);
+			return new joint_stmt(w, e, r, t, y, q);
+		}
+
+		break;
+	}
+	case 'k':
+	{
+
+		break;
+	}
+	case 'l':
+	{
+		if (ALine == "last_change_op_number")
+	{
+	int				w, e;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+
+	return new last_change_op_number(e, w, q);
+	}
+		else if (ALine == "last_conditional_execution")
+		{
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			w = stoi(ALine);
+			return new last_conditional_execution(q, w);
+		}
+		else if (ALine == "last_conditional_transition")
+		{
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			w = stoi(ALine);
+
+			return new last_conditional_transition(q, w);
+		}
+		else if (ALine == "last_conditional_transition_of_schedule")
+		{
+			int				e;
+			string			q, w;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			e = stoi(ALine);
+
+			return new last_conditional_transition_of_schedule(q, w, e);
+		}
+		else if (ALine == "last_for_loop_entry")
+		{
+			int				q;
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			q = stoi(ALine);
+
+			return new last_for_loop_entry(q);
+		}
+		else if (ALine == "last_incomplete")
+		{
+			int				q, w, e;
+			string			r;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			ALine.resize(ALine.size() - 1);
+			r = ALine;
+
+			return new last_incomplete(q, w, e, r);
+		}
+		else if (ALine == "last_linear_incomplete_node")
+	{
+	int				q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	q = stoi(ALine);
+
+	return new last_linear_incomplete_node(q);
+	}
+		else if (ALine == "last_local_number")
+		{
+		int				q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		q = stoi(ALine);
+
+		return new last_local_number(q);
+		}
+		else if (ALine == "last_non_io_found")
+		{
+		int				q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		q = stoi(ALine);
+
+		return new last_non_io_found(q);
+		}
+		else if (ALine == "last_op_in_a_state")
+	{
+	int				q, r;
+	string			w, e;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	r = stoi(ALine);
+	return new last_op_in_a_state(q, w, e, r);
+	}
+		else if (ALine == "last_op_instance")
+	{
+	int				q, e;
+	string			w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+	return new last_op_instance(q, w, e);
+	}
+		else if (ALine == "last_output_instance")
+	{
+	int				q;
+	string			w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	w = ALine;
+
+	return new last_output_instance(q, w);
+	}
+		else if (ALine == "last_reentrant_triangle")
+	{
+	int				w;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	w = stoi(ALine);
+	return new last_reentrant_triangle(q, w);
+	}
+		else if (ALine == "last_rescheduled")
+	{
+	int				e, t;
+	string			q, w, r;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	t = stoi(ALine);
+
+	return new last_rescheduled(w, e, q, r, t);
+	}
+		else if (ALine == "last_schedule_state")
+	{
+	int				e;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+
+	return new last_schedule_state(q, w, e);
+	}
+		else if (ALine == "last_signal_instance")
+	{
+	int				q;
+	string			w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	w = ALine;
+
+	return new last_signal_instance(q, w);
+	}
+		else if (ALine == "linear_incomplete_node")
+	{
+	vq.clear();
+	vw.clear();
+	int			e, y;
+	string		q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector2
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vw.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vw.push_back(stoi(ALine));
+	}
+
+	return new linear_incomplete_node(w, e, q, y, vq, vw);
+	}
+		else if (ALine == "local_ifthen_chain_end_operations_were_written")
+	{
+	int				q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	q = stoi(ALine);
+
+	return new local_ifthen_chain_end_operations_were_written(q);
+	}
+		else if (ALine == "local_object")
+	{
+	int				w, i, t;
+	string			q, e, r, y, u, o;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	u = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	i = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	o = ALine;
+	return new local_object(t, w, i, q, e, y, u, r, o);
+	}
+		else if (ALine == "last_while_loop_entry")
+	{
+	int				q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	q = stoi(ALine);
+
+	return new last_for_loop_entry(q);
+	}
+		break;
+	}
+	case 'm':
+	{
+		 if (ALine == "massively_parallel_style")
+	{
+	int				q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	q = stoi(ALine);
+
+	return new massively_parallel_style(q);
+	}
+		 else if (ALine == "max_op_order")
+		 {
+			 int				e;
+			 string			q, w;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 e = stoi(ALine);
+
+			 return new max_op_order(q, w, e);
+		 }
+		 else if (ALine == "max_parallel_call_order")
+		 {
+			 int				e, r;
+			 string			q, w;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 e = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 r = stoi(ALine);
+
+			 return new max_parallel_call_order(q, w, e, r);
+		 }
+		 else if (ALine == "max_path")
+		 {
+			 int				w;
+			 string			q;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 w = stoi(ALine);
+
+			 return new max_path(q, w);
+		 }
+		 else if (ALine == "mem_port")
+		 {
+			 int				q, y, i, s;
+			 string			w, e, r, t, u, o, p, a, d;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 e = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 r = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 t = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 y = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 u = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 i = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 o = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 p = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 a = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 s = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 ALine.resize(ALine.size() - 1);
+			 d = ALine;
+
+			 return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
+		 }
+		 else if (ALine == "min_path")
+		{
+		int				w;
+		string			q;
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		q = ALine;
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		w = stoi(ALine);
+
+		return new min_path(q, w);
+		}
+		 else if (ALine == "mixed_incomplete_state_lists")
+	{
+	vq.clear();
+	vw.clear();
+	int				e;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector2
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vw.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vw.push_back(stoi(ALine));
+	}
+
+	return new mixed_incomplete_state_lists(w, e, q, vq, vw);
+	}
+		 else if (ALine == "module_g_resource")
+	{
+	int				w;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	w = stoi(ALine);
+
+	return new module_g_resource(q, w);
+	}
+		 else if (ALine == "module_last_state")
+	{
+	int				q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	q = stoi(ALine);
+
+	return new module_last_state(q);
+	}
+		 else if (ALine == "module_local_list")
+	{
+	vobj.clear();
+	bool			flag2 = 1;
+	int				w, t, i;
+	string			q, r, e, y, u, o;
+
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (flag2)
+		{
+			ALine = subl.substr(13, subl.find(co, 0) - 13); // 14 because   module_local_list(<<[local_object>>("linedraw",1,"constant
+			q = ALine;
+			pos += ALine.length() + 13;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			u = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			i = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			if (inputline.find(co, pos) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				ALine.resize(ALine.size() - 1);
+				o = ALine;
+				vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+				pos += ALine.length() + 1;
+				subl = inputline.substr(++pos, inputline.length() - pos);
+			}
+			else
+			{
+				flag2 = 0;
 				ALine = subl.substr(0, subl.find(brcl, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length() + 1;		// getting after bracket
-				subl = inputline.substr(++pos, inputline.length() - pos);
-			}
-
-			return new return_cos(vq, w, q);
-		}
-	}
-	else if (ALine == "change_op_number")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new change_op_number(e, w, q);
-	}
-	else if (ALine == "last_change_op_number")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new last_change_op_number(e, w, q);
-	}
-	else if (ALine == "op_guards")
-	{
-		vq.clear();
-		vw.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length() + 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
+				ALine.resize(ALine.size() - 1);
+				o = ALine;
+				vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
 				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, brpos);
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-
-		return new op_guards(w, q, vq, vw);
-	}
-	else if (ALine == "var_guards")
-	{
-		vq.clear();
-		vw.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length() + 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-
-		return new var_guards(w, q, vq, vw);
-	}
-	else if (ALine == "guard_pair")
-	{
-		int				w, e;
-		string			q, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		r = ALine;
-
-		return new guard_pair(w, e, q, r);
-	}
-	else if (ALine == "guard_cond")
-	{
-		int				w, e;
-		string			q, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		r = ALine;
-
-		return new guard_cond(w, e, q, r);
-	}
-	else if (ALine == "predecessors")
-	{
-		vq.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}
-		return new predecessors(w, q, vq);
-	}
-	else if (ALine == "cessor")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-		return new cessor(w, e, q);
-	}
-	else if (ALine == "cessor_kind")
-	{
-		vq.clear();
-		int				e, r;
-		string			q, w, t, y;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = ALine;
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}		
-		return new cessor_kind(e, r, q, w, t, y, vq);
-
-	}
-	else if (ALine == "old_schedule")
-	{
-		string			q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		q = ALine;
-		return new old_schedule(q);
-	}
-	else if (ALine == "new_schedule")
-	{
-		string			q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		q = ALine;
-
-		return new new_schedule(q);
-	}
-	else if (ALine == "local_ifthen_chain_end_operations_were_written")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new local_ifthen_chain_end_operations_were_written(q);
-	}
-	else if (ALine == "calls_list")
-	{
-		vq.clear();
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}
-		return new calls_list(q, w, e, vq);
-	}
-	else if (ALine == "composites_list")
-	{
-		vq.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}
-		return new composites_list(q, w, vq);
-	}
-	else if (ALine == "record_aggregates_list")
-	{
-		vq.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}
-		return new record_aggregates_list(q, w, vq);
-	}
-	else if (ALine == "mem_port")
-	{
-		int				q, y, i, s;
-		string			w, e, r, t, u, o, p, a, d;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		o = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		p = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		a = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		s = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		d = ALine;
-
-		return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
-	}
-	else if (ALine == "global_declarations")
-	{
-		vobj.clear();
-		bool			flag2 = 1;
-		int				w, t, i, p;
-		string			q, r, e, y, u, o;
-
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (flag2)
-			{
-				ALine = subl.substr(13, subl.find(co, 0) - 13); // 14 because   global_declerations(<<[local_object>>("linedraw",1,"constant
-				q = ALine;
-				pos += ALine.length() + 13;
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				w = stoi(ALine);
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				e = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				r = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				t = stoi(ALine);
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				y = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				u = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				i = stoi(ALine);
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				if (inputline.find(co, pos) < brpos)
-				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					ALine.resize(ALine.size() - 1);
-					o = ALine;
-					vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
-					pos += ALine.length() + 1;
-					subl = inputline.substr(++pos, inputline.length() - pos);
-				}
-				else
-				{
-					flag2 = 0;
-					ALine = subl.substr(0, subl.find(brcl, 0));
-					ALine.resize(ALine.size() - 1);
-					o = ALine;
-					vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
-					pos += ALine.length();
-					subl = inputline.substr(++++++pos, inputline.length() - pos); // getting after »)],« 
-				}
 			}
 		}
-		else subl = inputline.substr(++++pos, inputline.length() - pos); 
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		p = stoi(ALine);
-		vobj.shrink_to_fit();
-		return new global_declarations(vobj, p);
 	}
-	else if (ALine == "source_is_normal_dt")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new source_is_normal_dt(q, w, e);
-	}
-	else if (ALine == "combo")
-	{
-		int				q, e;
-		string			w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new combo(q, w, e);
-	}
-	else if (ALine == "sequence")
-	{
-		int				q, e;
-		string			w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new sequence(q, w, e);
-	}
-	else if (ALine == "for_loop")
-	{
-		int				q, e, r, t, y, u, i, o, p, a, s, d;
-		string			w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		o = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		p = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		a = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		s = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		d = stoi(ALine);
-
-		return new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d);
-	}
-	else if (ALine == "last_for_loop_entry")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new last_for_loop_entry(q);
-	}
-	else if (ALine == "while_loop")
-	{
-		int				q, e, r, t, y, u;
-		string			w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		u = stoi(ALine);
-
-		return new while_loop(q, w, e, r, t, y, u);
-	}
-	else if (ALine == "last_while_loop_entry")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new last_for_loop_entry(q);
-	}
-	else if (ALine == "possible_end_if")
-	{
-		vq.clear();
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}
-		return new possible_end_if(q, vq);
-	}
-	else if (ALine == "end_if")
-	{
-		vq.clear();
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}
-		return new end_if(q, vq);
-	}
-	else if (ALine == "nested_cond_fact")
-	{
-		vq.clear();
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-		}
-		return new nested_cond_fact(q, vq);
-	}
-	else if (ALine == "top_level_call")
-	{
-		int				q, w, r, y, i, p;
-		string			e, t, u, o, a;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		o = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		p = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(pacl, 0));
-		a = ALine;
-
-		return new top_level_call(q, w, e, r, t, y, u, i, o, p, a);
-	}
-	else if (ALine == "top_level_call_parcs")
-	{
-		int				q, w, r, y, i, p;
-		string			e, t, u, o, a;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		o = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		p = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(pacl, 0));
-		a = ALine;
-
-		return new top_level_call_parcs(q, w, e, r, t, y, u, i, o, p, a);
-	}
-	else if (ALine == "added_aux_call_ios")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-
-		return new added_aux_call_ios(q, w);
-	}
-	else if (ALine == "added_aux_call_ios1")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new added_aux_call_ios1(q, w, e);
-	}
-	else if (ALine == "added_aux_call_signals")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-
-		return new added_aux_call_signals(q, w);
-	}
-	else if (ALine == "found_call_operator")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-
-		return new found_call_operator(q, w);
-	}
-	else if (ALine == "added_verilog_aux_call_outputs")
-	{
-		int				w;
-		string			q, e;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		e = ALine;
-
-		return new added_verilog_aux_call_outputs(q, w, e);
-	}
-	else if (ALine == "raw_dependencies")
-	{
-		vq.clear();
-		vw.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-		return new raw_dependencies(q, w, vq, vw);
-	}
-	else if (ALine == "war_dependencies")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length() + 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-		return new war_dependencies(q, w, vq, vw);
-	}
-	else if (ALine == "waw_dependencies")
-	{
-		vq.clear();
-		vw.clear();
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}		
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-		return new waw_dependencies(q, w, vq, vw);
-	}
-	else if (ALine == "schedule")
-	{
-		int				w, r;
-		string			q, e;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-
-		return new schedule(q, w, e, r);
-	}
-	else if (ALine == "last_conditional_execution")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-		return new last_conditional_execution(q, w);
-	}
-	else if (ALine == "conditional_operations")
-	{
-		int				e, r;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length() + 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-
-		//vector3
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				ve.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			ve.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-
-		//vector4
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vr.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vr.push_back(stoi(ALine));
-		}
-
-		return new conditional_operations(q, w, e, r, vq, vw, ve, vr);
-	}
-	else if (ALine == "last_conditional_transition_of_schedule")
-	{
-		int				e;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new last_conditional_transition_of_schedule(q, w, e);
-	}
-	else if (ALine == "transition_to_be_rescheduled")
-	{
-		int				e, t;
-		string			q, w, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		t = stoi(ALine);
-
-		return new transition_to_be_rescheduled(w, e, q, r, t);
-	}
-	else if (ALine == "last_conditional_transition")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-
-		return new last_conditional_transition(q, w);
-	}
-	else if (ALine == "conditional_transitions")
-	{
-		int				e, r, t, y, u, i;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		i = stoi(ALine);
-
-		return new conditional_transitions(q, w, e, r, t, y, u, i);
-	}
-	else if (ALine == "state")
-	{
-		vq.clear();
-		vw.clear();
-		int				e, t, y;
-		string			q, w, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-
-		return new state(q, w, e, r, t, y, vq, vw);
-	}
-	else if (ALine == "rescheduled")
-	{
-		int				e, t;
-		string			q, w, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		t = stoi(ALine);
-
-		return new rescheduled(w, e, q, r, t);
-	}
-	else if (ALine == "last_rescheduled")
-	{
-		int				e, t;
-		string			q, w, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		t = stoi(ALine);
-
-		return new last_rescheduled(w, e, q, r, t);
-	}
-	else if (ALine == "raw_cessor")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new raw_cessor(q, w, e);
-	}
-	else if (ALine == "war_cessor")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new war_cessor(q, w, e);
-	}
-	else if (ALine == "waw_cessor")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new waw_cessor(q, w, e);
-	}
-	else if (ALine == "op_resource")
-	{
-		int				e;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new op_resource(q, w, e);
-	}
-	else if (ALine == "global_resource")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new global_resource(q);
-	}
-	else if (ALine == "module_g_resource")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-
-		return new module_g_resource(q, w);
-	}
-	else if (ALine == "cf_previous_op")
-	{
-		int				w, e, r;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		r = stoi(ALine);
-
-		return new cf_previous_op(q, w, e, r);
-	}
-	else if (ALine == "cf_previous_state")
-	{
-		int				w, e, r;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		r = stoi(ALine);
-
-		return new cf_previous_state(q, w, e, r);
-	}
-	else if (ALine == "pred_candidate_examined")
-	{
-		int				w, e;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new pred_candidate_examined(q, w, e);
-	}
-	else if (ALine == "reentrant_triangle")
-	{
-		int				w, e, r, a, s;
-		string			q, d, f;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector3
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				ve.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			ve.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector4
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vr.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vr.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector5
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vt.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vt.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector6
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vy.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vy.push_back(stoi(ALine));
-			pos += ALine.length() + 1;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		a = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		s = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		d = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		ALine.resize(ALine.size() - 1);
-		f = ALine;
-
-		return new reentrant_triangle(q, w, e, r, vq, vw, ve, vr, vt, vy, a, s, d, f);
-	}
-	else if (ALine == "last_reentrant_triangle")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-		return new last_reentrant_triangle(q, w);
-	}
-	else if (ALine == "last_schedule_state")
-	{
-		int				e;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new last_schedule_state(q, w, e);
-	}
-	else if (ALine == "conditional_incomplete")
-	{
-		int				e, r, a, s, d, f, g, h, j, k, l, z, x;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector3
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				ve.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			ve.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector4
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vr.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vr.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector5
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vt.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vt.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector6
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vy.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vy.push_back(stoi(ALine));
-			pos += ALine.length() + 1;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		a = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		s = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		d = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		f = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		g = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		h = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		j = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		k = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		l = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		z = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		x = stoi(ALine);
-
-		return new conditional_incomplete(q, w, e, r, vq, vw, ve, vr, vt, vy, a, s, d, f, g, h, j, k, l, z, x);
-	}
-	else if (ALine == "mixed_incomplete_state_lists")
-	{
-		vq.clear();
-		vw.clear();
-		int				e;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length()+1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-
-		return new mixed_incomplete_state_lists(w, e, q, vq, vw);
-	}
-	else if (ALine == "linear_incomplete_node")
-	{
-		vq.clear();
-		vw.clear();
-		int			e, y;
-		string		q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length() + 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vq.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length() + 2;		// getting after bracket
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-		//vector2
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (subl.find(co, 0) < brpos)
-			{
-				ALine = subl.substr(0, subl.find(co, 0));
-				vw.push_back(stoi(ALine));
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos -= ALine.length();
-				brpos--;
-			}
-			ALine = subl.substr(0, subl.find(brcl, 0));
-			vw.push_back(stoi(ALine));
-		}
-
-		return new linear_incomplete_node(w, e, q, y, vq, vw);
-	}
-	else if (ALine == "incomplete_links")
-	{
-		int			q, w, e, r, t, y, u, i, o, p;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		o = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		p = stoi(ALine);
-
-		return new incomplete_links(q, w, e, r, t, y, u, i, o, p);
-	}
-	else if (ALine == "last_incomplete")
-	{
-		int				q, w, e;
-		string			r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		r = ALine;
-
-		return new last_incomplete(q, w, e, r);
-	}
-	else if (ALine == "global_nils")
-	{
-		vector<nil_node>	vnil;
-		nil_node			nn(0,"");
-		bool			flag2 = 1;
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (flag2)
-			{
-
-				ALine = subl.substr(9, subl.find(co, 0) - 9);
-				nn.q = stoi(ALine);
-				pos += ALine.length() + 9;
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				if (subl.find(co, 0) < brpos)
-				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					ALine.resize(ALine.size() - 1);
-					nn.w = ALine;
-					vnil.push_back(nn);
-					pos += ALine.length() + 1;
-					subl = inputline.substr(++pos, inputline.length() - pos);
-				}
-				else
-				{
-					flag2 = 0;
-					subl.resize(subl.size() - 3);
-					nn.w = subl;
-					vnil.push_back(nn);
-				}
-			}
-		}
-		return new global_nils(vnil);
-	}
-	else if (ALine == "current_module")
-	{
-		string			q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		q = ALine;
-
-		return new current_module(q);
-	}
-	else if (ALine == "last_linear_incomplete_node")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new last_linear_incomplete_node(q);
-	}
-	else if (ALine == "operator_instances")
-	{
-		int				w;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		w = stoi(ALine);
-
-		return new operator_instances(q, w);
-	}
-	else if (ALine == "massively_parallel_style")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new massively_parallel_style(q);
-	}
-	else if (ALine == "hdl_style")
-	{
-		string			q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		q = ALine;
-
-		return new hdl_style(q);
+	return new module_local_list(vobj);
 	}
-	else if (ALine == "op_instance")
+		 else if (ALine == "module_local_list_parcs")
 	{
-		int				q, e, r;
-		string			w, t;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		t = ALine;
-
-		return new op_instance(w, e, q, r, t);
-	}
-	else if (ALine == "last_op_instance")
-	{
-		int				q, e;
-		string			w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-		return new last_op_instance(q, w, e);
-	}
-	else if (ALine == "op_in_a_state")
-	{
-		int				q, r;
-		string			w, e, t;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		t = ALine;
-
-		return new op_in_a_state(w, e, q, r, t);
-	}
-	else if (ALine == "last_op_in_a_state")
-	{
-		int				q, r;
-		string			w, e;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		r = stoi(ALine);
-		return new last_op_in_a_state(q, w, e, r);
-	}
-	else if (ALine == "signal_instance")
-	{
-		int				q, t, y, u;
-		string			w, e, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		u = stoi(ALine);
-
-		return new signal_instance(q, w, e, r, t, y, u);
-	}
-	else if (ALine == "last_signal_instance")
-	{
-		int				q;
-		string			w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		w = ALine;
-
-		return new last_signal_instance(q, w);
-	}
-	else if (ALine == "output_instance")
-	{
-		int				q, t, y;
-		string			w, e, r;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		y = stoi(ALine);
-
-		return new output_instance(q, w, e, r, t, y);
-	}
-	else if (ALine == "last_output_instance")
-	{
-		int				q;
-		string			w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		w = ALine;
-
-		return new last_output_instance(q, w);
-	}
-	else if (ALine == "operator_instance_stats")
-	{
-		int				w, e, r;
-		string			q;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		r = stoi(ALine);
-
-		return new operator_instance_stats(q, w, e, r);
-	}
-	else if (ALine == "consecutive_106")
-	{
-		string			q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		q = ALine;
-
-		return new consecutive_106(q);
-	}
-	else if (ALine == "operation_order")
-	{
-		int				e, r, t, y, u, i, o, p;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		r = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		t = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		y = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		u = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		i = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		o = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		p = stoi(ALine);
-
-		return new operation_order(q, w, e, r, t, y, u, i, o, p);
-	}
-	else if (ALine == "max_parallel_call_order")
-	{
-		int				e, r;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		e = stoi(ALine);
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		r = stoi(ALine);
-
-		return new max_parallel_call_order(q, w, e, r);
-	}
-	else if (ALine == "max_op_order")
-	{
-		int				e;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new max_op_order(q, w, e);
-	}
-	else if (ALine == "totalmax_call_order")
-	{
-		int				e;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new totalmax_call_order(q, w, e);
-	}
-	else if (ALine == "totalmax_gross_depth")
-	{
-		int				e;
-		string			q, w;
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		q = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.find(co, 0));
-		w = ALine;
-		pos += ALine.length();
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		e = stoi(ALine);
-
-		return new totalmax_gross_depth(q, w, e);
-	}
-	else if (ALine == "current_total_max_order_entry")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new current_total_max_order_entry(q);
-	}
-	else if (ALine == "module_last_state")
-	{
-		int				q;
-
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		q = stoi(ALine);
-
-		return new module_last_state(q);
-	}
-	else if (ALine == "module_local_list")
-	{
-		vobj.clear();
-		bool			flag2 = 1;
-		int				w, t, i;
-		string			q, r, e, y, u, o;
-
-		subl = inputline.substr(++pos, inputline.length() - pos);
-
-		//vector
-		if ((subl.find(brcl, 0)) != 0)
-		{
-			brpos = subl.find(brcl, 0);
-			while (flag2)
-			{
-				ALine = subl.substr(13, subl.find(co, 0) - 13); // 14 because   module_local_list(<<[local_object>>("linedraw",1,"constant
-				q = ALine;
-				pos += ALine.length() + 13;
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				w = stoi(ALine);
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				e = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				r = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				t = stoi(ALine);
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				y = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				u = ALine;
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				ALine = subl.substr(0, subl.find(co, 0));
-				i = stoi(ALine);
-				pos += ALine.length();
-				subl = inputline.substr(++pos, inputline.length() - pos);
-
-				if (inputline.find(co, pos) < brpos)
-				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					ALine.resize(ALine.size() - 1);
-					o = ALine;
-					vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
-					pos += ALine.length() + 1;
-					subl = inputline.substr(++pos, inputline.length() - pos);
-				}
-				else
-				{
-					flag2 = 0;
-					ALine = subl.substr(0, subl.find(brcl, 0));
-					ALine.resize(ALine.size() - 1);
-					o = ALine;
-					vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
-					pos += ALine.length();
-				}
-			}
-		}
-		return new module_local_list(vobj);
-	}
-	//exeeded the limit of nested else if
-	if (ALine == "module_local_list_parcs")
-		{
 		vobj.clear();
 		bool			flag2 = 1;
 		int				w, t, i;
@@ -5248,29 +3681,973 @@ GeneralFact* makeInstanceOf(string inputline)
 			}
 		}
 		return new module_local_list_parcs(vobj);
-		}
-	else if (ALine == "last_non_io_found")
+	}
+
+		break;
+	}
+	case 'n':
+	{
+		 if (ALine == "nested_cond_fact")
+	{
+	vq.clear();
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
 		{
-			int				q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
-
-			return new last_non_io_found(q);
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
 		}
-	else if (ALine == "last_local_number")
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+	}
+	return new nested_cond_fact(q, vq);
+	}
+		 else if (ALine == "new_schedule")
+		 {
+			 string			q;
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 ALine.resize(ALine.size() - 1);
+			 q = ALine;
+
+			 return new new_schedule(q);
+		 }
+
+		break;
+	}
+	case 'o':
+	{
+		 if (ALine == "old_schedule")	{
+	string			q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	q = ALine;
+	return new old_schedule(q);
+	}
+		 else if (ALine == "op_belongs_to_state")
+		 {
+			 int				w, e, r;
+			 string			q;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 e = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 r = stoi(ALine);
+
+			 return new op_belongs_to_state(q, w, e, r);
+		 }
+		 else if (ALine == "op_def")
+		 {
+			 int				q, r, t, y, u;
+			 string			w, e;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 e = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 r = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 t = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 y = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 u = stoi(ALine);
+			 return new op_def(q, r, t, y, u, w, e);
+		 }
+		 else if (ALine == "op_guards")
+		 {
+			 vq.clear();
+			 vw.clear();
+			 int				w;
+			 string			q;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = stoi(ALine);
+			 pos += ALine.length() + 1;
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 //vector
+			 if ((subl.find(brcl, 0)) != 0)
+			 {
+				 brpos = subl.find(brcl, 0);
+				 while (subl.find(co, 0) < brpos)
+				 {
+					 ALine = subl.substr(0, subl.find(co, 0));
+					 vq.push_back(stoi(ALine));
+					 pos += ALine.length();
+					 subl = inputline.substr(++pos, inputline.length() - pos);
+					 brpos -= ALine.length();
+					 brpos--;
+				 }
+				 ALine = subl.substr(0, brpos);
+				 vq.push_back(stoi(ALine));
+				 pos += ALine.length() + 2;		// getting after bracket
+				 subl = inputline.substr(++pos, inputline.length() - pos);
+			 }
+			 else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+			 //vector2
+			 if ((subl.find(brcl, 0)) != 0)
+			 {
+				 brpos = subl.find(brcl, 0);
+				 while (subl.find(co, 0) < brpos)
+				 {
+					 ALine = subl.substr(0, subl.find(co, 0));
+					 vw.push_back(stoi(ALine));
+					 pos += ALine.length();
+					 subl = inputline.substr(++pos, inputline.length() - pos);
+					 brpos -= ALine.length();
+					 brpos--;
+				 }
+				 ALine = subl.substr(0, subl.find(brcl, 0));
+				 vw.push_back(stoi(ALine));
+			 }
+
+			 return new op_guards(w, q, vq, vw);
+		 }
+		 else if (ALine == "op_in_a_state")
+	{
+	int				q, r;
+	string			w, e, t;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	t = ALine;
+
+	return new op_in_a_state(w, e, q, r, t);
+	}
+		 else if (ALine == "op_instance")
+	{
+	int				q, e, r;
+	string			w, t;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	t = ALine;
+
+	return new op_instance(w, e, q, r, t);
+	}
+		 else if (ALine == "op_resource")
+	{
+	int				e;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+
+	return new op_resource(q, w, e);
+	}
+		 else if (ALine == "operation_order")
+	{
+	int				e, r, t, y, u, i, o, p;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	u = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	i = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	o = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	p = stoi(ALine);
+
+	return new operation_order(q, w, e, r, t, y, u, i, o, p);
+	}
+		 else if (ALine == "operator_instance_stats")
+	{
+	int				w, e, r;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	r = stoi(ALine);
+
+	return new operator_instance_stats(q, w, e, r);
+	}
+		 else if (ALine == "operator_instances")
+	{
+	int				w;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	w = stoi(ALine);
+
+	return new operator_instances(q, w);
+	}
+		 else if (ALine == "output_filename")
 		{
-			int				q;
+		string			q;
 
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		ALine.resize(ALine.size() - 1);
+		q = ALine;
 
-			return new last_local_number(q);
+		return new output_filename(q);
 		}
-	else if (ALine == "printed_formal_ios_of_called_module")
+		 else if (ALine == "output_instance")
+	{
+	int				q, t, y;
+	string			w, e, r;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	y = stoi(ALine);
+
+	return new output_instance(q, w, e, r, t, y);
+	}
+
+		break;
+	}
+	case 'p':
+	{
+		 if (ALine == "package_name")
+	{
+	string			q;
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	ALine.resize(ALine.size() - 1);
+	q = ALine;
+	return new package_name(q);
+	}
+		 else if (ALine == "path")
+		 {
+			 int				w, e;
+			 string			q;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 e = stoi(ALine);
+
+			 return new path(q, w, e);
+		 }
+		 else if (ALine == "possible_end_if")
+		 {
+			 vq.clear();
+			 string			q;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length() + 1;
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 //vector
+			 if ((subl.find(brcl, 0)) != 0)
+			 {
+				 brpos = subl.find(brcl, 0);
+				 while (subl.find(co, 0) < brpos)
+				 {
+					 ALine = subl.substr(0, subl.find(co, 0));
+					 vq.push_back(stoi(ALine));
+					 pos += ALine.length();
+					 subl = inputline.substr(++pos, inputline.length() - pos);
+					 brpos -= ALine.length();
+					 brpos--;
+				 }
+				 ALine = subl.substr(0, subl.find(brcl, 0));
+				 vq.push_back(stoi(ALine));
+			 }
+			 return new possible_end_if(q, vq);
+		 }
+		 else if (ALine == "pred_candidate_examined")
+		 {
+			 int				w, e;
+			 string			q;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = stoi(ALine);
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.rfind(pacl, 0));
+			 e = stoi(ALine);
+
+			 return new pred_candidate_examined(q, w, e);
+		 }
+		 else if (ALine == "predecessors")
+		 {
+			 vq.clear();
+			 int				w;
+			 string			q;
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 q = ALine;
+			 pos += ALine.length();
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 ALine = subl.substr(0, subl.find(co, 0));
+			 w = stoi(ALine);
+			 pos += ALine.length() + 1;
+			 subl = inputline.substr(++pos, inputline.length() - pos);
+
+			 //vector
+			 if ((subl.find(brcl, 0)) != 0)
+			 {
+				 brpos = subl.find(brcl, 0);
+				 while (subl.find(co, 0) < brpos)
+				 {
+					 ALine = subl.substr(0, subl.find(co, 0));
+					 vq.push_back(stoi(ALine));
+					 pos += ALine.length();
+					 subl = inputline.substr(++pos, inputline.length() - pos);
+					 brpos -= ALine.length();
+					 brpos--;
+				 }
+				 ALine = subl.substr(0, subl.find(brcl, 0));
+				 vq.push_back(stoi(ALine));
+			 }
+			 return new predecessors(w, q, vq);
+		 }
+		 else if (ALine == "print_C_main_body")
+		{
+		int				q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		q = stoi(ALine);
+
+		return new print_C_main_body(q);
+		}
+		 else if (ALine == "printed_formal_ios_of_called_module")
+		{
+		int				w, e;
+		string			q, r;
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		q = ALine;
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		w = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		e = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		ALine.resize(ALine.size() - 1);
+		r = ALine;
+
+		return new printed_formal_ios_of_called_module(q, w, e, r);
+		}
+		 else if (ALine == "prog_stmt")
+	{
+	int				w, e, r, t, y, u, i;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	u = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	i = stoi(ALine);
+	return new prog_stmt(w, e, r, t, y, u, i, q);
+	}
+
+		break;
+	}
+	case 'q':
+	{
+
+		break;
+	}
+	case 'r':
+	{
+		if (ALine == "raw_cessor")
 		{
 			int				w, e;
-			string			q, r;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			e = stoi(ALine);
+
+			return new raw_cessor(q, w, e);
+		}
+		else if (ALine == "raw_dependencies")
+		{
+			vq.clear();
+			vw.clear();
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length() + 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			//vector
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vq.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length() + 2;		// getting after bracket
+				subl = inputline.substr(++pos, inputline.length() - pos);
+			}
+			else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+			//vector2
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vw.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vw.push_back(stoi(ALine));
+			}
+			return new raw_dependencies(q, w, vq, vw);
+		}
+		else if (ALine == "rec_stmt")
+		{
+			vq.clear();
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length() + 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			//vector
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vq.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, brpos);
+				vq.push_back(stoi(ALine));
+			}
+			return new rec_stmt(w, q, vq);
+		}
+		else if (ALine == "record_aggregates_list")
+	{
+	vq.clear();
+	int				w;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+	}
+	return new record_aggregates_list(q, w, vq);
+	}
+		else if (ALine == "reentrant_triangle")
+	{
+	int				w, e, r, a, s;
+	string			q, d, f;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector2
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vw.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vw.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector3
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			ve.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		ve.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector4
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vr.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vr.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector5
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vt.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vt.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector6
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			vy.push_back(stoi(ALine));
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			brpos -= ALine.length();
+			brpos--;
+		}
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vy.push_back(stoi(ALine));
+		pos += ALine.length() + 1;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	a = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	s = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	d = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	ALine.resize(ALine.size() - 1);
+	f = ALine;
+
+	return new reentrant_triangle(q, w, e, r, vq, vw, ve, vr, vt, vy, a, s, d, f);
+	}
+		else if (ALine == "rescheduled")
+	{
+	int				e, t;
+	string			q, w, r;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	t = stoi(ALine);
+
+	return new rescheduled(w, e, q, r, t);
+	}
+		else if (ALine == "resetstyle")
+		{
+		string			q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		ALine.resize(ALine.size() - 1);
+		q = ALine;
+
+		return new resetstyle(q);
+		}
+
+		break;
+	}
+	case 's':
+	{
+		if (ALine == "schedule")
+		{
+			int				w, r;
+			string			q, e;
 
 			ALine = subl.substr(0, subl.find(co, 0));
 			q = ALine;
@@ -5283,57 +4660,468 @@ GeneralFact* makeInstanceOf(string inputline)
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
 			ALine = subl.substr(0, subl.find(co, 0));
+			e = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+
+			return new schedule(q, w, e, r);
+		}
+		else if (ALine == "sequence")
+		{
+			int				q, e;
+			string			w;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
 			e = stoi(ALine);
+
+			return new sequence(q, w, e);
+		}
+		else if (ALine == "signal_instance")
+		{
+			int				q, t, y, u;
+			string			w, e, r;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			u = stoi(ALine);
+
+			return new signal_instance(q, w, e, r, t, y, u);
+		}
+		else if (ALine == "source_is_normal_dt")
+		{
+			int				w, e;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			e = stoi(ALine);
+
+			return new source_is_normal_dt(q, w, e);
+		}
+		else if (ALine == "special_dt")
+		{
+			int				w, r;
+			string			q, e, t, y, u;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = ALine;
 			pos += ALine.length();
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
 			ALine = subl.substr(0, subl.rfind(pacl, 0));
 			ALine.resize(ALine.size() - 1);
-			r = ALine;
-
-			return new printed_formal_ios_of_called_module(q, w, e, r);
+			u = ALine;
+			return new special_dt(w, r, q, e, t, y, u);
 		}
-	else if (ALine == "it_includes_ifthen")
+		else if (ALine == "special_op")
+	{
+	int				w, r, t, y, i, o, p;
+	string			q, e, u;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	u = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	i = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	o = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	p = stoi(ALine);
+	return new special_op(w, r, t, y, i, o, p, q, e, u);
+	}
+		else if (ALine == "state")
+	{
+	vq.clear();
+	vw.clear();
+	int				e, t, y;
+	string			q, w, r;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = stoi(ALine);
+	pos += ALine.length() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	//vector
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
 		{
-			int				w, e;
-			string			q;
-
 			ALine = subl.substr(0, subl.find(co, 0));
-			q = ALine;
+			vq.push_back(stoi(ALine));
 			pos += ALine.length();
 			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.find(co, 0));
-			w = stoi(ALine);
-			pos += ALine.length();
-			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			e = stoi(ALine);
-
-			return new it_includes_ifthen(q, w, e);
+			brpos -= ALine.length();
+			brpos--;
 		}
-	else if (ALine == "it_includes_conditional_targeting")
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vq.push_back(stoi(ALine));
+		pos += ALine.length() + 2;		// getting after bracket
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	}
+	else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+	//vector2
+	if ((subl.find(brcl, 0)) != 0)
+	{
+		brpos = subl.find(brcl, 0);
+		while (subl.find(co, 0) < brpos)
 		{
-			int				w, e;
-			string			q;
-
 			ALine = subl.substr(0, subl.find(co, 0));
-			q = ALine;
+			vw.push_back(stoi(ALine));
 			pos += ALine.length();
 			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.find(co, 0));
-			w = stoi(ALine);
-			pos += ALine.length();
-			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			e = stoi(ALine);
-
-			return new it_includes_conditional_targeting(q, w, e);
+			brpos -= ALine.length();
+			brpos--;
 		}
-	else if (ALine == "targets_conditional_variable")
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		vw.push_back(stoi(ALine));
+	}
+
+	return new state(q, w, e, r, t, y, vq, vw);
+	}
+		else if (ALine == "state_node")
+	{
+	vq.clear();
+	int				w, e, r;
+	string			q;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(pa, 0));
+	pos += ALine.size() + 1;
+	subl = inputline.substr(++pos, inputline.length() - pos);
+	if (ALine == "subprogram_call")
+	{
+		//vector
+		if ((subl.find(brcl, 0)) != 0)
+		{
+			brpos = subl.find(brcl, 0);
+			while (subl.find(co, 0) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos -= ALine.length();
+				brpos--;
+			}
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length() + 1;		// getting after bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else subl = inputline.substr(++++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(pacl, 0));
+		e = stoi(ALine);
+		return new subprogram_call(e, vq, w, q);
+	}
+	else if (ALine == "dataflow")
+	{
+		//vector
+		if ((subl.find(brcl, 0)) != 0)
+		{
+			brpos = subl.find(brcl, 0);
+			while (subl.find(co, 0) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos -= ALine.length();
+				brpos--;
+			}
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length() + 1;		// getting after bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else subl = inputline.substr(++++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(pacl, 0));
+		e = stoi(ALine);
+		return new dataflow(e, vq, w, q);
+	}
+	else if (ALine == "ifthen")
+	{
+		vw.clear();
+		ve.clear();
+
+		//vector
+		if ((subl.find(brcl, 0)) != 0)
+		{
+			brpos = subl.find(brcl, 0);
+			while (subl.find(co, 0) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos -= ALine.length();
+				brpos--;
+			}
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length() + 2;		// getting after bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+		//vector2
+		if ((subl.find(brcl, 0)) != 0)
+		{
+			brpos = subl.find(brcl, 0);
+			while (subl.find(co, 0) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				vw.push_back(stoi(ALine));
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos -= ALine.length();
+				brpos--;
+			}
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			vw.push_back(stoi(ALine));
+			pos += ALine.length() + 2;		// getting after bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+		//vector3
+		if ((subl.find(brcl, 0)) != 0)
+		{
+			brpos = subl.find(brcl, 0);
+			while (subl.find(co, 0) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				ve.push_back(stoi(ALine));
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos -= ALine.length();
+				brpos--;
+			}
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			ve.push_back(stoi(ALine));
+			pos += ALine.length() + 1;		// getting after bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else subl = inputline.substr(++++pos, inputline.length() - pos);
+
+		subl = inputline.substr(pos, inputline.length() - pos);
+		ALine = subl.substr(0, subl.find(co, 0));
+		e = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		r = stoi(ALine);
+		pos += ALine.length();
+		return new ifthen(e, r, vq, vw, ve, w, q);
+	}
+	else if (ALine == "jump")
+	{
+		//vector
+		if ((subl.find(brcl, 0)) != 0)
+		{
+			brpos = subl.find(brcl, 0);
+			while (subl.find(co, 0) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos -= ALine.length();
+				brpos--;
+			}
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length() + 1;		// getting after bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else subl = inputline.substr(++++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(pacl, 0));
+		e = stoi(ALine);
+		return new jump(e, vq, w, q);
+	}
+	else if (ALine == "return")
+	{
+		//vector
+		if ((subl.find(brcl, 0)) != 0)
+		{
+			brpos = subl.find(brcl, 0);
+			while (subl.find(co, 0) < brpos)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos -= ALine.length();
+				brpos--;
+			}
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			vq.push_back(stoi(ALine));
+			pos += ALine.length() + 1;		// getting after bracket
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+
+		return new return_cos(vq, w, q);
+	}
+	}
+
+		break;
+	}
+	case 't':
+	{
+		if (ALine == "targets_conditional_variable")
 		{
 			int				w, e, r;
 			string			q;
@@ -5358,7 +5146,333 @@ GeneralFact* makeInstanceOf(string inputline)
 
 			return new targets_conditional_variable(q, w, e, r);
 		}
-	else if (ALine == "variable_has_been_listed")
+		else if (ALine == "top_level_call")
+		{
+			int				q, w, r, y, i, p;
+			string			e, t, u, o, a;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			u = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			i = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			o = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			p = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(pacl, 0));
+			a = ALine;
+
+			return new top_level_call(q, w, e, r, t, y, u, i, o, p, a);
+		}
+		else if (ALine == "top_level_call_parcs")
+		{
+			int				q, w, r, y, i, p;
+			string			e, t, u, o, a;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			e = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			r = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			t = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			y = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			u = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			i = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			o = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			p = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(pacl, 0));
+			a = ALine;
+
+			return new top_level_call_parcs(q, w, e, r, t, y, u, i, o, p, a);
+		}
+		else if (ALine == "top_module")
+		{
+		string			q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		ALine.resize(ALine.size() - 1);
+		q = ALine;
+
+		return new top_module(q);
+		}
+		else if (ALine == "total_local_entry")
+		{
+		int				q;
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		q = stoi(ALine);
+
+		return new total_local_entry(q);
+		}
+		else if (ALine == "totalmax_call_order")
+	{
+	int				e;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+
+	return new totalmax_call_order(q, w, e);
+	}
+		else if (ALine == "totalmax_gross_depth")
+	{
+	int				e;
+	string			q, w;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	e = stoi(ALine);
+
+	return new totalmax_gross_depth(q, w, e);
+	}
+		else if (ALine == "transition_to_be_rescheduled")
+	{
+	int				e, t;
+	string			q, w, r;
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	t = stoi(ALine);
+
+	return new transition_to_be_rescheduled(w, e, q, r, t);
+	}
+		else if (ALine == "type_def")
+	{
+		int				q, e, t, u, i, o;
+		string			w, r, y;
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		q = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		w = ALine;
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		e = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		r = ALine;
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		t = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		y = ALine;
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		u = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.find(co, 0));
+		i = stoi(ALine);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos);
+
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		ALine.resize(ALine.size() - 1);
+		o = stoi(ALine);
+		return new type_def(q, e, t, u, i, o, w, r, y);
+	}
+
+		break;
+	}
+	case 'u':
+	{
+
+		break;
+	}
+	case 'v':
+	{
+		if (ALine == "var_guards")
+		{
+			vq.clear();
+			vw.clear();
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length() + 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			//vector
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vq.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length() + 2;		// getting after bracket
+				subl = inputline.substr(++pos, inputline.length() - pos);
+			}
+			else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+			//vector2
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vw.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vw.push_back(stoi(ALine));
+			}
+
+			return new var_guards(w, q, vq, vw);
+		}
+		else if (ALine == "variable_has_been_listed")
 		{
 			string			q, w;
 
@@ -5373,111 +5487,65 @@ GeneralFact* makeInstanceOf(string inputline)
 
 			return new variable_has_been_listed(q, w);
 		}
-	else if (ALine == "resetstyle")
+
+		break;
+	}
+	case 'w':
+	{
+		if (ALine == "war_dependencies")
 		{
+			int				w;
 			string			q;
 
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			ALine.resize(ALine.size() - 1);
+			ALine = subl.substr(0, subl.find(co, 0));
 			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
 
-			return new resetstyle(q);
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length() + 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			//vector
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vq.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length() + 2;		// getting after bracket
+				subl = inputline.substr(++pos, inputline.length() - pos);
+			}
+			else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+			//vector2
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vw.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vw.push_back(stoi(ALine));
+			}
+			return new war_dependencies(q, w, vq, vw);
 		}
-	else if (ALine == "checkstyle")
-		{
-			string			q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			ALine.resize(ALine.size() - 1);
-			q = ALine;
-
-			return new checkstyle(q);
-		}
-	else if (ALine == "total_local_entry")
-		{
-			int				q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
-
-			return new total_local_entry(q);
-		}
-	else if (ALine == "complex_next_state_operation_depth")
-		{
-			int				q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
-
-			return new complex_next_state_operation_depth(q);
-		}
-	else if (ALine == "output_filename")
-		{
-			string			q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			ALine.resize(ALine.size() - 1);
-			q = ALine;
-
-			return new output_filename(q);
-		}
-	else if (ALine == "hdl_io_pass")
-		{
-			int				q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
-
-			return new hdl_io_pass(q);
-		}
-	else if (ALine == "current_hdl_style")
-		{
-			string			q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			ALine.resize(ALine.size() - 1);
-			q = ALine;
-
-			return new current_hdl_style(q);
-		}
-	else if (ALine == "call_ios_have_been_reset")
-		{
-			string			q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			ALine.resize(ALine.size() - 1);
-			q = ALine;
-
-			return new call_ios_have_been_reset(q);
-		}
-	else if (ALine == "debug_mode")
-		{
-			int				q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
-
-			return new debug_mode(q);
-		}
-	else if (ALine == "print_C_main_body")
-		{
-			int				q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
-
-			return new print_C_main_body(q);
-		}
-	else if (ALine == "cac_mode")
-		{
-			int				q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			q = stoi(ALine);
-
-			return new cac_mode(q);
-		}
-	else if (ALine == "path")
+		else if (ALine == "war_cessor")
 		{
 			int				w, e;
 			string			q;
@@ -5495,82 +5563,143 @@ GeneralFact* makeInstanceOf(string inputline)
 			ALine = subl.substr(0, subl.rfind(pacl, 0));
 			e = stoi(ALine);
 
-			return new path(q, w, e);
+			return new war_cessor(q, w, e);
 		}
-	else if (ALine == "max_path")
+		else if (ALine == "waw_cessor")
 		{
-			int				w;
+			int				w, e;
 			string			q;
 
 			ALine = subl.substr(0, subl.find(co, 0));
 			q = ALine;
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
 			pos += ALine.length();
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
 			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			w = stoi(ALine);
-
-			return new max_path(q, w);
-		}
-	else if (ALine == "min_path")
-		{
-			int				w;
-			string			q;
-
-			ALine = subl.substr(0, subl.find(co, 0));
-			q = ALine;
-			pos += ALine.length();
-			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			w = stoi(ALine);
-
-			return new min_path(q, w);
-		}
-	else if (ALine == "op_belongs_to_state")
-		{
-			int				w, e, r;
-			string			q;
-
-			ALine = subl.substr(0, subl.find(co, 0));
-			q = ALine;
-			pos += ALine.length();
-			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.find(co, 0));
-			w = stoi(ALine);
-			pos += ALine.length();
-			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			ALine = subl.substr(0, subl.find(co, 0));
 			e = stoi(ALine);
+
+			return new waw_cessor(q, w, e);
+		}
+		else if (ALine == "waw_dependencies")
+		{
+			vq.clear();
+			vw.clear();
+			int				w;
+			string			q;
+
+			ALine = subl.substr(0, subl.find(co, 0));
+			q = ALine;
 			pos += ALine.length();
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			r = stoi(ALine);
+			ALine = subl.substr(0, subl.find(co, 0));
+			w = stoi(ALine);
+			pos += ALine.length() + 1;
+			subl = inputline.substr(++pos, inputline.length() - pos);
 
-			return new op_belongs_to_state(q, w, e, r);
+			//vector
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vq.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vq.push_back(stoi(ALine));
+				pos += ALine.length() + 2;		// getting after bracket
+				subl = inputline.substr(++pos, inputline.length() - pos);
+			}
+			else subl = inputline.substr(++++++pos, inputline.length() - pos);
+
+			//vector2
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				brpos = subl.find(brcl, 0);
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					vw.push_back(stoi(ALine));
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+				}
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				vw.push_back(stoi(ALine));
+			}
+			return new waw_dependencies(q, w, vq, vw);
 		}
-	else if (ALine == "top_module")
-		{
-			string			q;
-
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			ALine.resize(ALine.size() - 1);
-			q = ALine;
-
-			return new top_module(q);
-		}
-	else if (ALine == "package_name")
+		else if (ALine == "while_loop")
 	{
-		string			q;
+	int				q, e, r, t, y, u;
+	string			w;
 
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		ALine.resize(ALine.size() - 1);
-		q = ALine;
-		return new package_name(q);
+	ALine = subl.substr(0, subl.find(co, 0));
+	q = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	w = ALine;
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	e = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	r = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	t = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.find(co, 0));
+	y = stoi(ALine);
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos);
+
+	ALine = subl.substr(0, subl.rfind(pacl, 0));
+	u = stoi(ALine);
+
+	return new while_loop(q, w, e, r, t, y, u);
 	}
+
+		break;
+	}
+	case 'x':
+	{
+
+		break;
+	}
+	case 'y':
+	{
+
+		break;
+	}
+	case 'z':
+	{
+
+		break;
+	}
+	}
+
 	return new GenfactError(inputline);
 }
 
