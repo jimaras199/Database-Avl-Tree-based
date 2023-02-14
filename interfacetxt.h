@@ -34,1290 +34,797 @@ string makeStringOf(GeneralFact* obj)
 	size_t			prlst;		// pre-last element of a vector
 	stringstream	ss;
 	string			ALine;
-	bool			flag = 1;
 
-	if (typeid(type_def) == typeid(*obj))
+	ALine = typeid(*obj).name();
+	ALine = ALine.substr(6);
+	string ch = ALine.substr(0, 1);
+	const char* sh = ch.c_str();
+	switch (*sh)
 	{
-		flag = 0;
-		type_def* ptr = dynamic_cast<type_def*>(obj);
-		ss << "type_def("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o;
-	}
-	else if (typeid(op_def) == typeid(*obj))
+	case 'a':
 	{
-		flag = 0;
-		op_def* ptr = dynamic_cast<op_def*>(obj);
-		ss << "op_def("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u;
-	}
-	else if (typeid(hierarchy_part) == typeid(*obj ))
-	{
-		flag = 0;
-		hierarchy_part* ptr = dynamic_cast<hierarchy_part*>(obj);
-		ss << "hierarchy_part("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u;
-	}
-	else if (typeid(data_stmt) == typeid(*obj))
-	{
-		flag = 0;
-		data_stmt* ptr = dynamic_cast<data_stmt*>(obj);
-		ss << "data_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y;
-	}
-	else if (typeid(prog_stmt) == typeid(*obj))
-	{
-		flag = 0;
-		prog_stmt* ptr = dynamic_cast<prog_stmt*>(obj);
-		ss << "prog_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i;
-	}
-	else if (typeid(joint_stmt) == typeid(*obj))
-	{
-		flag = 0;
-		joint_stmt* ptr = dynamic_cast<joint_stmt*>(obj);
-		ss << "joint_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y;
-	}
-	else if (typeid(call_stmt) == typeid(*obj))
-	{
-		flag = 0;
-		call_stmt* ptr = dynamic_cast<call_stmt*>(obj);
-		ss << "call_stmt(" << ptr->q << co << ptr->w << co << ptr->e << co << br;
-		//vector
-		if (!ptr->r.empty())
+		if ("added_aux_call_ios" == ALine)
 		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst;++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
+			added_aux_call_ios* ptr = dynamic_cast<added_aux_call_ios*>(obj);
+			ss << "added_aux_call_ios(" << ptr->q << co << ptr->w;
 		}
-		ss << brcl;
-	}
-	else if (typeid(compo_stmt) == typeid(*obj))
-	{
-		flag = 0;
-		compo_stmt* ptr = dynamic_cast<compo_stmt*>(obj);
-		ss << "compo_stmt(" << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->r.empty())
+		else if ("added_aux_call_ios1" == ALine)
 		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) 
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
+			added_aux_call_ios1* ptr = dynamic_cast<added_aux_call_ios1*>(obj);
+			ss << "added_aux_call_ios1(" << ptr->q << co << ptr->w << co << ptr->e;
 		}
-		ss << brcl;
-	}
-	else if (typeid(rec_stmt) == typeid(*obj))
-	{
-		flag = 0;
-		rec_stmt* ptr = dynamic_cast<rec_stmt*>(obj);
-		ss << "rec_stmt(" << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
+		else if ("added_aux_call_signals" == ALine)
 		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
+			added_aux_call_signals* ptr = dynamic_cast<added_aux_call_signals*>(obj);
+			ss << "added_aux_call_signals(" << ptr->q << co << ptr->w;
 		}
-		ss << brcl;
-	}
-	else if (typeid(special_op) == typeid(*obj))
-	{
-		flag = 0;
-		special_op* ptr = dynamic_cast<special_op*>(obj);
-		ss << "special_op("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-			<< co << ptr->p;
-	}
-	else if (typeid(special_dt) == typeid(*obj))
-	{
-		flag = 0;
-		special_dt* ptr = dynamic_cast<special_dt*>(obj);
-		ss << "special_dt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u;
-		
-	}
-	else if (typeid(local_object) == typeid(*obj))
-	{
-		flag = 0;
-		local_object* ptr = dynamic_cast<local_object*>(obj);
-		ss << "local_object("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o;
-	}
-	else if (typeid(subprogram_call) == typeid(*obj))
-	{
-		flag = 0;
-		state_node* ptr = dynamic_cast<state_node*>(obj);
-		ss << "state_node(" << ptr->q << co << ptr->w << co;
-		subprogram_call* ptr2 = dynamic_cast<subprogram_call*>(obj);
-		ss << "subprogram_call(" << br;
-		//vector
-		if (!ptr2->q.empty())
+		else if ("added_verilog_aux_call_outputs" == ALine)
 		{
-			prlst = ptr2->q.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr2->q[ii] << co;
-			}
-			ss << ptr2->q.back();
+			added_verilog_aux_call_outputs* ptr = dynamic_cast<added_verilog_aux_call_outputs*>(obj);
+			ss << "added_verilog_aux_call_outputs(" << ptr->q << co << ptr->w << co << ptr->e;
 		}
-		ss << brcl << co << ptr2->w << pacl;
-	}
-	else if (typeid(dataflow) == typeid(*obj))
-	{
-		flag = 0;
-		state_node* ptr = dynamic_cast<state_node*>(obj);
-		ss << "state_node(" << ptr->q << co << ptr->w << co;
-		dataflow* ptr2 = dynamic_cast<dataflow*>(obj);
-		ss << "dataflow(" << br;
-		//vector
-		if (!ptr2->q.empty())
-		{
-			prlst = ptr2->q.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr2->q[ii] << co;
-			}
-			ss << ptr2->q.back();
-		}
-		ss << brcl << co << ptr2->w << pacl;
-	}
-	else if (typeid(ifthen) == typeid(*obj))
-	{
-		flag = 0;
-		state_node* ptr = dynamic_cast<state_node*>(obj);
-		ss << "state_node(" << ptr->q << co << ptr->w << co;
-		ifthen* ptr2 = dynamic_cast<ifthen*>(obj);
-		ss << "ifthen(" << br;
-		//vector
-		if (!ptr2->q.empty())
-		{
-			prlst = ptr2->q.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr2->q[ii] << co;
-			}
-			ss << ptr2->q.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr2->w.empty())
-		{
-			prlst = ptr2->w.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr2->w[ii] << co;
-			}
-			ss << ptr2->w.back();
-		}
-		ss << brcl << co << br;
-		//vector3
-		if (!ptr2->e.empty())
-		{
-			prlst = ptr2->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr2->e[ii] << co;
-			}
-			ss << ptr2->e.back();
-		}
-		ss << brcl << co << ptr2->r << co << ptr2->t << pacl;
-	}
-	else if (typeid(jump) == typeid(*obj))	//losing align after 15 else if 
-	{
-		flag = 0;
-		state_node* ptr = dynamic_cast<state_node*>(obj);
-		ss << "state_node(" << ptr->q << co << ptr->w << co;
-		jump* ptr2 = dynamic_cast<jump*>(obj);
-		ss << "jump" << pa << br;
-		//vector
-		if (!ptr2->q.empty())
-		{
-			prlst = ptr2->q.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr2->q[ii] << co;
-			}
-			ss << ptr2->q.back();
-		}
-		ss << brcl << co << ptr2->w << pacl;
-	}
-	else if (typeid(return_cos) == typeid(*obj))
-	{
-		flag = 0;
-		state_node* ptr = dynamic_cast<state_node*>(obj);
-		ss << "state_node(" << ptr->q << co << ptr->w << co;
-		return_cos* ptr2 = dynamic_cast<return_cos*>(obj);
-		ss << "return(" << br;
-		//vector
-		if (!ptr2->q.empty())
-		{
-			prlst = ptr2->q.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr2->q[ii] << co;
-			}
-			ss << ptr2->q.back();
-		}
-		ss << brcl << pacl;
-	}
-	else if (typeid(change_op_number) == typeid(*obj))
-	{
-		flag = 0;
-		change_op_number* ptr = dynamic_cast<change_op_number*>(obj);
-		ss << "change_op_number(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(last_change_op_number) == typeid(*obj))
-	{
-		flag = 0;
-		last_change_op_number* ptr = dynamic_cast<last_change_op_number*>(obj);
-		ss << "last_change_op_number(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(op_guards) == typeid(*obj))
-	{
-		flag = 0;
-		op_guards* ptr = dynamic_cast<op_guards*>(obj);
-		ss << "op_guards(" << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
-		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->r.empty())
-		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(var_guards) == typeid(*obj))
-	{
-		flag = 0;
-		var_guards* ptr = dynamic_cast<var_guards*>(obj);
-		ss << "var_guards("  << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
-		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->r.empty())
-		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(guard_pair) == typeid(*obj))
-	{
-		flag = 0;
-		guard_pair* ptr = dynamic_cast<guard_pair*>(obj);
-		ss << "guard_pair(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(guard_cond) == typeid(*obj))
-	{
-		flag = 0;
-		guard_cond* ptr = dynamic_cast<guard_cond*>(obj);
-		ss << "guard_cond("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(predecessors) == typeid(*obj))
-	{
-		flag = 0;
-		predecessors* ptr = dynamic_cast<predecessors*>(obj);
-		ss << "predecessors("  << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
-		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
-		}
-		ss << brcl;
 
+		break;
+	}
+	case 'b':
+	{
 
+		break;
 	}
-	else if (typeid(cessor) == typeid(*obj))
+	case 'c':
 	{
-		flag = 0;
-		cessor* ptr = dynamic_cast<cessor*>(obj);
-		ss << "cessor("  << ptr->q << co << ptr->w << co << ptr->e ;
-	}
-	else if (typeid(cessor_kind) == typeid(*obj))
-	{
-		flag = 0;
-		cessor_kind* ptr = dynamic_cast<cessor_kind*>(obj);
-		ss << "cessor_kind("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << br;
-		//vector
-		if (!ptr->u.empty())
+		if ("cac_mode" == ALine)
 		{
-			prlst = ptr->u.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->u[ii] << co;
-			}
-			ss << ptr->u.back();
+			cac_mode* ptr = dynamic_cast<cac_mode*>(obj);
+			ss << "cac_mode(" << ptr->q;
 		}
-		ss << brcl;
-
-	}
-	else if (typeid(old_schedule) == typeid(*obj))
-	{
-		flag = 0;
-		old_schedule* ptr = dynamic_cast<old_schedule*>(obj);
-		ss << "old_schedule("  << ptr->q;
-	}
-	else if (typeid(new_schedule) == typeid(*obj))
-	{
-		flag = 0;
-		new_schedule* ptr = dynamic_cast<new_schedule*>(obj);
-		ss << "new_schedule("  << ptr->q;
-	}
-	else if (typeid(local_ifthen_chain_end_operations_were_written) == typeid(*obj))
-	{
-		flag = 0;
-		local_ifthen_chain_end_operations_were_written* ptr = dynamic_cast<local_ifthen_chain_end_operations_were_written*>(obj);
-		ss << "local_ifthen_chain_end_operations_were_written("  << ptr->q;
-	}
-	else if (typeid(calls_list) == typeid(*obj))
-	{
-		flag = 0;
-		calls_list* ptr = dynamic_cast<calls_list*>(obj);
-		ss << "calls_list("  << ptr->q << co << ptr->w << co << ptr->e << co << br;
-		//vector
-		if (!ptr->r.empty())
+		else if ("call_ios_have_been_reset" == ALine)
 		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
+			call_ios_have_been_reset* ptr = dynamic_cast<call_ios_have_been_reset*>(obj);
+			ss << "call_ios_have_been_reset(" << ptr->q;
 		}
-		ss << brcl;
-	}
-	else if (typeid(composites_list) == typeid(*obj))
-	{
-		flag = 0;
-		composites_list* ptr = dynamic_cast<composites_list*>(obj);
-		ss << "composites_list("  << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
+		else if ("call_stmt" == ALine)
 		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+			call_stmt* ptr = dynamic_cast<call_stmt*>(obj);
+			ss << "call_stmt(" << ptr->q << co << ptr->w << co << ptr->e << co << br;
+			//vector
+			if (!ptr->r.empty())
 			{
-				ss << ptr->e[ii] << co;
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
 			}
-			ss << ptr->e.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(record_aggregates_list) == typeid(*obj))
-	{
-		flag = 0;
-		record_aggregates_list* ptr = dynamic_cast<record_aggregates_list*>(obj);
-		ss << "record_aggregates_list(" << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
-		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(mem_port) == typeid(*obj))
-	{
-		flag = 0;
-		mem_port* ptr = dynamic_cast<mem_port*>(obj);
-		ss << "mem_port(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-			<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d;
-	}
-	else if (typeid(global_declarations) == typeid(*obj))
-	{
-		stringstream tt;
-		flag = 0;
-		int			ii = 0;
-		size_t		vs;
-		global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
-		ss << "global_declarations(" << br;
-		if (!ptr->q.empty())
-		{
-			vs = ptr->q.size();
-			for (int ii = 0; ii < vs; ii++)
-			{
-				ss << "local_object(" << ptr->q[ii].q << co << ptr->q[ii].w << co << ptr->q[ii].e << co << ptr->q[ii].r << co
-					<< ptr->q[ii].t << co << ptr->q[ii].y << co << ptr->q[ii].u << co << ptr->q[ii].i << co << ptr->q[ii].o << pacl << co;
-			}
-			string tmp = ss.str();
-			tmp.resize(tmp.size() - 1);  // getting rid of the last coma
-			swap(ss, tt);
-			ss << tmp;
-		}
-		ss << brcl << co << ptr->w;
-	}
-	else if (typeid(source_is_normal_dt) == typeid(*obj))
-	{
-		flag = 0;
-		source_is_normal_dt* ptr = dynamic_cast<source_is_normal_dt*>(obj);
-		ss << "source_is_normal_dt("  << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(combo) == typeid(*obj))
-	{
-		flag = 0;
-		combo* ptr = dynamic_cast<combo*>(obj);
-		ss << "combo("  << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(sequence) == typeid(*obj))
-	{
-		flag = 0;
-		sequence* ptr = dynamic_cast<sequence*>(obj);
-		ss << "sequence("  << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(for_loop) == typeid(*obj))
-	{
-		flag = 0;
-		for_loop* ptr = dynamic_cast<for_loop*>(obj);
-		ss << "for_loop("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-			<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d;
-	}
-	else if (typeid(last_for_loop_entry) == typeid(*obj))
-	{
-		flag = 0;
-		last_for_loop_entry* ptr = dynamic_cast<last_for_loop_entry*>(obj);
-		ss << "last_for_loop_entry("  << ptr->q;
-	}
-	else if (typeid(while_loop) == typeid(*obj))
-	{
-		flag = 0;
-		while_loop* ptr = dynamic_cast<while_loop*>(obj);
-		ss << "while_loop("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u;
-	}
-	else if (typeid(last_while_loop_entry) == typeid(*obj))
-	{
-		flag = 0;
-		last_while_loop_entry* ptr = dynamic_cast<last_while_loop_entry*>(obj);
-		ss << "last_while_loop_entry("  << ptr->q;
-	}
-	else if (typeid(possible_end_if) == typeid(*obj))
-	{
-		flag = 0;
-		possible_end_if* ptr = dynamic_cast<possible_end_if*>(obj);
-		ss << "possible_end_if("  << ptr->q << co << br;
-		//vector
-		if (!ptr->w.empty())
-		{
-			prlst = ptr->w.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->w[ii] << co;
-			}
-			ss << ptr->w.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(end_if) == typeid(*obj))
-	{
-		flag = 0;
-		end_if* ptr = dynamic_cast<end_if*>(obj);
-		ss << "end_if("  << ptr->q << co << br;
-		//vector
-		if (!ptr->w.empty())
-		{
-			prlst = ptr->w.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->w[ii] << co;
-			}
-			ss << ptr->w.back();
-		}
-		ss << brcl;
-
-	}
-	else if (typeid(nested_cond_fact) == typeid(*obj))
-	{
-		flag = 0;
-		nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
-		ss << "nested_cond_fact("  << ptr->q << co << br;
-		//vector
-		if (!ptr->w.empty())
-		{
-			prlst = ptr->w.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->w[ii] << co;
-			}
-			ss << ptr->w.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(top_level_call) == typeid(*obj))
-	{
-		flag = 0;
-		top_level_call* ptr = dynamic_cast<top_level_call*>(obj);
-		ss << "top_level_call("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-			<< co << ptr->p << co << ptr->a;
-	}
-	else if (typeid(top_level_call_parcs) == typeid(*obj))
-	{
-		flag = 0;
-		top_level_call_parcs* ptr = dynamic_cast<top_level_call_parcs*>(obj);
-		ss << "top_level_call_parcs("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-			<< co << ptr->p << co << ptr->a;
-	}
-	else if (typeid(added_aux_call_ios) == typeid(*obj))
-	{
-		flag = 0;
-		added_aux_call_ios* ptr = dynamic_cast<added_aux_call_ios*>(obj);
-		ss << "added_aux_call_ios("  << ptr->q << co << ptr->w ;
-	}
-	else if (typeid(added_aux_call_ios1) == typeid(*obj))
-	{
-		flag = 0;
-		added_aux_call_ios1* ptr = dynamic_cast<added_aux_call_ios1*>(obj);
-		ss << "added_aux_call_ios1("  << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(added_aux_call_signals) == typeid(*obj))
-	{
-		flag = 0;
-		added_aux_call_signals* ptr = dynamic_cast<added_aux_call_signals*>(obj);
-		ss << "added_aux_call_signals("  << ptr->q << co << ptr->w;
-	}
-	else if (typeid(found_call_operator) == typeid(*obj))
-	{
-		flag = 0;
-		found_call_operator* ptr = dynamic_cast<found_call_operator*>(obj);
-		ss << "found_call_operator("  << ptr->q << co << ptr->w;
-	}
-	else if (typeid(added_verilog_aux_call_outputs) == typeid(*obj))
-	{
-		flag = 0;
-		added_verilog_aux_call_outputs* ptr = dynamic_cast<added_verilog_aux_call_outputs*>(obj);
-		ss << "added_verilog_aux_call_outputs("  << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(raw_dependencies) == typeid(*obj))
-	{
-		flag = 0;
-		raw_dependencies* ptr = dynamic_cast<raw_dependencies*>(obj);
-		ss << "raw_dependencies("  << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
-		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->r.empty())
-		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
-		}
-		ss << brcl;
-
-	}
-	else if (typeid(war_dependencies) == typeid(*obj))
-	{
-		flag = 0;
-		war_dependencies* ptr = dynamic_cast<war_dependencies*>(obj);
-		ss << "war_dependencies(" << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
-		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->r.empty())
-		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(waw_dependencies) == typeid(*obj))
-	{
-		flag = 0;
-		waw_dependencies* ptr = dynamic_cast<waw_dependencies*>(obj);
-		ss << "waw_dependencies("  << ptr->q << co << ptr->w << co << br;
-		//vector
-		if (!ptr->e.empty())
-		{
-			prlst = ptr->e.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->e[ii] << co;
-			}
-			ss << ptr->e.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->r.empty())
-		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
-		}
-		ss << brcl;
-
-	}
-	else if (typeid(schedule) == typeid(*obj))
-	{
-		flag = 0;
-		schedule* ptr = dynamic_cast<schedule*>(obj);
-		ss << "schedule("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(last_conditional_execution) == typeid(*obj))
-	{
-		flag = 0;
-		last_conditional_execution* ptr = dynamic_cast<last_conditional_execution*>(obj);
-		ss << "last_conditional_execution("  << ptr->q << co << ptr->w;
-	}
-	else if (typeid(conditional_operations) == typeid(*obj))
-	{
-		flag = 0;
-		conditional_operations* ptr = dynamic_cast<conditional_operations*>(obj);
-		ss << "conditional_operations("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << br;
-		//vector
-		if (!ptr->t.empty())
-		{
-			prlst = ptr->t.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->t[ii] << co;
-			}
-			ss << ptr->t.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->y.empty())
-		{
-			prlst = ptr->y.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->y[ii] << co;
-			}
-			ss << ptr->y.back();
-		}
-		ss << brcl << co << br;
-		//vector3
-		if (!ptr->u.empty())
-		{
-			prlst = ptr->u.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->u[ii] << co;
-			}
-			ss << ptr->u.back();
-		}
-		ss << brcl << co << br;
-		//vector4
-		if (!ptr->i.empty())
-		{
-			prlst = ptr->i.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->i[ii] << co;
-			}
-			ss << ptr->i.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(last_conditional_transition_of_schedule) == typeid(*obj))
-	{
-		flag = 0;
-		last_conditional_transition_of_schedule* ptr = dynamic_cast<last_conditional_transition_of_schedule*>(obj);
-		ss << "last_conditional_transition_of_schedule("  << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(transition_to_be_rescheduled) == typeid(*obj))
-	{
-		flag = 0;
-		transition_to_be_rescheduled* ptr = dynamic_cast<transition_to_be_rescheduled*>(obj);
-		ss << "transition_to_be_rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << ptr->t;
-	}
-	else if (typeid(last_conditional_transition) == typeid(*obj))
-	{
-		flag = 0;
-		last_conditional_transition* ptr = dynamic_cast<last_conditional_transition*>(obj);
-		ss << "last_conditional_transition(" << ptr->q << co << ptr->w;
-	}
-	else if (typeid(conditional_transitions) == typeid(*obj))
-	{
-		flag = 0;
-		conditional_transitions* ptr = dynamic_cast<conditional_transitions*>(obj);
-		ss << "conditional_transitions(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i;
-	}
-	else if (typeid(state) == typeid(*obj))
-	{
-		flag = 0;
-		state* ptr = dynamic_cast<state*>(obj);
-		ss << "state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << br;
-		//vector
-		if (!ptr->u.empty())
-		{
-			prlst = ptr->u.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->u[ii] << co;
-			}
-			ss << ptr->u.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->i.empty())
-		{
-			prlst = ptr->i.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->i[ii] << co;
-			}
-			ss << ptr->i.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(rescheduled) == typeid(*obj))
-	{
-		flag = 0;
-		rescheduled* ptr = dynamic_cast<rescheduled*>(obj);
-		ss << "rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t;
-	}
-	else if (typeid(last_rescheduled) == typeid(*obj))
-	{
-		flag = 0;
-		last_rescheduled* ptr = dynamic_cast<last_rescheduled*>(obj);
-		ss << "last_rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << ptr->t;
-	}
-	else if (typeid(raw_cessor) == typeid(*obj))
-	{
-		flag = 0;
-		raw_cessor* ptr = dynamic_cast<raw_cessor*>(obj);
-		ss << "raw_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(war_cessor) == typeid(*obj))
-	{
-		flag = 0;
-		war_cessor* ptr = dynamic_cast<war_cessor*>(obj);
-		ss << "war_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(waw_cessor) == typeid(*obj))
-	{
-		flag = 0;
-		waw_cessor* ptr = dynamic_cast<waw_cessor*>(obj);
-		ss << "waw_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(op_resource) == typeid(*obj))
-	{
-		flag = 0;
-		op_resource* ptr = dynamic_cast<op_resource*>(obj);
-		ss << "op_resource(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(global_resource) == typeid(*obj))
-	{
-		flag = 0;
-		global_resource* ptr = dynamic_cast<global_resource*>(obj);
-		ss << "global_resource(" << ptr->q;
-	}
-	else if (typeid(module_g_resource) == typeid(*obj))
-	{
-		flag = 0;
-		module_g_resource* ptr = dynamic_cast<module_g_resource*>(obj);
-		ss << "module_g_resource(" << ptr->q << co << ptr->w;
-	}
-	else if (typeid(cf_previous_op) == typeid(*obj))
-	{
-		flag = 0;
-		cf_previous_op* ptr = dynamic_cast<cf_previous_op*>(obj);
-		ss << "cf_previous_op(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(cf_previous_state) == typeid(*obj))
-	{
-		flag = 0;
-		cf_previous_state* ptr = dynamic_cast<cf_previous_state*>(obj);
-		ss << "cf_previous_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(pred_candidate_examined) == typeid(*obj))
-	{
-		flag = 0;
-		pred_candidate_examined* ptr = dynamic_cast<pred_candidate_examined*>(obj);
-		ss << "pred_candidate_examined(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(reentrant_triangle) == typeid(*obj))
-	{
-		flag = 0;
-		reentrant_triangle* ptr = dynamic_cast<reentrant_triangle*>(obj);
-		ss << "reentrant_triangle(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << br;
-		//vector
-		if (!ptr->t.empty())
-		{
-			prlst = ptr->t.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->t[ii] << co;
-			}
-			ss << ptr->t.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->y.empty())
-		{
-			prlst = ptr->y.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->y[ii] << co;
-			}
-			ss << ptr->y.back();
-		}
-		ss << brcl << co << br;
-		//vector3
-		if (!ptr->u.empty())
-		{
-			prlst = ptr->u.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->u[ii] << co;
-			}
-			ss << ptr->u.back();
-		}
-		ss << brcl << co << br;
-		//vector4
-		if (!ptr->i.empty())
-		{
-			prlst = ptr->i.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->i[ii] << co;
-			}
-			ss << ptr->i.back();
-		}
-		ss << brcl << co << br;
-		//vector5
-		if (!ptr->o.empty())
-		{
-			prlst = ptr->o.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->o[ii] << co;
-			}
-			ss << ptr->o.back();
-		}
-		ss << brcl << co << br;
-		//vector6
-		if (!ptr->p.empty())
-		{
-			prlst = ptr->p.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->p[ii] << co;
-			}
-			ss << ptr->p.back();
-		}
-		ss << brcl << co << ptr->a << co << ptr->s << co << ptr->d << co << ptr->f;
-	}
-	else if (typeid(last_reentrant_triangle) == typeid(*obj))
-	{
-		flag = 0;
-		last_reentrant_triangle* ptr = dynamic_cast<last_reentrant_triangle*>(obj);
-		ss << "last_reentrant_triangle(" << ptr->q << co << ptr->w;
-	}
-	else if (typeid(last_schedule_state) == typeid(*obj))
-	{
-		flag = 0;
-		last_schedule_state* ptr = dynamic_cast<last_schedule_state*>(obj);
-		ss << "last_schedule_state(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(conditional_incomplete) == typeid(*obj))
-	{
-		flag = 0;
-		conditional_incomplete* ptr = dynamic_cast<conditional_incomplete*>(obj);
-		ss << "conditional_incomplete(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << br;
-		//vector
-		if (!ptr->t.empty())
-		{
-			prlst = ptr->t.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->t[ii] << co;
-			}
-			ss << ptr->t.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->y.empty())
-		{
-			prlst = ptr->y.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->y[ii] << co;
-			}
-			ss << ptr->y.back();
-		}
-		ss << brcl << co << br;
-		//vector3
-		if (!ptr->u.empty())
-		{
-			prlst = ptr->u.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->u[ii] << co;
-			}
-			ss << ptr->u.back();
-		}
-		ss << brcl << co << br;
-		//vector4
-		if (!ptr->i.empty())
-		{
-			prlst = ptr->i.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->i[ii] << co;
-			}
-			ss << ptr->i.back();
-		}
-		ss << brcl << co << br;
-		//vector5
-		if (!ptr->o.empty())
-		{
-			prlst = ptr->o.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->o[ii] << co;
-			}
-			ss << ptr->o.back();
-		}
-		ss << brcl << co << br;
-		//vector6
-		if (!ptr->p.empty())
-		{
-			prlst = ptr->p.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->p[ii] << co;
-			}
-			ss << ptr->p.back();
-		}
-		ss << brcl << co << ptr->a << co << ptr->s << co << ptr->d << co << ptr->f << co << ptr->g
-			<< co << ptr->h << co << ptr->j << co << ptr->k << co << ptr->l << co << ptr->z
-			<< co << ptr->x;
-	}
-	else if (typeid(mixed_incomplete_state_lists) == typeid(*obj))
-	{
-		flag = 0;
-		mixed_incomplete_state_lists* ptr = dynamic_cast<mixed_incomplete_state_lists*>(obj);
-		ss << "mixed_incomplete_state_lists(" << ptr->q << co << ptr->w << co << ptr->e << co << br;
-		//vector
-		if (!ptr->r.empty())
-		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->t.empty())
-		{
-			prlst = ptr->t.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->t[ii] << co;
-			}
-			ss << ptr->t.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(linear_incomplete_node) == typeid(*obj))
-	{
-		flag = 0;
-		linear_incomplete_node* ptr = dynamic_cast<linear_incomplete_node*>(obj);
-		ss << "linear_incomplete_node(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->y << co << br;
-		//vector
-		if (!ptr->r.empty())
-		{
-			prlst = ptr->r.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->r[ii] << co;
-			}
-			ss << ptr->r.back();
-		}
-		ss << brcl << co << br;
-		//vector2
-		if (!ptr->t.empty())
-		{
-			prlst = ptr->t.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << ptr->t[ii] << co;
-			}
-			ss << ptr->t.back();
-		}
-		ss << brcl;
-	}
-	else if (typeid(incomplete_links) == typeid(*obj))
-	{
-		flag = 0;
-		incomplete_links* ptr = dynamic_cast<incomplete_links*>(obj);
-		ss << "incomplete_links(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-			<< co << ptr->p;
-	}
-	else if (typeid(last_incomplete) == typeid(*obj))
-	{
-		flag = 0;
-		last_incomplete* ptr = dynamic_cast<last_incomplete*>(obj);
-		ss << "last_incomplete(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(global_nils) == typeid(*obj))
-	{
-		flag = 0;
-		global_nils* ptr = dynamic_cast<global_nils*>(obj);
-		ss << "global_nils(" << br ;
-		//vector
-		if (!ptr->q.empty())
-		{
-			prlst = ptr->q.size() - 1;
-			for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
-			{
-				ss << "nil_node" << pa;
-
-				ss << ptr->q[ii].q << co << ptr->q[ii].w << pacl << co;
-			}
-			ss << "nil_node" << pa << ptr->q.back().q << co << ptr->q.back().w;
-			ss << pacl;
-		}
-		ss << brcl;
-	}
-	else if (typeid(current_module) == typeid(*obj))
-	{
-		flag = 0;
-		current_module* ptr = dynamic_cast<current_module*>(obj);
-		ss << "current_module(" << ptr->q;
-	}
-	else if (typeid(last_linear_incomplete_node) == typeid(*obj))
-	{
-		flag = 0;
-		last_linear_incomplete_node* ptr = dynamic_cast<last_linear_incomplete_node*>(obj);
-		ss << "last_linear_incomplete_node(" << ptr->q;
-	}
-	else if (typeid(operator_instances) == typeid(*obj))
-	{
-		flag = 0;
-		operator_instances* ptr = dynamic_cast<operator_instances*>(obj);
-		ss << "operator_instances(" << ptr->q << co << ptr->w;
-	}
-	else if (typeid(massively_parallel_style) == typeid(*obj))
-	{
-		flag = 0;
-		massively_parallel_style* ptr = dynamic_cast<massively_parallel_style*>(obj);
-		ss << "massively_parallel_style(" << ptr->q;
-	}
-	else if (typeid(hdl_style) == typeid(*obj))
-	{
-		flag = 0;
-		hdl_style* ptr = dynamic_cast<hdl_style*>(obj);
-		ss << "hdl_style(" << ptr->q;
-	}
-	else if (typeid(op_instance) == typeid(*obj))
-	{
-		flag = 0;
-		op_instance* ptr = dynamic_cast<op_instance*>(obj);
-		ss << "op_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t;
-	}
-	else if (typeid(last_op_instance) == typeid(*obj))
-	{
-		flag = 0;
-		last_op_instance* ptr = dynamic_cast<last_op_instance*>(obj);
-		ss << "last_op_instance(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(op_in_a_state) == typeid(*obj))
-	{
-		flag = 0;
-		op_in_a_state* ptr = dynamic_cast<op_in_a_state*>(obj);
-		ss << "op_in_a_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t;
-	}
-	else if (typeid(last_op_in_a_state) == typeid(*obj))
-	{
-		flag = 0;
-		last_op_in_a_state* ptr = dynamic_cast<last_op_in_a_state*>(obj);
-		ss << "last_op_in_a_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(signal_instance) == typeid(*obj))
-	{
-		flag = 0;
-		signal_instance* ptr = dynamic_cast<signal_instance*>(obj);
-		ss << "signal_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u;
-	}
-	else if (typeid(last_signal_instance) == typeid(*obj))
-	{
-		flag = 0;
-		last_signal_instance* ptr = dynamic_cast<last_signal_instance*>(obj);
-		ss << "last_signal_instance(" << ptr->q << co << ptr->w;
-	}
-	else if (typeid(output_instance) == typeid(*obj))
-	{
-		flag = 0;
-		output_instance* ptr = dynamic_cast<output_instance*>(obj);
-		ss << "output_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y;
-	}
-	else if (typeid(last_output_instance) == typeid(*obj))
-	{
-		flag = 0;
-		last_output_instance* ptr = dynamic_cast<last_output_instance*>(obj);
-		ss << "last_output_instance(" << ptr->q << co << ptr->w;
-	}
-	else if (typeid(operator_instance_stats) == typeid(*obj))
-	{
-		flag = 0;
-		operator_instance_stats* ptr = dynamic_cast<operator_instance_stats*>(obj);
-		ss << "operator_instance_stats(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(consecutive_106) == typeid(*obj))
-	{
-		flag = 0;
-		consecutive_106* ptr = dynamic_cast<consecutive_106*>(obj);
-		ss << "consecutive_106(" << ptr->q;
-	}
-	else if (typeid(operation_order) == typeid(*obj))
-	{
-		flag = 0;
-		operation_order* ptr = dynamic_cast<operation_order*>(obj);
-		ss << "operation_order(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-			<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-			<< co << ptr->p;
-	}
-	else if (typeid(max_parallel_call_order) == typeid(*obj))
-	{
-		flag = 0;
-		max_parallel_call_order* ptr = dynamic_cast<max_parallel_call_order*>(obj);
-		ss << "max_parallel_call_order(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-	}
-	else if (typeid(max_op_order) == typeid(*obj))
-	{
-		flag = 0;
-		max_op_order* ptr = dynamic_cast<max_op_order*>(obj);
-		ss << "max_op_order(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(totalmax_call_order) == typeid(*obj))
-	{
-		flag = 0;
-		totalmax_call_order* ptr = dynamic_cast<totalmax_call_order*>(obj);
-		ss << "totalmax_call_order(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(totalmax_gross_depth) == typeid(*obj))
-	{
-		flag = 0;
-		totalmax_gross_depth* ptr = dynamic_cast<totalmax_gross_depth*>(obj);
-		ss << "totalmax_gross_depth(" << ptr->q << co << ptr->w << co << ptr->e;
-	}
-	else if (typeid(current_total_max_order_entry) == typeid(*obj))
-	{
-		flag = 0;
-		current_total_max_order_entry* ptr = dynamic_cast<current_total_max_order_entry*>(obj);
-		ss << "current_total_max_order_entry(" << ptr->q;
-	}
-	else if (typeid(module_last_state) == typeid(*obj))
-	{
-		flag = 0;
-		module_last_state* ptr = dynamic_cast<module_last_state*>(obj);
-		ss << "module_last_state(" << ptr->q;
-	}
-	else if (typeid(module_local_list) == typeid(*obj))
-	{
-		stringstream tt;
-		flag = 0;
-		module_local_list* ptr = dynamic_cast<module_local_list*>(obj);
-		int			ii = 0;
-		size_t		vs;
-		ss << "module_local_list(" << br;
-		if (!ptr->q.empty())
-		{
-			vs = ptr->q.size();
-			for (int ii = 0; ii < vs; ii++)
-			{
-				ss << "local_object(" << ptr->q[ii].q << co << ptr->q[ii].w << co << ptr->q[ii].e << co << ptr->q[ii].r << co
-					<< ptr->q[ii].t << co << ptr->q[ii].y << co << ptr->q[ii].u << co << ptr->q[ii].i << co << ptr->q[ii].o << pacl << co;
-			}
-			string tmp = ss.str();
-			tmp.resize(tmp.size() - 1);  // getting rid of the last
-			swap(ss, tt);
-			ss << tmp;
 			ss << brcl;
 		}
-	}
-	if (flag)								//exeeded the limit of nested else if
+		else if ("calls_list" == ALine)
+		{
+			calls_list* ptr = dynamic_cast<calls_list*>(obj);
+			ss << "calls_list(" << ptr->q << co << ptr->w << co << ptr->e << co << br;
+			//vector
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl;
+		}
+		else if ("cessor" == ALine)
+		{
+			cessor* ptr = dynamic_cast<cessor*>(obj);
+			ss << "cessor(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("cessor_kind" == ALine)
+		{
+			cessor_kind* ptr = dynamic_cast<cessor_kind*>(obj);
+			ss << "cessor_kind(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << br;
+			//vector
+			if (!ptr->u.empty())
+			{
+				prlst = ptr->u.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->u[ii] << co;
+				}
+				ss << ptr->u.back();
+			}
+			ss << brcl;
+
+		}
+		else if ("cf_previous_op" == ALine)
+		{
+			cf_previous_op* ptr = dynamic_cast<cf_previous_op*>(obj);
+			ss << "cf_previous_op(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("cf_previous_state" == ALine)
+		{
+			cf_previous_state* ptr = dynamic_cast<cf_previous_state*>(obj);
+			ss << "cf_previous_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("change_op_number" == ALine)
+		{
+			change_op_number* ptr = dynamic_cast<change_op_number*>(obj);
+			ss << "change_op_number(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("checkstyle" == ALine)
+		{
+			checkstyle* ptr = dynamic_cast<checkstyle*>(obj);
+			ss << "checkstyle(" << ptr->q;
+		}
+		else if ("combo" == ALine)
+		{
+			combo* ptr = dynamic_cast<combo*>(obj);
+			ss << "combo(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("complex_next_state_operation_depth" == ALine)
+		{
+			complex_next_state_operation_depth* ptr = dynamic_cast<complex_next_state_operation_depth*>(obj);
+			ss << "complex_next_state_operation_depth(" << ptr->q;
+		}
+		else if ("compo_stmt" == ALine)
+		{
+			compo_stmt* ptr = dynamic_cast<compo_stmt*>(obj);
+			ss << "compo_stmt(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii)
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl;
+		}
+		else if ("composites_list" == ALine)
 	{
-		if (typeid(module_local_list_parcs) == typeid(*obj) )
+	composites_list* ptr = dynamic_cast<composites_list*>(obj);
+	ss << "composites_list(" << ptr->q << co << ptr->w << co << br;
+	//vector
+	if (!ptr->e.empty())
+	{
+		prlst = ptr->e.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->e[ii] << co;
+		}
+		ss << ptr->e.back();
+	}
+	ss << brcl;
+	}
+		else if ("conditional_incomplete" == ALine)
+	{
+	conditional_incomplete* ptr = dynamic_cast<conditional_incomplete*>(obj);
+	ss << "conditional_incomplete(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << br;
+	//vector
+	if (!ptr->t.empty())
+	{
+		prlst = ptr->t.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->t[ii] << co;
+		}
+		ss << ptr->t.back();
+	}
+	ss << brcl << co << br;
+	//vector2
+	if (!ptr->y.empty())
+	{
+		prlst = ptr->y.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->y[ii] << co;
+		}
+		ss << ptr->y.back();
+	}
+	ss << brcl << co << br;
+	//vector3
+	if (!ptr->u.empty())
+	{
+		prlst = ptr->u.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->u[ii] << co;
+		}
+		ss << ptr->u.back();
+	}
+	ss << brcl << co << br;
+	//vector4
+	if (!ptr->i.empty())
+	{
+		prlst = ptr->i.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->i[ii] << co;
+		}
+		ss << ptr->i.back();
+	}
+	ss << brcl << co << br;
+	//vector5
+	if (!ptr->o.empty())
+	{
+		prlst = ptr->o.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->o[ii] << co;
+		}
+		ss << ptr->o.back();
+	}
+	ss << brcl << co << br;
+	//vector6
+	if (!ptr->p.empty())
+	{
+		prlst = ptr->p.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->p[ii] << co;
+		}
+		ss << ptr->p.back();
+	}
+	ss << brcl << co << ptr->a << co << ptr->s << co << ptr->d << co << ptr->f << co << ptr->g
+		<< co << ptr->h << co << ptr->j << co << ptr->k << co << ptr->l << co << ptr->z
+		<< co << ptr->x;
+	}
+		else if ("conditional_operations" == ALine)
+	{
+	conditional_operations* ptr = dynamic_cast<conditional_operations*>(obj);
+	ss << "conditional_operations(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+		<< co << br;
+	//vector
+	if (!ptr->t.empty())
+	{
+		prlst = ptr->t.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->t[ii] << co;
+		}
+		ss << ptr->t.back();
+	}
+	ss << brcl << co << br;
+	//vector2
+	if (!ptr->y.empty())
+	{
+		prlst = ptr->y.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->y[ii] << co;
+		}
+		ss << ptr->y.back();
+	}
+	ss << brcl << co << br;
+	//vector3
+	if (!ptr->u.empty())
+	{
+		prlst = ptr->u.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->u[ii] << co;
+		}
+		ss << ptr->u.back();
+	}
+	ss << brcl << co << br;
+	//vector4
+	if (!ptr->i.empty())
+	{
+		prlst = ptr->i.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr->i[ii] << co;
+		}
+		ss << ptr->i.back();
+	}
+	ss << brcl;
+	}
+		else if ("conditional_transitions" == ALine)
+	{
+	conditional_transitions* ptr = dynamic_cast<conditional_transitions*>(obj);
+	ss << "conditional_transitions(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i;
+	}
+		else if ("consecutive_106" == ALine)
+	{
+	consecutive_106* ptr = dynamic_cast<consecutive_106*>(obj);
+	ss << "consecutive_106(" << ptr->q;
+	}
+		else if ("current_hdl_style" == ALine)
+		{
+		current_hdl_style* ptr = dynamic_cast<current_hdl_style*>(obj);
+		ss << "current_hdl_style(" << ptr->q;
+		}
+		else if ("current_module" == ALine)
+	{
+	current_module* ptr = dynamic_cast<current_module*>(obj);
+	ss << "current_module(" << ptr->q;
+	}
+		else if ("current_total_max_order_entry" == ALine)
+	{
+	current_total_max_order_entry* ptr = dynamic_cast<current_total_max_order_entry*>(obj);
+	ss << "current_total_max_order_entry(" << ptr->q;
+	}
+
+		break;
+	}
+	case 'd':
+	{
+		if ("data_stmt" == ALine)
+			{
+				data_stmt* ptr = dynamic_cast<data_stmt*>(obj);
+				ss << "data_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+					<< co << ptr->t << co << ptr->y;
+			}
+		else if ("dataflow" == ALine)
+		{
+			state_node* ptr = dynamic_cast<state_node*>(obj);
+			ss << "state_node(" << ptr->q << co << ptr->w << co;
+			dataflow* ptr2 = dynamic_cast<dataflow*>(obj);
+			ss << "dataflow(" << br;
+			//vector
+			if (!ptr2->q.empty())
+			{
+				prlst = ptr2->q.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr2->q[ii] << co;
+				}
+				ss << ptr2->q.back();
+			}
+			ss << brcl << co << ptr2->w << pacl;
+		}
+		else if ("debug_mode" == ALine)
+		{
+			debug_mode* ptr = dynamic_cast<debug_mode*>(obj);
+			ss << "debug_mode(" << ptr->q;
+		}
+
+		break;
+	}
+	case 'e':
+	{
+		if ("end_if" == ALine)
+		{
+			end_if* ptr = dynamic_cast<end_if*>(obj);
+			ss << "end_if(" << ptr->q << co << br;
+			//vector
+			if (!ptr->w.empty())
+			{
+				prlst = ptr->w.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->w[ii] << co;
+				}
+				ss << ptr->w.back();
+			}
+			ss << brcl;
+
+		}
+
+		break;
+	}
+	case 'f':
+	{
+		if ("for_loop" == ALine)
+		{
+			for_loop* ptr = dynamic_cast<for_loop*>(obj);
+			ss << "for_loop(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+				<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d;
+		}
+		else if ("found_call_operator" == ALine)
+		{
+			found_call_operator* ptr = dynamic_cast<found_call_operator*>(obj);
+			ss << "found_call_operator(" << ptr->q << co << ptr->w;
+		}
+
+		break;
+	}
+	case 'g':
+	{
+		if ("global_declarations" == ALine)
+		{
+			stringstream tt;
+			int			ii = 0;
+			size_t		vs;
+			global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
+			ss << "global_declarations(" << br;
+			if (!ptr->q.empty())
+			{
+				vs = ptr->q.size();
+				for (int ii = 0; ii < vs; ii++)
+				{
+					ss << "local_object(" << ptr->q[ii].q << co << ptr->q[ii].w << co << ptr->q[ii].e << co << ptr->q[ii].r << co
+						<< ptr->q[ii].t << co << ptr->q[ii].y << co << ptr->q[ii].u << co << ptr->q[ii].i << co << ptr->q[ii].o << pacl << co;
+				}
+				string tmp = ss.str();
+				tmp.resize(tmp.size() - 1);  // getting rid of the last coma
+				swap(ss, tt);
+				ss << tmp;
+			}
+			ss << brcl << co << ptr->w;
+		}
+		else if ("global_nils" == ALine)
+		{
+			global_nils* ptr = dynamic_cast<global_nils*>(obj);
+			ss << "global_nils(" << br;
+			//vector
+			if (!ptr->q.empty())
+			{
+				prlst = ptr->q.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << "nil_node" << pa;
+
+					ss << ptr->q[ii].q << co << ptr->q[ii].w << pacl << co;
+				}
+				ss << "nil_node" << pa << ptr->q.back().q << co << ptr->q.back().w;
+				ss << pacl;
+			}
+			ss << brcl;
+		}
+		else if ("global_resource" == ALine)
+		{
+			global_resource* ptr = dynamic_cast<global_resource*>(obj);
+			ss << "global_resource(" << ptr->q;
+		}
+		else if ("guard_cond" == ALine)
+		{
+			guard_cond* ptr = dynamic_cast<guard_cond*>(obj);
+			ss << "guard_cond(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("guard_pair" == ALine)
+		{
+			guard_pair* ptr = dynamic_cast<guard_pair*>(obj);
+			ss << "guard_pair(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+
+		break;
+	}
+	case 'h':
+	{
+		if ("hdl_io_pass" == ALine)
+		{
+			hdl_io_pass* ptr = dynamic_cast<hdl_io_pass*>(obj);
+			ss << "hdl_io_pass(" << ptr->q;
+		}
+		else if ("hdl_style" == ALine)
+		{
+			hdl_style* ptr = dynamic_cast<hdl_style*>(obj);
+			ss << "hdl_style(" << ptr->q;
+		}
+		else if ("hierarchy_part" == ALine)
+		{
+			hierarchy_part* ptr = dynamic_cast<hierarchy_part*>(obj);
+			ss << "hierarchy_part(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u;
+		}
+
+		break;
+	}
+	case 'i':
+	{
+		if ("ifthen" == ALine)
+	{
+	state_node* ptr = dynamic_cast<state_node*>(obj);
+	ss << "state_node(" << ptr->q << co << ptr->w << co;
+	ifthen* ptr2 = dynamic_cast<ifthen*>(obj);
+	ss << "ifthen(" << br;
+	//vector
+	if (!ptr2->q.empty())
+	{
+		prlst = ptr2->q.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr2->q[ii] << co;
+		}
+		ss << ptr2->q.back();
+	}
+	ss << brcl << co << br;
+	//vector2
+	if (!ptr2->w.empty())
+	{
+		prlst = ptr2->w.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr2->w[ii] << co;
+		}
+		ss << ptr2->w.back();
+	}
+	ss << brcl << co << br;
+	//vector3
+	if (!ptr2->e.empty())
+	{
+		prlst = ptr2->e.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr2->e[ii] << co;
+		}
+		ss << ptr2->e.back();
+	}
+	ss << brcl << co << ptr2->r << co << ptr2->t << pacl;
+	}
+		else if ("incomplete_links" == ALine)
+		{
+			incomplete_links* ptr = dynamic_cast<incomplete_links*>(obj);
+			ss << "incomplete_links(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+				<< co << ptr->p;
+		}
+		else if ("it_includes_conditional_targeting" == ALine)
+		{
+			it_includes_conditional_targeting* ptr = dynamic_cast<it_includes_conditional_targeting*>(obj);
+			ss << "it_includes_conditional_targeting(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("it_includes_ifthen" == ALine)
+		{
+			it_includes_ifthen* ptr = dynamic_cast<it_includes_ifthen*>(obj);
+			ss << "it_includes_ifthen(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+
+		break;
+	}
+	case 'j':
+	{
+		if ("joint_stmt" == ALine)
+		{
+			joint_stmt* ptr = dynamic_cast<joint_stmt*>(obj);
+			ss << "joint_stmt(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y;
+		}
+		else if ("jump" == ALine)	//losing align after 15 else if 
+		{
+			state_node* ptr = dynamic_cast<state_node*>(obj);
+			ss << "state_node(" << ptr->q << co << ptr->w << co;
+			jump* ptr2 = dynamic_cast<jump*>(obj);
+			ss << "jump" << pa << br;
+			//vector
+			if (!ptr2->q.empty())
+			{
+				prlst = ptr2->q.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr2->q[ii] << co;
+				}
+				ss << ptr2->q.back();
+			}
+			ss << brcl << co << ptr2->w << pacl;
+		}
+
+		break;
+	}
+	case 'k':
+	{
+
+		break;
+	}
+	case 'l':
+	{
+		if ("last_change_op_number" == ALine)
+		{
+			last_change_op_number* ptr = dynamic_cast<last_change_op_number*>(obj);
+			ss << "last_change_op_number(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("last_conditional_execution" == ALine)
+		{
+			last_conditional_execution* ptr = dynamic_cast<last_conditional_execution*>(obj);
+			ss << "last_conditional_execution(" << ptr->q << co << ptr->w;
+		}
+		else if ("last_conditional_transition" == ALine)
+		{
+			last_conditional_transition* ptr = dynamic_cast<last_conditional_transition*>(obj);
+			ss << "last_conditional_transition(" << ptr->q << co << ptr->w;
+		}
+		else if ("last_conditional_transition_of_schedule" == ALine)
+		{
+			last_conditional_transition_of_schedule* ptr = dynamic_cast<last_conditional_transition_of_schedule*>(obj);
+			ss << "last_conditional_transition_of_schedule(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("last_for_loop_entry" == ALine)
+		{
+			last_for_loop_entry* ptr = dynamic_cast<last_for_loop_entry*>(obj);
+			ss << "last_for_loop_entry(" << ptr->q;
+		}
+		else if ("last_incomplete" == ALine)
+		{
+			last_incomplete* ptr = dynamic_cast<last_incomplete*>(obj);
+			ss << "last_incomplete(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("last_linear_incomplete_node" == ALine)
+		{
+			last_linear_incomplete_node* ptr = dynamic_cast<last_linear_incomplete_node*>(obj);
+			ss << "last_linear_incomplete_node(" << ptr->q;
+		}
+		else if ("last_local_number" == ALine)
+		{
+			last_local_number* ptr = dynamic_cast<last_local_number*>(obj);
+			ss << "last_local_number(" << ptr->q;
+		}
+		else if ("last_non_io_found" == ALine)
+		{
+			last_non_io_found* ptr = dynamic_cast<last_non_io_found*>(obj);
+			ss << "last_non_io_found(" << ptr->q;
+		}
+		else if ("last_op_in_a_state" == ALine)
+		{
+			last_op_in_a_state* ptr = dynamic_cast<last_op_in_a_state*>(obj);
+			ss << "last_op_in_a_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("last_op_instance" == ALine)
+		{
+			last_op_instance* ptr = dynamic_cast<last_op_instance*>(obj);
+			ss << "last_op_instance(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("last_output_instance" == ALine)
+		{
+			last_output_instance* ptr = dynamic_cast<last_output_instance*>(obj);
+			ss << "last_output_instance(" << ptr->q << co << ptr->w;
+		}
+		else if ("last_reentrant_triangle" == ALine)
+		{
+			last_reentrant_triangle* ptr = dynamic_cast<last_reentrant_triangle*>(obj);
+			ss << "last_reentrant_triangle(" << ptr->q << co << ptr->w;
+		}
+		else if ("last_rescheduled" == ALine)
+		{
+			last_rescheduled* ptr = dynamic_cast<last_rescheduled*>(obj);
+			ss << "last_rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << ptr->t;
+		}
+		else if ("last_schedule_state" == ALine)
+		{
+			last_schedule_state* ptr = dynamic_cast<last_schedule_state*>(obj);
+			ss << "last_schedule_state(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("last_signal_instance" == ALine)
+		{
+			last_signal_instance* ptr = dynamic_cast<last_signal_instance*>(obj);
+			ss << "last_signal_instance(" << ptr->q << co << ptr->w;
+		}
+		else if ("last_while_loop_entry" == ALine)
+		{
+			last_while_loop_entry* ptr = dynamic_cast<last_while_loop_entry*>(obj);
+			ss << "last_while_loop_entry(" << ptr->q;
+		}
+		else if ("linear_incomplete_node" == ALine)
+		{
+			linear_incomplete_node* ptr = dynamic_cast<linear_incomplete_node*>(obj);
+			ss << "linear_incomplete_node(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->y << co << br;
+			//vector
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->t.empty())
+			{
+				prlst = ptr->t.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->t[ii] << co;
+				}
+				ss << ptr->t.back();
+			}
+			ss << brcl;
+		}
+		else if ("local_ifthen_chain_end_operations_were_written" == ALine)
+	{
+	local_ifthen_chain_end_operations_were_written* ptr = dynamic_cast<local_ifthen_chain_end_operations_were_written*>(obj);
+	ss << "local_ifthen_chain_end_operations_were_written(" << ptr->q;
+	}
+		else if ("local_object" == ALine)
+	{
+	local_object* ptr = dynamic_cast<local_object*>(obj);
+	ss << "local_object(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o;
+	}
+
+		break;
+	}
+	case 'm':
+	{
+		if ("massively_parallel_style" == ALine)
+		{
+			massively_parallel_style* ptr = dynamic_cast<massively_parallel_style*>(obj);
+			ss << "massively_parallel_style(" << ptr->q;
+		}
+		else if ("max_op_order" == ALine)
+		{
+			max_op_order* ptr = dynamic_cast<max_op_order*>(obj);
+			ss << "max_op_order(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("max_parallel_call_order" == ALine)
+		{
+			max_parallel_call_order* ptr = dynamic_cast<max_parallel_call_order*>(obj);
+			ss << "max_parallel_call_order(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("max_path" == ALine)
+		{
+			max_path* ptr = dynamic_cast<max_path*>(obj);
+			ss << "max_path(" << ptr->q << co << ptr->w;
+		}
+		else if ("mem_port" == ALine)
+		{
+			mem_port* ptr = dynamic_cast<mem_port*>(obj);
+			ss << "mem_port(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+				<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d;
+		}
+		else if ("min_path" == ALine)
+		{
+			min_path* ptr = dynamic_cast<min_path*>(obj);
+			ss << "min_path(" << ptr->q << co << ptr->w;
+		}
+		else if ("mixed_incomplete_state_lists" == ALine)
+		{
+			mixed_incomplete_state_lists* ptr = dynamic_cast<mixed_incomplete_state_lists*>(obj);
+			ss << "mixed_incomplete_state_lists(" << ptr->q << co << ptr->w << co << ptr->e << co << br;
+			//vector
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->t.empty())
+			{
+				prlst = ptr->t.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->t[ii] << co;
+				}
+				ss << ptr->t.back();
+			}
+			ss << brcl;
+		}
+		else if ("module_g_resource" == ALine)
+		{
+			module_g_resource* ptr = dynamic_cast<module_g_resource*>(obj);
+			ss << "module_g_resource(" << ptr->q << co << ptr->w;
+		}
+		else if ("module_last_state" == ALine)
+		{
+			module_last_state* ptr = dynamic_cast<module_last_state*>(obj);
+			ss << "module_last_state(" << ptr->q;
+		}
+		else if ("module_local_list" == ALine)
+		{
+			stringstream tt;
+			module_local_list* ptr = dynamic_cast<module_local_list*>(obj);
+			int			ii = 0;
+			size_t		vs;
+			ss << "module_local_list(" << br;
+			if (!ptr->q.empty())
+			{
+				vs = ptr->q.size();
+				for (int ii = 0; ii < vs; ii++)
+				{
+					ss << "local_object(" << ptr->q[ii].q << co << ptr->q[ii].w << co << ptr->q[ii].e << co << ptr->q[ii].r << co
+						<< ptr->q[ii].t << co << ptr->q[ii].y << co << ptr->q[ii].u << co << ptr->q[ii].i << co << ptr->q[ii].o << pacl << co;
+				}
+				string tmp = ss.str();
+				tmp.resize(tmp.size() - 1);  // getting rid of the last
+				swap(ss, tt);
+				ss << tmp;
+				ss << brcl;
+			}
+		}
+		if ("module_local_list_parcs" == ALine)
 		{
 			stringstream tt;
 			module_local_list_parcs* ptr = dynamic_cast<module_local_list_parcs*>(obj);
@@ -1339,136 +846,1993 @@ string makeStringOf(GeneralFact* obj)
 				ss << brcl;
 			}
 		}
-		else if (typeid(last_non_io_found) == typeid(*obj))
+
+		break;
+	}
+	case 'n':
+	{
+		if ("nested_cond_fact" == ALine)
+	{
+	nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
+	ss << "nested_cond_fact(" << ptr->q << co << br;
+	//vector
+	if (!ptr->w.empty())
+	{
+		prlst = ptr->w.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
 		{
-			last_non_io_found* ptr = dynamic_cast<last_non_io_found*>(obj);
-			ss << "last_non_io_found(" << ptr->q;
+			ss << ptr->w[ii] << co;
 		}
-		else if (typeid(last_local_number) == typeid(*obj))
+		ss << ptr->w.back();
+	}
+	ss << brcl;
+	}
+		else if ("new_schedule" == ALine)
 		{
-			last_local_number* ptr = dynamic_cast<last_local_number*>(obj);
-			ss << "last_local_number(" << ptr->q;
+			new_schedule* ptr = dynamic_cast<new_schedule*>(obj);
+			ss << "new_schedule(" << ptr->q;
 		}
-		else if (typeid(printed_formal_ios_of_called_module) == typeid(*obj))
+
+		break;
+	}
+	case 'o':
+	{
+		if ("old_schedule" == ALine)
 		{
-			printed_formal_ios_of_called_module* ptr = dynamic_cast<printed_formal_ios_of_called_module*>(obj);
-			ss << "printed_formal_ios_of_called_module(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+			old_schedule* ptr = dynamic_cast<old_schedule*>(obj);
+			ss << "old_schedule(" << ptr->q;
 		}
-		else if (typeid(it_includes_ifthen) == typeid(*obj))
-		{
-			it_includes_ifthen* ptr = dynamic_cast<it_includes_ifthen*>(obj);
-			ss << "it_includes_ifthen(" << ptr->q << co << ptr->w << co << ptr->e;
-		}
-		else if (typeid(it_includes_conditional_targeting) == typeid(*obj))
-		{
-			it_includes_conditional_targeting* ptr = dynamic_cast<it_includes_conditional_targeting*>(obj);
-			ss << "it_includes_conditional_targeting(" << ptr->q << co << ptr->w << co << ptr->e;
-		}
-		else if (typeid(targets_conditional_variable) == typeid(*obj))
-		{
-			targets_conditional_variable* ptr = dynamic_cast<targets_conditional_variable*>(obj);
-			ss << "targets_conditional_variable(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
-		}
-		else if (typeid(variable_has_been_listed) == typeid(*obj))
-		{
-			variable_has_been_listed* ptr = dynamic_cast<variable_has_been_listed*>(obj);
-			ss << "variable_has_been_listed(" << ptr->q << co << ptr->w;
-		}
-		else if (typeid(resetstyle) == typeid(*obj))
-		{
-			resetstyle* ptr = dynamic_cast<resetstyle*>(obj);
-			ss << "resetstyle(" << ptr->q;
-		}
-		else if (typeid(checkstyle) == typeid(*obj))
-		{
-			checkstyle* ptr = dynamic_cast<checkstyle*>(obj);
-			ss << "checkstyle(" << ptr->q;
-		}
-		else if (typeid(total_local_entry) == typeid(*obj) )
-		{
-			total_local_entry* ptr = dynamic_cast<total_local_entry*>(obj);
-			ss << "total_local_entry(" << ptr->q;
-		}
-		else if (typeid(complex_next_state_operation_depth) == typeid(*obj))
-		{
-			complex_next_state_operation_depth* ptr = dynamic_cast<complex_next_state_operation_depth*>(obj);
-			ss << "complex_next_state_operation_depth(" << ptr->q;
-		}
-		else if (typeid(output_filename) == typeid(*obj))
-		{
-			output_filename* ptr = dynamic_cast<output_filename*>(obj);
-			ss << "output_filename(" << ptr->q;
-		}
-		else if (typeid(hdl_io_pass) == typeid(*obj))
-		{
-			hdl_io_pass* ptr = dynamic_cast<hdl_io_pass*>(obj);
-			ss << "hdl_io_pass(" << ptr->q;
-		}
-		else if (typeid(current_hdl_style) == typeid(*obj))
-		{
-			current_hdl_style* ptr = dynamic_cast<current_hdl_style*>(obj);
-			ss << "current_hdl_style(" << ptr->q;
-		}
-		else if (typeid(call_ios_have_been_reset) == typeid(*obj))
-		{
-			call_ios_have_been_reset* ptr = dynamic_cast<call_ios_have_been_reset*>(obj);
-			ss << "call_ios_have_been_reset(" << ptr->q;
-		}
-		else if (typeid(debug_mode) == typeid(*obj))
-		{
-			debug_mode* ptr = dynamic_cast<debug_mode*>(obj);
-			ss << "debug_mode(" << ptr->q;
-		}
-		else if (typeid(print_C_main_body) == typeid(*obj))
-		{
-			print_C_main_body* ptr = dynamic_cast<print_C_main_body*>(obj);
-			ss << "print_C_main_body(" << ptr->q;
-		}
-		else if (typeid(cac_mode) == typeid(*obj))
-		{
-			cac_mode* ptr = dynamic_cast<cac_mode*>(obj);
-			ss << "cac_mode(" << ptr->q;
-		}
-		else if (typeid(path) == typeid(*obj))
-		{
-			path* ptr = dynamic_cast<path*>(obj);
-			ss << "path(" << ptr->q << co << ptr->w << co << ptr->e;
-		}
-		else if (typeid(max_path) == typeid(*obj))
-		{
-			max_path* ptr = dynamic_cast<max_path*>(obj);
-			ss << "max_path(" << ptr->q << co << ptr->w;
-		}
-		else if (typeid(min_path) == typeid(*obj))
-		{
-			min_path* ptr = dynamic_cast<min_path*>(obj);
-			ss << "min_path(" << ptr->q << co << ptr->w;
-		}
-		else if (typeid(op_belongs_to_state) == typeid(*obj))
+		else if ("op_belongs_to_state" == ALine)
 		{
 			op_belongs_to_state* ptr = dynamic_cast<op_belongs_to_state*>(obj);
 			ss << "op_belongs_to_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
 		}
-		else if (typeid(top_module) == typeid(*obj))
+		else if ("op_def" == ALine)
 		{
-			top_module* ptr = dynamic_cast<top_module*>(obj);
-			ss << "top_module(" << ptr->q;
+			op_def* ptr = dynamic_cast<op_def*>(obj);
+			ss << "op_def(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u;
 		}
-		else if (typeid(package_name) == typeid(*obj))
+		else if ("op_guards" == ALine)
+		{
+			op_guards* ptr = dynamic_cast<op_guards*>(obj);
+			ss << "op_guards(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl;
+		}
+		else if ("op_in_a_state" == ALine)
+		{
+			op_in_a_state* ptr = dynamic_cast<op_in_a_state*>(obj);
+			ss << "op_in_a_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t;
+		}
+		else if ("op_instance" == ALine)
+		{
+			op_instance* ptr = dynamic_cast<op_instance*>(obj);
+			ss << "op_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t;
+		}
+		else if ("op_resource" == ALine)
+		{
+			op_resource* ptr = dynamic_cast<op_resource*>(obj);
+			ss << "op_resource(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("operation_order" == ALine)
+		{
+			operation_order* ptr = dynamic_cast<operation_order*>(obj);
+			ss << "operation_order(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+				<< co << ptr->p;
+		}
+		else if ("operator_instance_stats" == ALine)
+		{
+			operator_instance_stats* ptr = dynamic_cast<operator_instance_stats*>(obj);
+			ss << "operator_instance_stats(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("operator_instances" == ALine)
+		{
+			operator_instances* ptr = dynamic_cast<operator_instances*>(obj);
+			ss << "operator_instances(" << ptr->q << co << ptr->w;
+		}
+		else if ("output_filename" == ALine)
+		{
+			output_filename* ptr = dynamic_cast<output_filename*>(obj);
+			ss << "output_filename(" << ptr->q;
+		}
+		else if ("output_instance" == ALine)
+		{
+			output_instance* ptr = dynamic_cast<output_instance*>(obj);
+			ss << "output_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y;
+		}
+
+		break;
+	}
+	case 'p':
+	{
+		if ("package_name" == ALine)
 		{
 			package_name* ptr = dynamic_cast<package_name*>(obj);
 			ss << "package_name(" << ptr->q;
 		}
-		else 
+		else if ("path" == ALine)
 		{
-			GenfactError* ptr = new GenfactError("error for ");
-			ptr->saying += typeid(*obj).name();
-			ss << "Error at fact " << ptr->saying;
+			path* ptr = dynamic_cast<path*>(obj);
+			ss << "path(" << ptr->q << co << ptr->w << co << ptr->e;
 		}
-	}	// if (flag)
+		else if ("possible_end_if" == ALine)
+		{
+			possible_end_if* ptr = dynamic_cast<possible_end_if*>(obj);
+			ss << "possible_end_if(" << ptr->q << co << br;
+			//vector
+			if (!ptr->w.empty())
+			{
+				prlst = ptr->w.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->w[ii] << co;
+				}
+				ss << ptr->w.back();
+			}
+			ss << brcl;
+		}
+		else if ("pred_candidate_examined" == ALine)
+		{
+			pred_candidate_examined* ptr = dynamic_cast<pred_candidate_examined*>(obj);
+			ss << "pred_candidate_examined(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("predecessors" == ALine)
+		{
+			predecessors* ptr = dynamic_cast<predecessors*>(obj);
+			ss << "predecessors(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl;
+
+
+		}
+		else if ("print_C_main_body" == ALine)
+		{
+			print_C_main_body* ptr = dynamic_cast<print_C_main_body*>(obj);
+			ss << "print_C_main_body(" << ptr->q;
+		}
+		else if ("printed_formal_ios_of_called_module" == ALine)
+		{
+			printed_formal_ios_of_called_module* ptr = dynamic_cast<printed_formal_ios_of_called_module*>(obj);
+			ss << "printed_formal_ios_of_called_module(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("prog_stmt" == ALine)
+		{
+			prog_stmt* ptr = dynamic_cast<prog_stmt*>(obj);
+			ss << "prog_stmt(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i;
+		}
+
+		break;
+	}
+	case 'q':
+	{
+
+		break;
+	}
+	case 'r':
+	{
+		if ("raw_cessor" == ALine)
+	{
+	raw_cessor* ptr = dynamic_cast<raw_cessor*>(obj);
+	ss << "raw_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
+	}
+		else if ("raw_dependencies" == ALine)
+		{
+			raw_dependencies* ptr = dynamic_cast<raw_dependencies*>(obj);
+			ss << "raw_dependencies(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl;
+
+		}
+		else if ("rec_stmt" == ALine)
+		{
+			rec_stmt* ptr = dynamic_cast<rec_stmt*>(obj);
+			ss << "rec_stmt(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl;
+		}
+		else if ("record_aggregates_list" == ALine)
+		{
+			record_aggregates_list* ptr = dynamic_cast<record_aggregates_list*>(obj);
+			ss << "record_aggregates_list(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl;
+		}
+		else if ("reentrant_triangle" == ALine)
+		{
+			reentrant_triangle* ptr = dynamic_cast<reentrant_triangle*>(obj);
+			ss << "reentrant_triangle(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << br;
+			//vector
+			if (!ptr->t.empty())
+			{
+				prlst = ptr->t.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->t[ii] << co;
+				}
+				ss << ptr->t.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->y.empty())
+			{
+				prlst = ptr->y.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->y[ii] << co;
+				}
+				ss << ptr->y.back();
+			}
+			ss << brcl << co << br;
+			//vector3
+			if (!ptr->u.empty())
+			{
+				prlst = ptr->u.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->u[ii] << co;
+				}
+				ss << ptr->u.back();
+			}
+			ss << brcl << co << br;
+			//vector4
+			if (!ptr->i.empty())
+			{
+				prlst = ptr->i.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->i[ii] << co;
+				}
+				ss << ptr->i.back();
+			}
+			ss << brcl << co << br;
+			//vector5
+			if (!ptr->o.empty())
+			{
+				prlst = ptr->o.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->o[ii] << co;
+				}
+				ss << ptr->o.back();
+			}
+			ss << brcl << co << br;
+			//vector6
+			if (!ptr->p.empty())
+			{
+				prlst = ptr->p.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->p[ii] << co;
+				}
+				ss << ptr->p.back();
+			}
+			ss << brcl << co << ptr->a << co << ptr->s << co << ptr->d << co << ptr->f;
+		}
+		else if ("transition_to_be_rescheduled" == ALine)
+	{
+	transition_to_be_rescheduled* ptr = dynamic_cast<transition_to_be_rescheduled*>(obj);
+	ss << "transition_to_be_rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << ptr->t;
+	}
+		else if ("rescheduled" == ALine)
+		{
+			rescheduled* ptr = dynamic_cast<rescheduled*>(obj);
+			ss << "rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t;
+		}
+		else if ("resetstyle" == ALine)
+		{
+		resetstyle* ptr = dynamic_cast<resetstyle*>(obj);
+		ss << "resetstyle(" << ptr->q;
+		}
+		else if ("return_cos" == ALine)
+	{
+	state_node* ptr = dynamic_cast<state_node*>(obj);
+	ss << "state_node(" << ptr->q << co << ptr->w << co;
+	return_cos* ptr2 = dynamic_cast<return_cos*>(obj);
+	ss << "return(" << br;
+	//vector
+	if (!ptr2->q.empty())
+	{
+		prlst = ptr2->q.size() - 1;
+		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+		{
+			ss << ptr2->q[ii] << co;
+		}
+		ss << ptr2->q.back();
+	}
+	ss << brcl << pacl;
+	}
+
+		break;
+	}
+	case 's':
+	{
+		if ("schedule" == ALine)
+		{
+			schedule* ptr = dynamic_cast<schedule*>(obj);
+			ss << "schedule(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("sequence" == ALine)
+		{
+			sequence* ptr = dynamic_cast<sequence*>(obj);
+			ss << "sequence(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("signal_instance" == ALine)
+		{
+			signal_instance* ptr = dynamic_cast<signal_instance*>(obj);
+			ss << "signal_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u;
+		}
+		else if ("source_is_normal_dt" == ALine)
+		{
+			source_is_normal_dt* ptr = dynamic_cast<source_is_normal_dt*>(obj);
+			ss << "source_is_normal_dt(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("special_dt" == ALine)
+		{
+			special_dt* ptr = dynamic_cast<special_dt*>(obj);
+			ss << "special_dt(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u;
+
+		}
+		else if ("special_op" == ALine)
+		{
+			special_op* ptr = dynamic_cast<special_op*>(obj);
+			ss << "special_op(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+				<< co << ptr->p;
+		}
+		else if ("state" == ALine)
+		{
+			state* ptr = dynamic_cast<state*>(obj);
+			ss << "state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << br;
+			//vector
+			if (!ptr->u.empty())
+			{
+				prlst = ptr->u.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->u[ii] << co;
+				}
+				ss << ptr->u.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->i.empty())
+			{
+				prlst = ptr->i.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->i[ii] << co;
+				}
+				ss << ptr->i.back();
+			}
+			ss << brcl;
+		}
+		else if ("subprogram_call" == ALine)
+		{
+			state_node* ptr = dynamic_cast<state_node*>(obj);
+			ss << "state_node(" << ptr->q << co << ptr->w << co;
+			subprogram_call* ptr2 = dynamic_cast<subprogram_call*>(obj);
+			ss << "subprogram_call(" << br;
+			//vector
+			if (!ptr2->q.empty())
+			{
+				prlst = ptr2->q.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr2->q[ii] << co;
+				}
+				ss << ptr2->q.back();
+			}
+			ss << brcl << co << ptr2->w << pacl;
+		}
+
+		break;
+	}
+	case 't':
+	{
+		if ("targets_conditional_variable" == ALine)
+		{
+			targets_conditional_variable* ptr = dynamic_cast<targets_conditional_variable*>(obj);
+			ss << "targets_conditional_variable(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+		}
+		else if ("top_level_call" == ALine)
+		{
+			top_level_call* ptr = dynamic_cast<top_level_call*>(obj);
+			ss << "top_level_call(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+				<< co << ptr->p << co << ptr->a;
+		}
+		else if ("top_level_call_parcs" == ALine)
+		{
+			top_level_call_parcs* ptr = dynamic_cast<top_level_call_parcs*>(obj);
+			ss << "top_level_call_parcs(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+				<< co << ptr->p << co << ptr->a;
+		}
+		else if ("top_module" == ALine)
+		{
+			top_module* ptr = dynamic_cast<top_module*>(obj);
+			ss << "top_module(" << ptr->q;
+		}
+		else if ("total_local_entry" == ALine)
+		{
+			total_local_entry* ptr = dynamic_cast<total_local_entry*>(obj);
+			ss << "total_local_entry(" << ptr->q;
+		}
+		else if ("totalmax_call_order" == ALine)
+		{
+			totalmax_call_order* ptr = dynamic_cast<totalmax_call_order*>(obj);
+			ss << "totalmax_call_order(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("totalmax_gross_depth" == ALine)
+		{
+			totalmax_gross_depth* ptr = dynamic_cast<totalmax_gross_depth*>(obj);
+			ss << "totalmax_gross_depth(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("transition_to_be_rescheduled" == ALine)
+		{
+			transition_to_be_rescheduled* ptr = dynamic_cast<transition_to_be_rescheduled*>(obj);
+			ss << "transition_to_be_rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << ptr->t;
+		}
+		else if ("type_def" == ALine)
+		{
+			type_def* ptr = dynamic_cast<type_def*>(obj);
+			ss << "type_def(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o;
+		}
+
+		break;
+	}
+	case 'u':
+	{
+
+		break;
+	}
+	case 'v':
+	{
+		if ("var_guards" == ALine)
+		{
+			var_guards* ptr = dynamic_cast<var_guards*>(obj);
+			ss << "var_guards(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl;
+		}
+		else if ("variable_has_been_listed" == ALine)
+		{
+			variable_has_been_listed* ptr = dynamic_cast<variable_has_been_listed*>(obj);
+			ss << "variable_has_been_listed(" << ptr->q << co << ptr->w;
+		}
+
+		break;
+	}
+	case 'w':
+	{
+		if ("war_cessor" == ALine)
+		{
+			war_cessor* ptr = dynamic_cast<war_cessor*>(obj);
+			ss << "war_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("war_dependencies" == ALine)
+		{
+			war_dependencies* ptr = dynamic_cast<war_dependencies*>(obj);
+			ss << "war_dependencies(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl;
+		}
+		else if ("waw_cessor" == ALine)
+		{
+			waw_cessor* ptr = dynamic_cast<waw_cessor*>(obj);
+			ss << "waw_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
+		}
+		else if ("waw_dependencies" == ALine)
+		{
+			waw_dependencies* ptr = dynamic_cast<waw_dependencies*>(obj);
+			ss << "waw_dependencies(" << ptr->q << co << ptr->w << co << br;
+			//vector
+			if (!ptr->e.empty())
+			{
+				prlst = ptr->e.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->e[ii] << co;
+				}
+				ss << ptr->e.back();
+			}
+			ss << brcl << co << br;
+			//vector2
+			if (!ptr->r.empty())
+			{
+				prlst = ptr->r.size() - 1;
+				for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+				{
+					ss << ptr->r[ii] << co;
+				}
+				ss << ptr->r.back();
+			}
+			ss << brcl;
+
+		}
+		else if ("while_loop" == ALine)
+		{
+			while_loop* ptr = dynamic_cast<while_loop*>(obj);
+			ss << "while_loop(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+				<< co << ptr->t << co << ptr->y << co << ptr->u;
+		}
+
+		break;
+	}
+	case 'x':
+	{
+
+		break;
+	}
+	case 'y':
+	{
+
+		break;
+	}
+	case 'z':
+	{
+
+		break;
+	}
+	GenfactError* ptr = new GenfactError("error for ");
+	ptr->saying += typeid(*obj).name();
+	ss << "Error at fact " << ptr->saying;
+		
+	}
 	ss << pacl;
 	ALine = ss.str();
+	if (ALine == ")")
+	cout << "lol" << endl;
+
 	return ALine;
+
+
+	//if ("type_def" == ALine)
+	//{
+	//	type_def* ptr = dynamic_cast<type_def*>(obj);
+	//	ss << "type_def("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o;
+	//}
+	//else if ("op_def" == ALine)
+	//{
+	//	op_def* ptr = dynamic_cast<op_def*>(obj);
+	//	ss << "op_def("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u;
+	//}
+	//else if ("hierarchy_part" == ALine)
+	//{
+	//	hierarchy_part* ptr = dynamic_cast<hierarchy_part*>(obj);
+	//	ss << "hierarchy_part("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u;
+	//}
+	//else if ("data_stmt" == ALine)
+	//{
+	//	data_stmt* ptr = dynamic_cast<data_stmt*>(obj);
+	//	ss << "data_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y;
+	//}
+	//else if ("prog_stmt" == ALine)
+	//{
+	//	prog_stmt* ptr = dynamic_cast<prog_stmt*>(obj);
+	//	ss << "prog_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i;
+	//}
+	//else if ("joint_stmt" == ALine)
+	//{
+	//	joint_stmt* ptr = dynamic_cast<joint_stmt*>(obj);
+	//	ss << "joint_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y;
+	//}
+	//else if ("call_stmt" == ALine)
+	//{
+	//	call_stmt* ptr = dynamic_cast<call_stmt*>(obj);
+	//	ss << "call_stmt(" << ptr->q << co << ptr->w << co << ptr->e << co << br;
+	//	//vector
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst;++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("compo_stmt" == ALine)
+	//{
+	//	compo_stmt* ptr = dynamic_cast<compo_stmt*>(obj);
+	//	ss << "compo_stmt(" << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) 
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("rec_stmt" == ALine)
+	//{
+	//	rec_stmt* ptr = dynamic_cast<rec_stmt*>(obj);
+	//	ss << "rec_stmt(" << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("special_op" == ALine)
+	//{
+	//	special_op* ptr = dynamic_cast<special_op*>(obj);
+	//	ss << "special_op("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+	//		<< co << ptr->p;
+	//}
+	//else if ("special_dt" == ALine)
+	//{
+	//	special_dt* ptr = dynamic_cast<special_dt*>(obj);
+	//	ss << "special_dt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u;
+	//	
+	//}
+	//else if ("local_object" == ALine)
+	//{
+	//	local_object* ptr = dynamic_cast<local_object*>(obj);
+	//	ss << "local_object("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o;
+	//}
+	//else if ("subprogram_call" == ALine)
+	//{
+	//	state_node* ptr = dynamic_cast<state_node*>(obj);
+	//	ss << "state_node(" << ptr->q << co << ptr->w << co;
+	//	subprogram_call* ptr2 = dynamic_cast<subprogram_call*>(obj);
+	//	ss << "subprogram_call(" << br;
+	//	//vector
+	//	if (!ptr2->q.empty())
+	//	{
+	//		prlst = ptr2->q.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr2->q[ii] << co;
+	//		}
+	//		ss << ptr2->q.back();
+	//	}
+	//	ss << brcl << co << ptr2->w << pacl;
+	//}
+	//else if ("dataflow" == ALine)
+	//{
+	//	state_node* ptr = dynamic_cast<state_node*>(obj);
+	//	ss << "state_node(" << ptr->q << co << ptr->w << co;
+	//	dataflow* ptr2 = dynamic_cast<dataflow*>(obj);
+	//	ss << "dataflow(" << br;
+	//	//vector
+	//	if (!ptr2->q.empty())
+	//	{
+	//		prlst = ptr2->q.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr2->q[ii] << co;
+	//		}
+	//		ss << ptr2->q.back();
+	//	}
+	//	ss << brcl << co << ptr2->w << pacl;
+	//}
+	//else if ("ifthen" == ALine)
+	//{
+	//	state_node* ptr = dynamic_cast<state_node*>(obj);
+	//	ss << "state_node(" << ptr->q << co << ptr->w << co;
+	//	ifthen* ptr2 = dynamic_cast<ifthen*>(obj);
+	//	ss << "ifthen(" << br;
+	//	//vector
+	//	if (!ptr2->q.empty())
+	//	{
+	//		prlst = ptr2->q.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr2->q[ii] << co;
+	//		}
+	//		ss << ptr2->q.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr2->w.empty())
+	//	{
+	//		prlst = ptr2->w.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr2->w[ii] << co;
+	//		}
+	//		ss << ptr2->w.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector3
+	//	if (!ptr2->e.empty())
+	//	{
+	//		prlst = ptr2->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr2->e[ii] << co;
+	//		}
+	//		ss << ptr2->e.back();
+	//	}
+	//	ss << brcl << co << ptr2->r << co << ptr2->t << pacl;
+	//}
+	//else if ("jump" == ALine)	//losing align after 15 else if 
+	//{
+	//	state_node* ptr = dynamic_cast<state_node*>(obj);
+	//	ss << "state_node(" << ptr->q << co << ptr->w << co;
+	//	jump* ptr2 = dynamic_cast<jump*>(obj);
+	//	ss << "jump" << pa << br;
+	//	//vector
+	//	if (!ptr2->q.empty())
+	//	{
+	//		prlst = ptr2->q.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr2->q[ii] << co;
+	//		}
+	//		ss << ptr2->q.back();
+	//	}
+	//	ss << brcl << co << ptr2->w << pacl;
+	//}
+	//else if ("return_cos" == ALine)
+	//{
+	//	state_node* ptr = dynamic_cast<state_node*>(obj);
+	//	ss << "state_node(" << ptr->q << co << ptr->w << co;
+	//	return_cos* ptr2 = dynamic_cast<return_cos*>(obj);
+	//	ss << "return(" << br;
+	//	//vector
+	//	if (!ptr2->q.empty())
+	//	{
+	//		prlst = ptr2->q.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr2->q[ii] << co;
+	//		}
+	//		ss << ptr2->q.back();
+	//	}
+	//	ss << brcl << pacl;
+	//}
+	//else if ("change_op_number" == ALine)
+	//{
+	//	change_op_number* ptr = dynamic_cast<change_op_number*>(obj);
+	//	ss << "change_op_number(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("last_change_op_number" == ALine)
+	//{
+	//	last_change_op_number* ptr = dynamic_cast<last_change_op_number*>(obj);
+	//	ss << "last_change_op_number(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("op_guards" == ALine)
+	//{
+	//	op_guards* ptr = dynamic_cast<op_guards*>(obj);
+	//	ss << "op_guards(" << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("var_guards" == ALine)
+	//{
+	//	var_guards* ptr = dynamic_cast<var_guards*>(obj);
+	//	ss << "var_guards("  << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("guard_pair" == ALine)
+	//{
+	//	guard_pair* ptr = dynamic_cast<guard_pair*>(obj);
+	//	ss << "guard_pair(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("guard_cond" == ALine)
+	//{
+	//	guard_cond* ptr = dynamic_cast<guard_cond*>(obj);
+	//	ss << "guard_cond("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("predecessors" == ALine)
+	//{
+	//	predecessors* ptr = dynamic_cast<predecessors*>(obj);
+	//	ss << "predecessors("  << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl;
+
+
+	//}
+	//else if ("cessor" == ALine)
+	//{
+	//	cessor* ptr = dynamic_cast<cessor*>(obj);
+	//	ss << "cessor("  << ptr->q << co << ptr->w << co << ptr->e ;
+	//}
+	//else if ("cessor_kind" == ALine)
+	//{
+	//	cessor_kind* ptr = dynamic_cast<cessor_kind*>(obj);
+	//	ss << "cessor_kind("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << br;
+	//	//vector
+	//	if (!ptr->u.empty())
+	//	{
+	//		prlst = ptr->u.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->u[ii] << co;
+	//		}
+	//		ss << ptr->u.back();
+	//	}
+	//	ss << brcl;
+
+	//}
+	//else if ("old_schedule" == ALine)
+	//{
+	//	old_schedule* ptr = dynamic_cast<old_schedule*>(obj);
+	//	ss << "old_schedule("  << ptr->q;
+	//}
+	//else if ("new_schedule" == ALine)
+	//{
+	//	new_schedule* ptr = dynamic_cast<new_schedule*>(obj);
+	//	ss << "new_schedule("  << ptr->q;
+	//}
+	//else if ("local_ifthen_chain_end_operations_were_written" == ALine)
+	//{
+	//	local_ifthen_chain_end_operations_were_written* ptr = dynamic_cast<local_ifthen_chain_end_operations_were_written*>(obj);
+	//	ss << "local_ifthen_chain_end_operations_were_written("  << ptr->q;
+	//}
+	//else if ("calls_list" == ALine)
+	//{
+	//	calls_list* ptr = dynamic_cast<calls_list*>(obj);
+	//	ss << "calls_list("  << ptr->q << co << ptr->w << co << ptr->e << co << br;
+	//	//vector
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("composites_list" == ALine)
+	//{
+	//	composites_list* ptr = dynamic_cast<composites_list*>(obj);
+	//	ss << "composites_list("  << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("record_aggregates_list" == ALine)
+	//{
+	//	record_aggregates_list* ptr = dynamic_cast<record_aggregates_list*>(obj);
+	//	ss << "record_aggregates_list(" << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("mem_port" == ALine)
+	//{
+	//	mem_port* ptr = dynamic_cast<mem_port*>(obj);
+	//	ss << "mem_port(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+	//		<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d;
+	//}
+	//else if ("global_declarations" == ALine)
+	//{
+	//	stringstream tt;
+	//	int			ii = 0;
+	//	size_t		vs;
+	//	global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
+	//	ss << "global_declarations(" << br;
+	//	if (!ptr->q.empty())
+	//	{
+	//		vs = ptr->q.size();
+	//		for (int ii = 0; ii < vs; ii++)
+	//		{
+	//			ss << "local_object(" << ptr->q[ii].q << co << ptr->q[ii].w << co << ptr->q[ii].e << co << ptr->q[ii].r << co
+	//				<< ptr->q[ii].t << co << ptr->q[ii].y << co << ptr->q[ii].u << co << ptr->q[ii].i << co << ptr->q[ii].o << pacl << co;
+	//		}
+	//		string tmp = ss.str();
+	//		tmp.resize(tmp.size() - 1);  // getting rid of the last coma
+	//		swap(ss, tt);
+	//		ss << tmp;
+	//	}
+	//	ss << brcl << co << ptr->w;
+	//}
+	//else if ("source_is_normal_dt" == ALine)
+	//{
+	//	source_is_normal_dt* ptr = dynamic_cast<source_is_normal_dt*>(obj);
+	//	ss << "source_is_normal_dt("  << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("combo" == ALine)
+	//{
+	//	combo* ptr = dynamic_cast<combo*>(obj);
+	//	ss << "combo("  << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("sequence" == ALine)
+	//{
+	//	sequence* ptr = dynamic_cast<sequence*>(obj);
+	//	ss << "sequence("  << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("for_loop" == ALine)
+	//{
+	//	for_loop* ptr = dynamic_cast<for_loop*>(obj);
+	//	ss << "for_loop("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+	//		<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d;
+	//}
+	//else if ("last_for_loop_entry" == ALine)
+	//{
+	//	last_for_loop_entry* ptr = dynamic_cast<last_for_loop_entry*>(obj);
+	//	ss << "last_for_loop_entry("  << ptr->q;
+	//}
+	//else if ("while_loop" == ALine)
+	//{
+	//	while_loop* ptr = dynamic_cast<while_loop*>(obj);
+	//	ss << "while_loop("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u;
+	//}
+	//else if ("last_while_loop_entry" == ALine)
+	//{
+	//	last_while_loop_entry* ptr = dynamic_cast<last_while_loop_entry*>(obj);
+	//	ss << "last_while_loop_entry("  << ptr->q;
+	//}
+	//else if ("possible_end_if" == ALine)
+	//{
+	//	possible_end_if* ptr = dynamic_cast<possible_end_if*>(obj);
+	//	ss << "possible_end_if("  << ptr->q << co << br;
+	//	//vector
+	//	if (!ptr->w.empty())
+	//	{
+	//		prlst = ptr->w.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->w[ii] << co;
+	//		}
+	//		ss << ptr->w.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("end_if" == ALine)
+	//{
+	//	end_if* ptr = dynamic_cast<end_if*>(obj);
+	//	ss << "end_if("  << ptr->q << co << br;
+	//	//vector
+	//	if (!ptr->w.empty())
+	//	{
+	//		prlst = ptr->w.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->w[ii] << co;
+	//		}
+	//		ss << ptr->w.back();
+	//	}
+	//	ss << brcl;
+
+	//}
+	//else if ("nested_cond_fact" == ALine)
+	//{
+	//	nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
+	//	ss << "nested_cond_fact("  << ptr->q << co << br;
+	//	//vector
+	//	if (!ptr->w.empty())
+	//	{
+	//		prlst = ptr->w.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->w[ii] << co;
+	//		}
+	//		ss << ptr->w.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("top_level_call" == ALine)
+	//{
+	//	top_level_call* ptr = dynamic_cast<top_level_call*>(obj);
+	//	ss << "top_level_call("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+	//		<< co << ptr->p << co << ptr->a;
+	//}
+	//else if ("top_level_call_parcs" == ALine)
+	//{
+	//	top_level_call_parcs* ptr = dynamic_cast<top_level_call_parcs*>(obj);
+	//	ss << "top_level_call_parcs("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+	//		<< co << ptr->p << co << ptr->a;
+	//}
+	//else if ("added_aux_call_ios" == ALine)
+	//{
+	//	added_aux_call_ios* ptr = dynamic_cast<added_aux_call_ios*>(obj);
+	//	ss << "added_aux_call_ios("  << ptr->q << co << ptr->w ;
+	//}
+	//else if ("added_aux_call_ios1" == ALine)
+	//{
+	//	added_aux_call_ios1* ptr = dynamic_cast<added_aux_call_ios1*>(obj);
+	//	ss << "added_aux_call_ios1("  << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("added_aux_call_signals" == ALine)
+	//{
+	//	added_aux_call_signals* ptr = dynamic_cast<added_aux_call_signals*>(obj);
+	//	ss << "added_aux_call_signals("  << ptr->q << co << ptr->w;
+	//}
+	//else if ("found_call_operator" == ALine)
+	//{
+	//	found_call_operator* ptr = dynamic_cast<found_call_operator*>(obj);
+	//	ss << "found_call_operator("  << ptr->q << co << ptr->w;
+	//}
+	//else if ("added_verilog_aux_call_outputs" == ALine)
+	//{
+	//	added_verilog_aux_call_outputs* ptr = dynamic_cast<added_verilog_aux_call_outputs*>(obj);
+	//	ss << "added_verilog_aux_call_outputs("  << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("raw_dependencies" == ALine)
+	//{
+	//	raw_dependencies* ptr = dynamic_cast<raw_dependencies*>(obj);
+	//	ss << "raw_dependencies("  << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+
+	//}
+	//else if ("war_dependencies" == ALine)
+	//{
+	//	war_dependencies* ptr = dynamic_cast<war_dependencies*>(obj);
+	//	ss << "war_dependencies(" << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("waw_dependencies" == ALine)
+	//{
+	//	waw_dependencies* ptr = dynamic_cast<waw_dependencies*>(obj);
+	//	ss << "waw_dependencies("  << ptr->q << co << ptr->w << co << br;
+	//	//vector
+	//	if (!ptr->e.empty())
+	//	{
+	//		prlst = ptr->e.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->e[ii] << co;
+	//		}
+	//		ss << ptr->e.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl;
+
+	//}
+	//else if ("schedule" == ALine)
+	//{
+	//	schedule* ptr = dynamic_cast<schedule*>(obj);
+	//	ss << "schedule("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("last_conditional_execution" == ALine)
+	//{
+	//	last_conditional_execution* ptr = dynamic_cast<last_conditional_execution*>(obj);
+	//	ss << "last_conditional_execution("  << ptr->q << co << ptr->w;
+	//}
+	//else if ("conditional_operations" == ALine)
+	//{
+	//	conditional_operations* ptr = dynamic_cast<conditional_operations*>(obj);
+	//	ss << "conditional_operations("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << br;
+	//	//vector
+	//	if (!ptr->t.empty())
+	//	{
+	//		prlst = ptr->t.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->t[ii] << co;
+	//		}
+	//		ss << ptr->t.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->y.empty())
+	//	{
+	//		prlst = ptr->y.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->y[ii] << co;
+	//		}
+	//		ss << ptr->y.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector3
+	//	if (!ptr->u.empty())
+	//	{
+	//		prlst = ptr->u.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->u[ii] << co;
+	//		}
+	//		ss << ptr->u.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector4
+	//	if (!ptr->i.empty())
+	//	{
+	//		prlst = ptr->i.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->i[ii] << co;
+	//		}
+	//		ss << ptr->i.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("last_conditional_transition_of_schedule" == ALine)
+	//{
+	//	last_conditional_transition_of_schedule* ptr = dynamic_cast<last_conditional_transition_of_schedule*>(obj);
+	//	ss << "last_conditional_transition_of_schedule("  << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("transition_to_be_rescheduled" == ALine)
+	//{
+	//	transition_to_be_rescheduled* ptr = dynamic_cast<transition_to_be_rescheduled*>(obj);
+	//	ss << "transition_to_be_rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << ptr->t;
+	//}
+	//else if ("last_conditional_transition" == ALine)
+	//{
+	//	last_conditional_transition* ptr = dynamic_cast<last_conditional_transition*>(obj);
+	//	ss << "last_conditional_transition(" << ptr->q << co << ptr->w;
+	//}
+	//else if ("conditional_transitions" == ALine)
+	//{
+	//	conditional_transitions* ptr = dynamic_cast<conditional_transitions*>(obj);
+	//	ss << "conditional_transitions(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i;
+	//}
+	//else if ("state" == ALine)
+	//{
+	//	state* ptr = dynamic_cast<state*>(obj);
+	//	ss << "state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << br;
+	//	//vector
+	//	if (!ptr->u.empty())
+	//	{
+	//		prlst = ptr->u.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->u[ii] << co;
+	//		}
+	//		ss << ptr->u.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->i.empty())
+	//	{
+	//		prlst = ptr->i.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->i[ii] << co;
+	//		}
+	//		ss << ptr->i.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("rescheduled" == ALine)
+	//{
+	//	rescheduled* ptr = dynamic_cast<rescheduled*>(obj);
+	//	ss << "rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t;
+	//}
+	//else if ("last_rescheduled" == ALine)
+	//{
+	//	last_rescheduled* ptr = dynamic_cast<last_rescheduled*>(obj);
+	//	ss << "last_rescheduled(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << ptr->t;
+	//}
+	//else if ("raw_cessor" == ALine)
+	//{
+	//	raw_cessor* ptr = dynamic_cast<raw_cessor*>(obj);
+	//	ss << "raw_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("war_cessor" == ALine)
+	//{
+	//	war_cessor* ptr = dynamic_cast<war_cessor*>(obj);
+	//	ss << "war_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("waw_cessor" == ALine)
+	//{
+	//	waw_cessor* ptr = dynamic_cast<waw_cessor*>(obj);
+	//	ss << "waw_cessor(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("op_resource" == ALine)
+	//{
+	//	op_resource* ptr = dynamic_cast<op_resource*>(obj);
+	//	ss << "op_resource(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("global_resource" == ALine)
+	//{
+	//	global_resource* ptr = dynamic_cast<global_resource*>(obj);
+	//	ss << "global_resource(" << ptr->q;
+	//}
+	//else if ("module_g_resource" == ALine)
+	//{
+	//	module_g_resource* ptr = dynamic_cast<module_g_resource*>(obj);
+	//	ss << "module_g_resource(" << ptr->q << co << ptr->w;
+	//}
+	//else if ("cf_previous_op" == ALine)
+	//{
+	//	cf_previous_op* ptr = dynamic_cast<cf_previous_op*>(obj);
+	//	ss << "cf_previous_op(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("cf_previous_state" == ALine)
+	//{
+	//	cf_previous_state* ptr = dynamic_cast<cf_previous_state*>(obj);
+	//	ss << "cf_previous_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("pred_candidate_examined" == ALine)
+	//{
+	//	pred_candidate_examined* ptr = dynamic_cast<pred_candidate_examined*>(obj);
+	//	ss << "pred_candidate_examined(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("reentrant_triangle" == ALine)
+	//{
+	//	reentrant_triangle* ptr = dynamic_cast<reentrant_triangle*>(obj);
+	//	ss << "reentrant_triangle(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << br;
+	//	//vector
+	//	if (!ptr->t.empty())
+	//	{
+	//		prlst = ptr->t.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->t[ii] << co;
+	//		}
+	//		ss << ptr->t.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->y.empty())
+	//	{
+	//		prlst = ptr->y.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->y[ii] << co;
+	//		}
+	//		ss << ptr->y.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector3
+	//	if (!ptr->u.empty())
+	//	{
+	//		prlst = ptr->u.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->u[ii] << co;
+	//		}
+	//		ss << ptr->u.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector4
+	//	if (!ptr->i.empty())
+	//	{
+	//		prlst = ptr->i.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->i[ii] << co;
+	//		}
+	//		ss << ptr->i.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector5
+	//	if (!ptr->o.empty())
+	//	{
+	//		prlst = ptr->o.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->o[ii] << co;
+	//		}
+	//		ss << ptr->o.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector6
+	//	if (!ptr->p.empty())
+	//	{
+	//		prlst = ptr->p.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->p[ii] << co;
+	//		}
+	//		ss << ptr->p.back();
+	//	}
+	//	ss << brcl << co << ptr->a << co << ptr->s << co << ptr->d << co << ptr->f;
+	//}
+	//else if ("last_reentrant_triangle" == ALine)
+	//{
+	//	last_reentrant_triangle* ptr = dynamic_cast<last_reentrant_triangle*>(obj);
+	//	ss << "last_reentrant_triangle(" << ptr->q << co << ptr->w;
+	//}
+	//else if ("last_schedule_state" == ALine)
+	//{
+	//	last_schedule_state* ptr = dynamic_cast<last_schedule_state*>(obj);
+	//	ss << "last_schedule_state(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("conditional_incomplete" == ALine)
+	//{
+	//	conditional_incomplete* ptr = dynamic_cast<conditional_incomplete*>(obj);
+	//	ss << "conditional_incomplete(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r << co << br;
+	//	//vector
+	//	if (!ptr->t.empty())
+	//	{
+	//		prlst = ptr->t.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->t[ii] << co;
+	//		}
+	//		ss << ptr->t.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->y.empty())
+	//	{
+	//		prlst = ptr->y.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->y[ii] << co;
+	//		}
+	//		ss << ptr->y.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector3
+	//	if (!ptr->u.empty())
+	//	{
+	//		prlst = ptr->u.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->u[ii] << co;
+	//		}
+	//		ss << ptr->u.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector4
+	//	if (!ptr->i.empty())
+	//	{
+	//		prlst = ptr->i.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->i[ii] << co;
+	//		}
+	//		ss << ptr->i.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector5
+	//	if (!ptr->o.empty())
+	//	{
+	//		prlst = ptr->o.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->o[ii] << co;
+	//		}
+	//		ss << ptr->o.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector6
+	//	if (!ptr->p.empty())
+	//	{
+	//		prlst = ptr->p.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->p[ii] << co;
+	//		}
+	//		ss << ptr->p.back();
+	//	}
+	//	ss << brcl << co << ptr->a << co << ptr->s << co << ptr->d << co << ptr->f << co << ptr->g
+	//		<< co << ptr->h << co << ptr->j << co << ptr->k << co << ptr->l << co << ptr->z
+	//		<< co << ptr->x;
+	//}
+	//else if ("mixed_incomplete_state_lists" == ALine)
+	//{
+	//	mixed_incomplete_state_lists* ptr = dynamic_cast<mixed_incomplete_state_lists*>(obj);
+	//	ss << "mixed_incomplete_state_lists(" << ptr->q << co << ptr->w << co << ptr->e << co << br;
+	//	//vector
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->t.empty())
+	//	{
+	//		prlst = ptr->t.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->t[ii] << co;
+	//		}
+	//		ss << ptr->t.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("linear_incomplete_node" == ALine)
+	//{
+	//	linear_incomplete_node* ptr = dynamic_cast<linear_incomplete_node*>(obj);
+	//	ss << "linear_incomplete_node(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->y << co << br;
+	//	//vector
+	//	if (!ptr->r.empty())
+	//	{
+	//		prlst = ptr->r.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->r[ii] << co;
+	//		}
+	//		ss << ptr->r.back();
+	//	}
+	//	ss << brcl << co << br;
+	//	//vector2
+	//	if (!ptr->t.empty())
+	//	{
+	//		prlst = ptr->t.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << ptr->t[ii] << co;
+	//		}
+	//		ss << ptr->t.back();
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("incomplete_links" == ALine)
+	//{
+	//	incomplete_links* ptr = dynamic_cast<incomplete_links*>(obj);
+	//	ss << "incomplete_links(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+	//		<< co << ptr->p;
+	//}
+	//else if ("last_incomplete" == ALine)
+	//{
+	//	last_incomplete* ptr = dynamic_cast<last_incomplete*>(obj);
+	//	ss << "last_incomplete(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("global_nils" == ALine)
+	//{
+	//	global_nils* ptr = dynamic_cast<global_nils*>(obj);
+	//	ss << "global_nils(" << br ;
+	//	//vector
+	//	if (!ptr->q.empty())
+	//	{
+	//		prlst = ptr->q.size() - 1;
+	//		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
+	//		{
+	//			ss << "nil_node" << pa;
+
+	//			ss << ptr->q[ii].q << co << ptr->q[ii].w << pacl << co;
+	//		}
+	//		ss << "nil_node" << pa << ptr->q.back().q << co << ptr->q.back().w;
+	//		ss << pacl;
+	//	}
+	//	ss << brcl;
+	//}
+	//else if ("current_module" == ALine)
+	//{
+	//	current_module* ptr = dynamic_cast<current_module*>(obj);
+	//	ss << "current_module(" << ptr->q;
+	//}
+	//else if ("last_linear_incomplete_node" == ALine)
+	//{
+	//	last_linear_incomplete_node* ptr = dynamic_cast<last_linear_incomplete_node*>(obj);
+	//	ss << "last_linear_incomplete_node(" << ptr->q;
+	//}
+	//else if ("operator_instances" == ALine)
+	//{
+	//	operator_instances* ptr = dynamic_cast<operator_instances*>(obj);
+	//	ss << "operator_instances(" << ptr->q << co << ptr->w;
+	//}
+	//else if ("massively_parallel_style" == ALine)
+	//{
+	//	massively_parallel_style* ptr = dynamic_cast<massively_parallel_style*>(obj);
+	//	ss << "massively_parallel_style(" << ptr->q;
+	//}
+	//else if ("hdl_style" == ALine)
+	//{
+	//	hdl_style* ptr = dynamic_cast<hdl_style*>(obj);
+	//	ss << "hdl_style(" << ptr->q;
+	//}
+	//else if ("op_instance" == ALine)
+	//{
+	//	op_instance* ptr = dynamic_cast<op_instance*>(obj);
+	//	ss << "op_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t;
+	//}
+	//else if ("last_op_instance" == ALine)
+	//{
+	//	last_op_instance* ptr = dynamic_cast<last_op_instance*>(obj);
+	//	ss << "last_op_instance(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("op_in_a_state" == ALine)
+	//{
+	//	op_in_a_state* ptr = dynamic_cast<op_in_a_state*>(obj);
+	//	ss << "op_in_a_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t;
+	//}
+	//else if ("last_op_in_a_state" == ALine)
+	//{
+	//	last_op_in_a_state* ptr = dynamic_cast<last_op_in_a_state*>(obj);
+	//	ss << "last_op_in_a_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("signal_instance" == ALine)
+	//{
+	//	signal_instance* ptr = dynamic_cast<signal_instance*>(obj);
+	//	ss << "signal_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u;
+	//}
+	//else if ("last_signal_instance" == ALine)
+	//{
+	//	last_signal_instance* ptr = dynamic_cast<last_signal_instance*>(obj);
+	//	ss << "last_signal_instance(" << ptr->q << co << ptr->w;
+	//}
+	//else if ("output_instance" == ALine)
+	//{
+	//	output_instance* ptr = dynamic_cast<output_instance*>(obj);
+	//	ss << "output_instance(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y;
+	//}
+	//else if ("last_output_instance" == ALine)
+	//{
+	//	last_output_instance* ptr = dynamic_cast<last_output_instance*>(obj);
+	//	ss << "last_output_instance(" << ptr->q << co << ptr->w;
+	//}
+	//else if ("operator_instance_stats" == ALine)
+	//{
+	//	operator_instance_stats* ptr = dynamic_cast<operator_instance_stats*>(obj);
+	//	ss << "operator_instance_stats(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("consecutive_106" == ALine)
+	//{
+	//	consecutive_106* ptr = dynamic_cast<consecutive_106*>(obj);
+	//	ss << "consecutive_106(" << ptr->q;
+	//}
+	//else if ("operation_order" == ALine)
+	//{
+	//	operation_order* ptr = dynamic_cast<operation_order*>(obj);
+	//	ss << "operation_order(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+	//		<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
+	//		<< co << ptr->p;
+	//}
+	//else if ("max_parallel_call_order" == ALine)
+	//{
+	//	max_parallel_call_order* ptr = dynamic_cast<max_parallel_call_order*>(obj);
+	//	ss << "max_parallel_call_order(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//}
+	//else if ("max_op_order" == ALine)
+	//{
+	//	max_op_order* ptr = dynamic_cast<max_op_order*>(obj);
+	//	ss << "max_op_order(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("totalmax_call_order" == ALine)
+	//{
+	//	totalmax_call_order* ptr = dynamic_cast<totalmax_call_order*>(obj);
+	//	ss << "totalmax_call_order(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("totalmax_gross_depth" == ALine)
+	//{
+	//	totalmax_gross_depth* ptr = dynamic_cast<totalmax_gross_depth*>(obj);
+	//	ss << "totalmax_gross_depth(" << ptr->q << co << ptr->w << co << ptr->e;
+	//}
+	//else if ("current_total_max_order_entry" == ALine)
+	//{
+	//	current_total_max_order_entry* ptr = dynamic_cast<current_total_max_order_entry*>(obj);
+	//	ss << "current_total_max_order_entry(" << ptr->q;
+	//}
+	//else if ("module_last_state" == ALine)
+	//{
+	//	module_last_state* ptr = dynamic_cast<module_last_state*>(obj);
+	//	ss << "module_last_state(" << ptr->q;
+	//}
+	//else if ("module_local_list" == ALine)
+	//{
+	//	stringstream tt;
+	//	module_local_list* ptr = dynamic_cast<module_local_list*>(obj);
+	//	int			ii = 0;
+	//	size_t		vs;
+	//	ss << "module_local_list(" << br;
+	//	if (!ptr->q.empty())
+	//	{
+	//		vs = ptr->q.size();
+	//		for (int ii = 0; ii < vs; ii++)
+	//		{
+	//			ss << "local_object(" << ptr->q[ii].q << co << ptr->q[ii].w << co << ptr->q[ii].e << co << ptr->q[ii].r << co
+	//				<< ptr->q[ii].t << co << ptr->q[ii].y << co << ptr->q[ii].u << co << ptr->q[ii].i << co << ptr->q[ii].o << pacl << co;
+	//		}
+	//		string tmp = ss.str();
+	//		tmp.resize(tmp.size() - 1);  // getting rid of the last
+	//		swap(ss, tt);
+	//		ss << tmp;
+	//		ss << brcl;
+	//	}
+	//}
+	//if(true)
+	//{
+	//	if ("module_local_list_parcs" == ALine )
+	//	{
+	//		stringstream tt;
+	//		module_local_list_parcs* ptr = dynamic_cast<module_local_list_parcs*>(obj);
+	//		int			ii = 0;
+	//		size_t		vs;
+	//		ss << "module_local_list_parcs(" << br;
+	//		if (!ptr->q.empty())
+	//		{
+	//			vs = ptr->q.size();
+	//			for (int ii = 0; ii < vs; ii++)
+	//			{
+	//				ss << "local_object(" << ptr->q[ii].q << co << ptr->q[ii].w << co << ptr->q[ii].e << co << ptr->q[ii].r << co
+	//					<< ptr->q[ii].t << co << ptr->q[ii].y << co << ptr->q[ii].u << co << ptr->q[ii].i << co << ptr->q[ii].o << pacl << co;
+	//			}
+	//			string tmp = ss.str();
+	//			tmp.resize(tmp.size() - 1);  // getting rid of the last
+	//			swap(ss, tt);
+	//			ss << tmp;
+	//			ss << brcl;
+	//		}
+	//	}
+	//	else if ("last_non_io_found" == ALine)
+	//	{
+	//		last_non_io_found* ptr = dynamic_cast<last_non_io_found*>(obj);
+	//		ss << "last_non_io_found(" << ptr->q;
+	//	}
+	//	else if ("last_local_number" == ALine)
+	//	{
+	//		last_local_number* ptr = dynamic_cast<last_local_number*>(obj);
+	//		ss << "last_local_number(" << ptr->q;
+	//	}
+	//	else if ("printed_formal_ios_of_called_module" == ALine)
+	//	{
+	//		printed_formal_ios_of_called_module* ptr = dynamic_cast<printed_formal_ios_of_called_module*>(obj);
+	//		ss << "printed_formal_ios_of_called_module(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//	}
+	//	else if ("it_includes_ifthen" == ALine)
+	//	{
+	//		it_includes_ifthen* ptr = dynamic_cast<it_includes_ifthen*>(obj);
+	//		ss << "it_includes_ifthen(" << ptr->q << co << ptr->w << co << ptr->e;
+	//	}
+	//	else if ("it_includes_conditional_targeting" == ALine)
+	//	{
+	//		it_includes_conditional_targeting* ptr = dynamic_cast<it_includes_conditional_targeting*>(obj);
+	//		ss << "it_includes_conditional_targeting(" << ptr->q << co << ptr->w << co << ptr->e;
+	//	}
+	//	else if ("targets_conditional_variable" == ALine)
+	//	{
+	//		targets_conditional_variable* ptr = dynamic_cast<targets_conditional_variable*>(obj);
+	//		ss << "targets_conditional_variable(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//	}
+	//	else if ("variable_has_been_listed" == ALine)
+	//	{
+	//		variable_has_been_listed* ptr = dynamic_cast<variable_has_been_listed*>(obj);
+	//		ss << "variable_has_been_listed(" << ptr->q << co << ptr->w;
+	//	}
+	//	else if ("resetstyle" == ALine)
+	//	{
+	//		resetstyle* ptr = dynamic_cast<resetstyle*>(obj);
+	//		ss << "resetstyle(" << ptr->q;
+	//	}
+	//	else if ("checkstyle" == ALine)
+	//	{
+	//		checkstyle* ptr = dynamic_cast<checkstyle*>(obj);
+	//		ss << "checkstyle(" << ptr->q;
+	//	}
+	//	else if ("total_local_entry" == ALine )
+	//	{
+	//		total_local_entry* ptr = dynamic_cast<total_local_entry*>(obj);
+	//		ss << "total_local_entry(" << ptr->q;
+	//	}
+	//	else if ("complex_next_state_operation_depth" == ALine)
+	//	{
+	//		complex_next_state_operation_depth* ptr = dynamic_cast<complex_next_state_operation_depth*>(obj);
+	//		ss << "complex_next_state_operation_depth(" << ptr->q;
+	//	}
+	//	else if ("output_filename" == ALine)
+	//	{
+	//		output_filename* ptr = dynamic_cast<output_filename*>(obj);
+	//		ss << "output_filename(" << ptr->q;
+	//	}
+	//	else if ("hdl_io_pass" == ALine)
+	//	{
+	//		hdl_io_pass* ptr = dynamic_cast<hdl_io_pass*>(obj);
+	//		ss << "hdl_io_pass(" << ptr->q;
+	//	}
+	//	else if ("current_hdl_style" == ALine)
+	//	{
+	//		current_hdl_style* ptr = dynamic_cast<current_hdl_style*>(obj);
+	//		ss << "current_hdl_style(" << ptr->q;
+	//	}
+	//	else if ("call_ios_have_been_reset" == ALine)
+	//	{
+	//		call_ios_have_been_reset* ptr = dynamic_cast<call_ios_have_been_reset*>(obj);
+	//		ss << "call_ios_have_been_reset(" << ptr->q;
+	//	}
+	//	else if ("debug_mode" == ALine)
+	//	{
+	//		debug_mode* ptr = dynamic_cast<debug_mode*>(obj);
+	//		ss << "debug_mode(" << ptr->q;
+	//	}
+	//	else if ("print_C_main_body" == ALine)
+	//	{
+	//		print_C_main_body* ptr = dynamic_cast<print_C_main_body*>(obj);
+	//		ss << "print_C_main_body(" << ptr->q;
+	//	}
+	//	else if ("cac_mode" == ALine)
+	//	{
+	//		cac_mode* ptr = dynamic_cast<cac_mode*>(obj);
+	//		ss << "cac_mode(" << ptr->q;
+	//	}
+	//	else if ("path" == ALine)
+	//	{
+	//		path* ptr = dynamic_cast<path*>(obj);
+	//		ss << "path(" << ptr->q << co << ptr->w << co << ptr->e;
+	//	}
+	//	else if ("max_path" == ALine)
+	//	{
+	//		max_path* ptr = dynamic_cast<max_path*>(obj);
+	//		ss << "max_path(" << ptr->q << co << ptr->w;
+	//	}
+	//	else if ("min_path" == ALine)
+	//	{
+	//		min_path* ptr = dynamic_cast<min_path*>(obj);
+	//		ss << "min_path(" << ptr->q << co << ptr->w;
+	//	}
+	//	else if ("op_belongs_to_state" == ALine)
+	//	{
+	//		op_belongs_to_state* ptr = dynamic_cast<op_belongs_to_state*>(obj);
+	//		ss << "op_belongs_to_state(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r;
+	//	}
+	//	else if ("top_module" == ALine)
+	//	{
+	//		top_module* ptr = dynamic_cast<top_module*>(obj);
+	//		ss << "top_module(" << ptr->q;
+	//	}
+	//	else if ("package_name" == ALine)
+	//	{
+	//		package_name* ptr = dynamic_cast<package_name*>(obj);
+	//		ss << "package_name(" << ptr->q;
+	//	}
+	//	else 
+	//	{
+	//		GenfactError* ptr = new GenfactError("error for ");
+	//		ptr->saying += typeid(*obj).name();
+	//		ss << "Error at fact " << ptr->saying;
+	//	}
+	//}	// if (flag)
+	//ss << pacl;
+	//ALine = ss.str();
+	//return ALine;
 }
 
 /// @brief makes data of string
