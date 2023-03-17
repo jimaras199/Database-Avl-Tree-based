@@ -37,7 +37,7 @@
 *.vcxproj
 *.filters
 *.user
-*.cpp
+%*.cpp
 *.log
 
 # Manually ignoring
@@ -46,3 +46,5 @@
 Debug/
 x64/
 hdlmaker.pro
+test_functions.cpp
+clock.cpp
