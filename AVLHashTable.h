@@ -9,6 +9,9 @@ using namespace std;
 constexpr auto N = 997;
 //constexpr auto N = 1;
 
+
+//returned to Flist and similar must work also with regular fact and also must complete a check whether the input is factsstar or factspec
+
 class HashTable
 {
 	std::vector<AVLTree>	Table;
