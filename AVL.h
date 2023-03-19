@@ -134,6 +134,7 @@ private:
 	typename AVLTree::Node* Release(Node* r);
 	AVLTree::Node* delNode(Node* r, size_t Hash, bool* ptrdup);
 	AVLTree::Node* delNode(Node* r, factstar* fs, bool* ptrdup);
+	AVLTree::Node* delNode(Node* r, factUnderInspection* fs, bool* ptrdup);
 	string show(Node* p);
 	void storeToVector(Node* node, vector<string>* ptr);
 
@@ -233,9 +234,14 @@ public:
 	friend void readnodes(Node* n, forward_list<string>* ptr);
 	friend void readnodes(Node* n, string* ptr);
 	friend void readnodes(AVLTree::Node* n, factstar* ptr, list<string>* ptrL);
+	friend void readnodes(AVLTree::Node* n, factUnderInspection* ptr, list<string>* ptrL);
 	friend void readnodes(AVLTree::Node* n, factstar* ptr, forward_list<string>* ptrFL);
+	friend void readnodes(AVLTree::Node* n, factUnderInspection* ptr, forward_list<string>* ptrFL);
 	friend void readnodes(AVLTree::Node* n, factstar* ptr, bool* flag);
+	friend void readnodes(AVLTree::Node* n, factUnderInspection* ptr, bool* flag);
 	friend void readnodes(AVLTree::Node* n, size_t hashv, bool* flag);
+	friend void readnodes(AVLTree::Node* n, size_t hashv, list<string>* ptrL);
+	friend void readnodes(AVLTree::Node* n, size_t hashv, forward_list<string>* ptrFL);
 };
 
 //====================PRIVATE CODES OF FUNCTIONS
@@ -396,6 +402,47 @@ typename AVLTree::Node* AVLTree::delNode(Node* r, factstar* fs, bool* ptrdup)
 	if (r->Left != nullptr && r != nullptr) r->Left = delNode(r->Left, fs, ptrdup);
 	if (r->Right != nullptr && r != nullptr) r->Right = delNode(r->Right, fs, ptrdup);
 	if (matchfactsstar(r->Data, fs))
+	{
+		*ptrdup = false;
+		if (r->Left == nullptr && r->Right == nullptr)
+		{
+			delete r;
+			r = nullptr;
+			NumNodes--;
+		}
+		else if (r->Left == nullptr)
+		{
+			Node* n = r;
+			r = r->Right;
+			delete n;
+			NumNodes--;
+		}
+		else if (r->Right == nullptr)
+		{
+			Node* n = r;
+			r = r->Left;
+			delete n;
+			NumNodes--;
+		}
+		else
+		{
+			Node* n = FindMin(r->Right);
+			string tmp = makeStringOf(n->Data);
+			delete r->Data;
+			r->Data = makeInstanceOf(tmp);
+			r->HashV = n->HashV;
+			r->Right = delNode(r->Right, n->HashV, ptrdup);
+		}
+	}return r;
+}
+
+typename AVLTree::Node* AVLTree::delNode(Node* r, factUnderInspection* fs, bool* ptrdup)
+{
+	if (r == nullptr) return r;
+
+	if (r->Left != nullptr && r != nullptr) r->Left = delNode(r->Left, fs, ptrdup);
+	if (r->Right != nullptr && r != nullptr) r->Right = delNode(r->Right, fs, ptrdup);
+	if (matchfactsSpec(r->Data, fs))
 	{
 		*ptrdup = false;
 		if (r->Left == nullptr && r->Right == nullptr)

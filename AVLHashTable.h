@@ -9,8 +9,8 @@ using namespace std;
 constexpr auto N = 997;
 //constexpr auto N = 1;
 
-
-//returned to Flist and similar must work also with regular fact and also must complete a check whether the input is factsstar or factspec
+//checks  for factUnderInspection
+bool check4spec(string inputline);
 
 class HashTable
 {
@@ -106,6 +106,20 @@ bool HashTable::findfact(string Line)
 			}
 		}
 	}
+	else if (check4spec(Line))
+	{
+		factUnderInspection fs;
+		fs = makeInstanceOfSpecFact(Line);
+		factUnderInspection* ptrfs = &fs;
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (Table[i].NumNodes)
+			{
+				readnodes(Table[i].Root, ptrfs, ptrflg);
+				if (flag) return true;
+			}
+		}
+	}
 	else
 	{
 		size_t Hash = (hash<string>{}(Line));
@@ -147,6 +161,25 @@ void HashTable::retractall(string Line)
 		factstar fs;
 		fs = makefactstar(Line);
 		factstar* ptrfs = &fs;
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (Table[i].NumNodes)
+			{
+				while (!duplicate)//check for duplicate
+				{
+					*ptrdup = true;
+					Table[i].Root = Table[i].delNode(Table[i].Root, ptrfs, ptrdup);
+					Table[i].Root = Table[i].balance(Table[i].Root);
+				}
+				*ptrdup = false;
+			}
+		}
+	}
+	else if (check4spec(Line))
+	{
+		factUnderInspection fs;
+		fs = makeInstanceOfSpecFact(Line);
+		factUnderInspection* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
 			if (Table[i].NumNodes)
@@ -285,14 +318,39 @@ string HashTable::exportToString()
 list<string> HashTable::matchedToList(string Line)
 {
 	list<string>	result{};
-
-	factstar fc;
-	fc = makefactstar(Line);
-	for (int i = 0; i < N; i++)
+	if (Line.find("*", 0) != Line.npos)
 	{
-		if(Table[i].Root != nullptr)
+		factstar fc;
+		fc = makefactstar(Line);
+		for (int i = 0; i < N; i++)
 		{
-			readnodes(Table[i].Root, &fc, &result);
+			if (Table[i].Root != nullptr)
+			{
+				readnodes(Table[i].Root, &fc, &result);
+			}
+		}
+	}
+	else if (check4spec(Line))
+	{
+		factUnderInspection fc;
+			fc = makeInstanceOfSpecFact(Line);
+			for (int i = 0; i < N; i++)
+			{
+				if (Table[i].Root != nullptr)
+				{
+					readnodes(Table[i].Root, &fc, &result);
+				}
+			}
+
+	}
+	else
+	{
+		size_t Treepos;
+		size_t Hash = (hash<string>{}(Line));
+		Treepos = Hash % N;
+		if (Table[Treepos].NumNodes)
+		{
+			readnodes(Table[Treepos].Root, Hash, &result);
 		}
 	}
 	return result;
@@ -302,18 +360,110 @@ forward_list<string> HashTable::matchedToFList(string Line)
 {
 	forward_list<string>	result{};
 
-	factstar fc;
-	fc = makefactstar(Line);
-	for (int i = 0; i < N; i++)
+	if (Line.find("*", 0) != Line.npos)
 	{
-		if (Table[i].Root != nullptr)
+		factstar fc;
+		fc = makefactstar(Line);
+		for (int i = 0; i < N; i++)
 		{
-			readnodes(Table[i].Root, &fc, &result);
+			if (Table[i].Root != nullptr)
+			{
+				readnodes(Table[i].Root, &fc, &result);
+			}
+		}
+	}
+	else if (check4spec(Line))
+	{
+		factUnderInspection fc;
+		fc = makeInstanceOfSpecFact(Line);
+		for (int i = 0; i < N; i++)
+		{
+			if (Table[i].Root != nullptr)
+			{
+				readnodes(Table[i].Root, &fc, &result);
+			}
+		}
+
+	}
+	else
+	{
+		size_t Treepos;
+		size_t Hash = (hash<string>{}(Line));
+		Treepos = Hash % N;
+		if (Table[Treepos].NumNodes)
+		{
+			readnodes(Table[Treepos].Root, Hash, &result);
 		}
 	}
 	return result;
 }
 
+//checks  for factUnderInspection
+bool check4spec(string inputline)
+{
+	string ALine, subl;
+	size_t pos = 0, brpos = 0;
+	ALine = inputline.substr(0, inputline.find(pa, 0));
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos); // ++pos getting after the first  parenthesis
+	if (subl.find(co, 0) == subl.npos)
+	{
+		if (subl.find(br, 0) == 0)
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		if (subl.find(us, 0) == 0)
+			return true;
+		else return false;
+	}
+	do
+	{
+		if (((subl.find(br, 0)) == 0))
+		{
+			brpos = subl.find(brcl, 0);
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			while (subl.find(co, 0) < brpos)
+			{
+				if ((subl.find(us, 0)) != 0)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					pos += ALine.length();
+				}
+				else
+				{
+					return true;
+				}
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos = subl.find(brcl, 0);
+			}
+			if (subl.find(us, 0) != 0)
+			{
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				pos += ALine.size();
+			}
+			else
+			{
+				return true;
+			}
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else if ((subl.find(us, 0)) != 0)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			pos += ALine.length();
+		}
+		else
+		{
+			return true;
+		}
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	} while (subl.find(co, 0) != subl.npos);
+	if (subl.find(br, 0) == 0)
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	if (subl.find(us, 0) == 0)
+		return true;
+	return false;
+}
+
+//stores all data to list
 void readnodes(AVLTree::Node* n, list<string>* ptr)
 {
 	if (n->Left != nullptr)
@@ -323,26 +473,7 @@ void readnodes(AVLTree::Node* n, list<string>* ptr)
 	ptr->push_back(makeStringOf(n->Data));
 }
 
-void readnodes(AVLTree::Node* n, factstar* ptr, list<string>* ptrL)
-{
-	if (n->Left != nullptr)
-		readnodes(n->Left, ptr, ptrL);
-	if (n->Right != nullptr)
-		readnodes(n->Right, ptr, ptrL);
-	if (matchfactsstar(n->Data, ptr))
-		ptrL->push_back(makeStringOf(n->Data));
-}
-
-void readnodes(AVLTree::Node* n, factstar* ptr, forward_list<string>* ptrFL)
-{
-	if (n->Left != nullptr)
-		readnodes(n->Left, ptr, ptrFL);
-	if (n->Right != nullptr)
-		readnodes(n->Right, ptr, ptrFL);
-	if (matchfactsstar(n->Data, ptr))
-		ptrFL->push_front(makeStringOf(n->Data));
-}
-
+//stores all data to forward list
 void readnodes(AVLTree::Node* n, forward_list<string>* ptr)
 {
 	if (n->Left != nullptr)
@@ -352,6 +483,7 @@ void readnodes(AVLTree::Node* n, forward_list<string>* ptr)
 	ptr->push_front(makeStringOf(n->Data));
 }
 
+//stores all data to string separated with coma
 void readnodes(AVLTree::Node* n, string* ptr)
 {
 	if (n->Left != nullptr)
@@ -362,6 +494,73 @@ void readnodes(AVLTree::Node* n, string* ptr)
 	*ptr += ",";
 }
 
+//stores matched data(factstar) to list
+void readnodes(AVLTree::Node* n, factstar* ptr, list<string>* ptrL)
+{
+	if (n->Left != nullptr)
+		readnodes(n->Left, ptr, ptrL);
+	if (n->Right != nullptr)
+		readnodes(n->Right, ptr, ptrL);
+	if (matchfactsstar(n->Data, ptr))
+		ptrL->push_back(makeStringOf(n->Data));
+}
+
+//stores matched data(factUnderInspection) to list
+void readnodes(AVLTree::Node* n, factUnderInspection* ptr, list<string>* ptrL)
+{
+	if (n->Left != nullptr)
+		readnodes(n->Left, ptr, ptrL);
+	if (n->Right != nullptr)
+		readnodes(n->Right, ptr, ptrL);
+	if (matchfactsSpec(n->Data, ptr))
+		ptrL->push_back(makeStringOf(n->Data));
+}
+
+//stores matched data(factstar) to forward list
+void readnodes(AVLTree::Node* n, factstar* ptr, forward_list<string>* ptrFL)
+{
+	if (n->Left != nullptr)
+		readnodes(n->Left, ptr, ptrFL);
+	if (n->Right != nullptr)
+		readnodes(n->Right, ptr, ptrFL);
+	if (matchfactsstar(n->Data, ptr))
+		ptrFL->push_front(makeStringOf(n->Data));
+}
+
+//stores matched data(factUnderInspection) to forward list
+void readnodes(AVLTree::Node* n, factUnderInspection* ptr, forward_list<string>* ptrFL)
+{
+	if (n->Left != nullptr)
+		readnodes(n->Left, ptr, ptrFL);
+	if (n->Right != nullptr)
+		readnodes(n->Right, ptr, ptrFL);
+	if (matchfactsSpec(n->Data, ptr))
+		ptrFL->push_front(makeStringOf(n->Data));
+}
+
+//stores matched data(GeneralFact) to list
+void readnodes(AVLTree::Node* n, size_t hashv, list<string>* ptrL)
+{
+	if (n->Left != nullptr)
+		readnodes(n->Left, hashv, ptrL);
+	if (n->Right != nullptr)
+		readnodes(n->Right, hashv, ptrL);
+	if (n->HashV == hashv)
+		ptrL->push_back(makeStringOf(n->Data));
+}
+
+//stores matched data(GeneralFact) to forward list
+void readnodes(AVLTree::Node* n, size_t hashv, forward_list<string>* ptrFL)
+{
+	if (n->Left != nullptr)
+		readnodes(n->Left, hashv, ptrFL);
+	if (n->Right != nullptr)
+		readnodes(n->Right, hashv, ptrFL);
+	if (n->HashV == hashv)
+		ptrFL->push_front(makeStringOf(n->Data));
+}
+
+//checks for data using factstar
 void readnodes(AVLTree::Node* n, factstar* ptr, bool* flag)
 {
 	if (matchfactsstar(n->Data, ptr))
@@ -372,6 +571,18 @@ void readnodes(AVLTree::Node* n, factstar* ptr, bool* flag)
 		readnodes(n->Right, ptr, flag);
 }
 
+//checks for data using factUnderInspection
+void readnodes(AVLTree::Node* n, factUnderInspection* ptr, bool* flag)
+{
+	if (matchfactsSpec(n->Data, ptr))
+		*flag = true;
+	if (!(*flag) && n->Left != nullptr)
+		readnodes(n->Left, ptr, flag);
+	if (!(*flag) && n->Right != nullptr)
+		readnodes(n->Right, ptr, flag);
+}
+
+//checks for data using GeneralFact
 void readnodes(AVLTree::Node* n, size_t hashv, bool* flag)
 {
 	if (n == nullptr) return;

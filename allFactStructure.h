@@ -69,7 +69,7 @@ public:
 
 	friend factUnderInspection makeInstanceOfSpecFact(string inputline);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj); // othernode, _
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj); // othernode, _
 
 };
 
@@ -169,7 +169,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj); 
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 
 };//page 5
 
@@ -219,7 +219,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 6
 
 class hierarchy_part : public GeneralFact
@@ -268,7 +268,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 7
 
 class data_stmt : public GeneralFact
@@ -314,7 +314,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 8
 
 class prog_stmt : public GeneralFact
@@ -364,7 +364,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 9
 
 class joint_stmt : public GeneralFact
@@ -411,7 +411,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 12
 
 //vector
@@ -455,7 +455,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 13
 
 //vector
@@ -499,7 +499,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 14
 
 //vector
@@ -547,7 +547,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 16
 
 class special_op : public GeneralFact
@@ -600,7 +600,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 23
 
 class special_dt : public GeneralFact
@@ -649,7 +649,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 24
 
 class local_object : public GeneralFact
@@ -724,7 +724,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 25
 
 class state_node : public GeneralFact
@@ -758,7 +758,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 26
 
 //vector
@@ -797,7 +797,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -836,7 +836,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -885,7 +885,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -924,7 +924,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -962,7 +962,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class change_op_number : public GeneralFact
@@ -1002,7 +1002,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 28
 
 class last_change_op_number : public GeneralFact
@@ -1042,7 +1042,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 28
 
 //vector
@@ -1087,7 +1087,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 29
 
 //vector
@@ -1132,7 +1132,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 30
 	
 class guard_pair : public GeneralFact
@@ -1172,7 +1172,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 30
 
 class guard_cond : public GeneralFact
@@ -1212,7 +1212,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 31
 
 //vector
@@ -1256,7 +1256,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 32
 
 class cessor : public GeneralFact
@@ -1296,7 +1296,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 33
 
 //vector
@@ -1349,7 +1349,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };//page 34
 
 class old_schedule : public GeneralFact
@@ -1387,7 +1387,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class new_schedule : public GeneralFact
@@ -1426,7 +1426,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class  local_ifthen_chain_end_operations_were_written : public GeneralFact
@@ -1463,7 +1463,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -1511,7 +1511,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -1558,7 +1558,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -1605,7 +1605,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class mem_port : public GeneralFact
@@ -1673,7 +1673,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -1717,7 +1717,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class source_is_normal_dt : public GeneralFact
@@ -1761,7 +1761,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class combo : public GeneralFact
@@ -1804,7 +1804,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class sequence : public GeneralFact
@@ -1847,7 +1847,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class for_loop : public GeneralFact
@@ -1915,7 +1915,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_for_loop_entry : public GeneralFact
@@ -1954,7 +1954,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class while_loop : public GeneralFact
@@ -2007,7 +2007,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_while_loop_entry : public GeneralFact
@@ -2045,7 +2045,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -2087,7 +2087,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -2129,7 +2129,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -2171,7 +2171,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class top_level_call : public GeneralFact
@@ -2234,7 +2234,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class top_level_call_parcs : public GeneralFact
@@ -2295,7 +2295,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class added_aux_call_ios : public GeneralFact
@@ -2334,7 +2334,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class added_aux_call_ios1 : public GeneralFact
@@ -2376,7 +2376,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class added_aux_call_signals : public GeneralFact
@@ -2415,7 +2415,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class found_call_operator : public GeneralFact
@@ -2454,7 +2454,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class added_verilog_aux_call_outputs : public GeneralFact
@@ -2497,7 +2497,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -2545,7 +2545,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -2593,7 +2593,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -2641,7 +2641,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class schedule : public GeneralFact
@@ -2686,7 +2686,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_conditional_execution : public GeneralFact
@@ -2727,7 +2727,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -2787,7 +2787,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_conditional_transition_of_schedule : public GeneralFact
@@ -2831,7 +2831,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class transition_to_be_rescheduled : public GeneralFact
@@ -2875,7 +2875,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_conditional_transition : public GeneralFact
@@ -2916,7 +2916,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class conditional_transitions : public GeneralFact
@@ -2970,7 +2970,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -3029,7 +3029,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class rescheduled : public GeneralFact
@@ -3072,7 +3072,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_rescheduled : public GeneralFact
@@ -3115,7 +3115,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class raw_cessor : public GeneralFact
@@ -3158,7 +3158,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class war_cessor : public GeneralFact
@@ -3201,7 +3201,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class waw_cessor : public GeneralFact
@@ -3244,7 +3244,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class op_resource : public GeneralFact
@@ -3286,7 +3286,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class global_resource : public GeneralFact
@@ -3324,7 +3324,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class module_g_resource : public GeneralFact
@@ -3364,7 +3364,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class cf_previous_op : public GeneralFact
@@ -3409,7 +3409,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class cf_previous_state : public GeneralFact
@@ -3453,7 +3453,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class pred_candidate_examined : public GeneralFact
@@ -3496,7 +3496,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -3573,7 +3573,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_reentrant_triangle : public GeneralFact
@@ -3614,7 +3614,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_schedule_state : public GeneralFact
@@ -3658,7 +3658,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -3754,7 +3754,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -3801,7 +3801,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -3849,7 +3849,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class incomplete_links : public GeneralFact
@@ -3907,7 +3907,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_incomplete : public GeneralFact
@@ -3951,7 +3951,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class nil_node 
@@ -3994,7 +3994,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -4036,7 +4036,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class current_module : public GeneralFact
@@ -4075,7 +4075,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_linear_incomplete_node : public GeneralFact
@@ -4114,7 +4114,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class operator_instances : public GeneralFact
@@ -4155,7 +4155,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class massively_parallel_style : public GeneralFact
@@ -4193,7 +4193,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class hdl_style : public GeneralFact
@@ -4231,7 +4231,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class op_instance : public GeneralFact
@@ -4274,7 +4274,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_op_instance : public GeneralFact
@@ -4318,7 +4318,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class op_in_a_state : public GeneralFact
@@ -4360,7 +4360,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_op_in_a_state : public GeneralFact
@@ -4405,7 +4405,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class signal_instance : public GeneralFact
@@ -4458,7 +4458,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_signal_instance : public GeneralFact
@@ -4499,7 +4499,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class output_instance : public GeneralFact
@@ -4548,7 +4548,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_output_instance : public GeneralFact
@@ -4589,7 +4589,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class operator_instance_stats : public GeneralFact
@@ -4633,7 +4633,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class consecutive_106 : public GeneralFact
@@ -4672,7 +4672,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class operation_order : public GeneralFact
@@ -4731,7 +4731,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class max_parallel_call_order : public GeneralFact
@@ -4776,7 +4776,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class max_op_order : public GeneralFact
@@ -4820,7 +4820,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class totalmax_call_order : public GeneralFact
@@ -4864,7 +4864,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class totalmax_gross_depth : public GeneralFact
@@ -4908,7 +4908,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class current_total_max_order_entry : public GeneralFact
@@ -4947,7 +4947,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class module_last_state : public GeneralFact
@@ -4984,7 +4984,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -5028,7 +5028,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 //vector
@@ -5069,7 +5069,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_non_io_found : public GeneralFact
@@ -5108,7 +5108,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class last_local_number : public GeneralFact
@@ -5147,7 +5147,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class printed_formal_ios_of_called_module : public GeneralFact
@@ -5191,7 +5191,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class it_includes_ifthen : public GeneralFact
@@ -5234,7 +5234,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class it_includes_conditional_targeting : public GeneralFact
@@ -5277,7 +5277,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class targets_conditional_variable : public GeneralFact
@@ -5321,7 +5321,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class variable_has_been_listed : public GeneralFact
@@ -5360,7 +5360,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class resetstyle : public GeneralFact
@@ -5398,7 +5398,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class checkstyle : public GeneralFact
@@ -5436,7 +5436,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class total_local_entry : public GeneralFact
@@ -5475,7 +5475,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class complex_next_state_operation_depth : public GeneralFact
@@ -5513,7 +5513,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class output_filename : public GeneralFact
@@ -5551,7 +5551,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class hdl_io_pass : public GeneralFact
@@ -5589,7 +5589,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class current_hdl_style : public GeneralFact
@@ -5627,7 +5627,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class call_ios_have_been_reset : public GeneralFact
@@ -5665,7 +5665,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class debug_mode : public GeneralFact
@@ -5703,7 +5703,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class print_C_main_body : public GeneralFact
@@ -5741,7 +5741,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class cac_mode : public GeneralFact
@@ -5779,7 +5779,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class path : public GeneralFact
@@ -5822,7 +5822,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class max_path : public GeneralFact
@@ -5862,7 +5862,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class min_path : public GeneralFact
@@ -5902,7 +5902,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class op_belongs_to_state : public GeneralFact
@@ -5947,7 +5947,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class top_module : public GeneralFact
@@ -5986,7 +5986,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class package_name : public GeneralFact
@@ -6024,7 +6024,7 @@ public:
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
 class GenfactError : public GeneralFact
@@ -6047,6 +6047,6 @@ public:
 	
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
-	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection obj);
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 

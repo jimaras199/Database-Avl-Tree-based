@@ -16,13 +16,33 @@
 
 using namespace std;
 
+bool generate_top();
 void itf_not_found_message();
+
+//essential functions
+bool fronttoken();
+
+//in language add 16 on page search
 
 int main()
 {
+
+	return 0;
+}
+
+//essential functions
+
+bool fronttoken()
+{
+
+}
+
+//functions
+bool generate_top()
+{
 	//line 33885
 	ifstream File;
-	
+
 	File.open("TYPESOPSDB.DBA", fstream::in);
 	if (!File.is_open())
 	{
@@ -34,6 +54,7 @@ int main()
 		HT.assertz("consecutive_106(\"false\")");
 	}
 	return 0;
+
 }
 
 void itf_not_found_message()
@@ -42,10 +63,6 @@ void itf_not_found_message()
 	stringstream line;
 	string str;
 	
-	//cout << " hdlmaker CCC compiler run on: " << __DATE__ << endl;
-	//cout << "        ...with errors    at: " << __TIME__ << endl << endl;
-	//cout << " hdlmaker CCC compiler runtime error : " << endl;
-	//cout << "    there is no TYPESOPSDB.DBA file....; run first the front-end CCC compiler SUBADA.EXE" << endl;
 	line << " hdlmaker CCC compiler run on: " << __DATE__ << endl;
 	line << "        ...with errors    at: " << __TIME__ << endl << endl;
 	line << " hdlmaker CCC compiler runtime error : " << endl;

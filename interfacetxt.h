@@ -24338,12 +24338,12 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 /// @param Treesfact <- loaded data
 /// @param obj <- data to compare (/w '_')
 /// @return if matched 1 else 0
-size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection obj) // node of a tree, fact with underscores
+size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node of a tree, fact with underscores
 {
 	bool					flag = 1;
-	vector<bool>			tcmp = obj.getcmp();
-	vector<vector<bool>>	tcmpV = obj.getcmpV();
-	GeneralFact* fact = obj.fact;
+	vector<bool>			tcmp = obj->getcmp();
+	vector<vector<bool>>	tcmpV = obj->getcmpV();
+	GeneralFact* fact = obj->fact;
 
 	//cout << endl << "controll" << endl
 	//	<< typeid(*fact).name() << endl
