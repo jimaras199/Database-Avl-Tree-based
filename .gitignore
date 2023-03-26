@@ -39,6 +39,8 @@
 *.user
 %*.cpp
 *.log
+*.ods
+*.ods#
 
 # Manually ignoring
 .editorconfig

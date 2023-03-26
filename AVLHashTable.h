@@ -33,6 +33,11 @@ public:
 	/// @return true if dound else false
 	bool findfact(string Line);
 
+	/// @brief looks for fact and returns the posisioned parameter
+	/// @param pos <-- position 
+	/// @return the parameter in string form
+	string findandreturn(string Line);
+
 	/// @brief erases data from the memory
 	/// @param Line <- 3 cases-examples: 
 	/// @param "(*)" <- all data || 
@@ -131,6 +136,54 @@ bool HashTable::findfact(string Line)
 		}
 	}
 	return false;
+}
+
+string HashTable::findandreturn(string Line)
+{
+	size_t Treepos = 0;
+	bool flag = false;
+	bool* ptrflg = &flag;
+
+	if (Line.find("*", 0) != Line.npos)
+	{
+		factstar fs;
+		fs = makefactstar(Line);
+		factstar* ptrfs = &fs;
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (Table[i].NumNodes)
+			{
+				readnodesreturn(Table[i].Root, ptrfs, ptrflg);
+				//if (flag) return true;
+			}
+		}
+	}
+	else if (check4spec(Line))
+	{
+		factUnderInspection fs;
+		fs = makeInstanceOfSpecFact(Line);
+		factUnderInspection* ptrfs = &fs;
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (Table[i].NumNodes)
+			{
+				readnodesreturn(Table[i].Root, ptrfs, ptrflg);
+				//if (flag) return true;
+			}
+		}
+	}
+	else
+	{
+		size_t Hash = (hash<string>{}(Line));
+		Treepos = Hash % N;
+		if (Table[Treepos].NumNodes)
+		{
+			readnodesreturn(Table[Treepos].Root, Hash, ptrflg);
+			//if (flag) return true;
+		}
+	}
+	return "";
+
 }
 
 void HashTable::retractall(string Line)
@@ -590,6 +643,48 @@ void readnodes(AVLTree::Node* n, size_t hashv, bool* flag)
 	{
 		*flag = true;
 		return;
+	}
+	if (n->HashV > hashv && !(*flag))
+		readnodes(n->Left, hashv, flag);
+	if (n->HashV < hashv && !(*flag))
+		readnodes(n->Right, hashv, flag);
+}
+
+//checks for data using factstar and return the posisioned parameter
+string readnodesreturn(AVLTree::Node* n, factstar* ptr, bool* flag)
+{
+	if (matchfactsstar(n->Data, ptr))
+	{
+		return makeStringOf(n->Data);
+		*flag = true;
+	}
+	if (!(*flag) && n->Left != nullptr)
+		readnodes(n->Left, ptr, flag);
+	if (!(*flag) && n->Right != nullptr)
+		readnodes(n->Right, ptr, flag);
+}
+
+//checks for data using factUnderInspection and return the posisioned parameter
+string readnodesreturn(AVLTree::Node* n, factUnderInspection* ptr, bool* flag)
+{
+	if (matchfactsSpec(n->Data, ptr))
+	{
+		return makeStringOf(n->Data);
+		*flag = true;
+	}
+	if (!(*flag) && n->Left != nullptr)
+		readnodes(n->Left, ptr, flag);
+	if (!(*flag) && n->Right != nullptr)
+		readnodes(n->Right, ptr, flag);
+}
+
+//checks for data using GeneralFact and return the posisioned parameter
+string readnodesreturn(AVLTree::Node* n, size_t hashv, bool* flag)
+{
+	if (n->HashV == hashv)
+	{
+		*flag = true;
+		return makeStringOf(n->Data);
 	}
 	if (n->HashV > hashv && !(*flag))
 		readnodes(n->Left, hashv, flag);
