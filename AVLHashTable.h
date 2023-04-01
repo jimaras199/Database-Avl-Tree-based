@@ -516,6 +516,103 @@ bool check4spec(string inputline)
 	return false;
 }
 
+/// @brief returns a posisioned parameter
+/// @param inputline <- fact
+/// @param pospar <- the target parameter
+/// @return the target parameter otherwise ""
+string returnpar(string inputline, int pospar)
+{
+	string ALine, subl;
+	size_t pos = 0, brpos = 0, index = 0;
+	ALine = inputline.substr(0, inputline.find(pa, 0));
+	pos += ALine.length();
+	subl = inputline.substr(++pos, inputline.length() - pos); // ++pos getting after the first  parenthesis
+	if (subl.find(co, 0) == subl.npos)
+	{
+		if (subl.find(br, 0) == 0)
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			if(pospar == 1)
+				return ALine;
+		if (subl.find(us, 0) == 0)
+		{
+			++pos;
+			++index;
+		}
+	}
+	do
+	{
+		if (((subl.find(br, 0)) == 0))
+		{
+			brpos = subl.find(brcl, 0);
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			while (subl.find(co, 0) < brpos)
+			{
+				++index;
+				if ((subl.find(us, 0)) != 0)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					if (pospar == index)
+						return ALine;
+					pos += ALine.length();
+				}
+				else
+				{
+					++pos;
+					++index;
+				}
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				brpos = subl.find(brcl, 0);
+			}
+			if (subl.find(us, 0) != 0)
+			{
+				++index;
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				if (pospar == index)
+					return ALine;
+				pos += ALine.size();
+			}
+			else
+			{
+				++pos;
+				++index;
+			}
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		}
+		else if ((subl.find(us, 0)) != 0)
+		{
+			++index;
+			ALine = subl.substr(0, subl.find(co, 0));
+			if (pospar == index)
+				return ALine;
+			pos += ALine.length();
+		}
+		else
+		{
+			++pos;
+			++index;
+		}
+		subl = inputline.substr(++pos, inputline.length() - pos);
+	} while (subl.find(co, 0) != subl.npos);
+	if (subl.find(br, 0) == 0)
+		subl = inputline.substr(++pos, inputline.length() - pos);
+		ALine = subl.substr(0, subl.find(brcl, 0));
+		if (pospar == index)
+			return ALine;
+	if (subl.find(us, 0) == 0)
+		++pos;
+	return "";
+}
+
+// returns the Value of data_stmt
+string last_from_data_stmt(string inputline)
+{
+	string ALine;
+	ALine = inputline.substr(inputline.find(pa, 0) + 1, inputline.find(pacl, 0) - 1);
+	ALine.resize(ALine.size() - 1);
+	return ALine;
+}
+
 //stores all data to list
 void readnodes(AVLTree::Node* n, list<string>* ptr)
 {
@@ -662,6 +759,7 @@ string readnodesreturn(AVLTree::Node* n, factstar* ptr, bool* flag)
 		readnodes(n->Left, ptr, flag);
 	if (!(*flag) && n->Right != nullptr)
 		readnodes(n->Right, ptr, flag);
+	return""; 
 }
 
 //checks for data using factUnderInspection and return the posisioned parameter
@@ -676,6 +774,7 @@ string readnodesreturn(AVLTree::Node* n, factUnderInspection* ptr, bool* flag)
 		readnodes(n->Left, ptr, flag);
 	if (!(*flag) && n->Right != nullptr)
 		readnodes(n->Right, ptr, flag);
+	return"";
 }
 
 //checks for data using GeneralFact and return the posisioned parameter
@@ -690,4 +789,5 @@ string readnodesreturn(AVLTree::Node* n, size_t hashv, bool* flag)
 		readnodes(n->Left, hashv, flag);
 	if (n->HashV < hashv && !(*flag))
 		readnodes(n->Right, hashv, flag);
+	return"";
 }
