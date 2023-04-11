@@ -59,8 +59,16 @@ public:
 	/// @param list2 <- to be considered as the sequel of the list
 	/// @param list3 <- to be considered as the extracted list
 	/// @returns list3
-	template<typename T>
-	list<T> concat(list<T> list1, list<T> list2, list<T> list3);
+	//template<typename T>
+	//list<T> concat(list<T> list1, list<T> list2, list<T> list3);
+
+	/// @brief combines 2 strings into 1 string
+	/// @param T <- template parameter
+	/// @param list1 <- to be considered as the initial of the string
+	/// @param list2 <- to be considered as the sequel of the string
+	/// @param list3 <- to be considered as the extracted string
+	/// @returns string3
+	void concat(string string1, string string2, string string3);
 
 	/// @brief extracts all the loaded data to string
 	list<string> exportToList();
@@ -320,16 +328,24 @@ void HashTable::save(string filename)
 	}
 }
 
-template<typename T>
-list<T> HashTable::concat(list<T> list1, list<T> list2, list<T> list3)
+//template<typename T>
+ 
+//list<T> HashTable::concat(list<T> list1, list<T> list2, list<T> list3)
+
+//{
+//	if (!list1.empty())
+//		for (T x : list1)
+//			list3.push_back(x);
+//	if (!list2.empty())
+//		for (T x : list2)
+//			list3.push_back(x);
+//	return list3;
+//}
+
+void HashTable::concat(string string1, string string2, string string3)
 {
-	if (!list1.empty())
-		for (T x : list1)
-			list3.push_back(x);
-	if (!list2.empty())
-		for (T x : list2)
-			list3.push_back(x);
-	return list3;
+	string3 += string1;
+	string3 += string2;
 }
 
 list<string> HashTable::exportToList()
@@ -451,7 +467,7 @@ forward_list<string> HashTable::matchedToFList(string Line)
 	return result;
 }
 
-//checks  for factUnderInspection
+//checks for factUnderInspection
 bool check4spec(string inputline)
 {
 	string ALine, subl;

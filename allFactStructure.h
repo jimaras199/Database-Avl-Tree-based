@@ -6050,3 +6050,41 @@ public:
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
+class module_counter : public GeneralFact
+{
+	int				q{};
+public:
+	module_counter(const int q1)
+		: q(q1) {}
+
+	module_counter(const module_counter& other)
+	{
+		if (this != &other)
+		{
+			this->q = other.q;
+		}
+	}
+	~module_counter()
+	{
+		this->q = NULL;
+
+	}
+	void operator=(GeneralFact& other) override
+	{
+		module_counter* ptr = dynamic_cast<module_counter*>(&other);
+		this->q = ptr->q;
+	}
+
+	module_counter(module_counter&& other) noexcept
+		: q{ other.q } {}
+
+	void operator=(module_counter&& other) noexcept
+	{
+		std::swap(q, other.q);
+	}
+	friend string makeStringOf(GeneralFact* obj);
+
+	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
+
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
+};
