@@ -274,11 +274,11 @@ public:
 class data_stmt : public GeneralFact
 {
 	int				e{}, r{};
-	string			q{}, w{}, t{}, y{};
+	string			q{}, w{}, t{}, y{}, vt{};
 public:
 	data_stmt(const int e1, const int r1, string q1, string w1,
-		string t1, const string y1)
-		:e(e1), r(r1), q(q1), w(w1), t(t1), y(y1) {}
+		string t1, const string y1, const string vt1)
+		:e(e1), r(r1), q(q1), w(w1), t(t1), y(y1), vt(vt1) {}
 	data_stmt(const data_stmt& other)
 	{
 		if (this != &other)
@@ -286,6 +286,7 @@ public:
 			this->q = other.q;	this->r = other.r;
 			this->t = other.t;	this->y = other.y;
 			this->w = other.w;	this->e = other.e;
+			this->vt = other.vt;
 		}
 	}
 	~data_stmt()
@@ -293,7 +294,7 @@ public:
 		this->q.clear();	this->r = NULL;
 		this->t.clear();	this->y.clear();
 		this->w.clear();	this->e = NULL;
-
+		this->vt.clear();
 	}
 	void operator=(GeneralFact& other) override
 	{
@@ -301,14 +302,15 @@ public:
 		this->q = ptr->q;	this->r = ptr->r;
 		this->t = ptr->t;	this->y = ptr->y;
 		this->w = ptr->w;	this->e = ptr->e;
+		this->vt = ptr->vt;
 	}
 	data_stmt(data_stmt&& other)  noexcept
 		: q{ other.q }, e{ other.e }, t{ other.t },
-		w{ other.w }, r{ other.r }, y{ other.y } {}
+		w{ other.w }, r{ other.r }, y{ other.y }, vt{ other.vt } {}
 	void operator=(data_stmt&& other)  noexcept
 	{
 		std::swap(q, other.q); std::swap(e, other.e); std::swap(t, other.t); std::swap(w, other.w);
-		std::swap(r, other.r); std::swap(y, other.y);
+		std::swap(r, other.r); std::swap(y, other.y); std::swap(vt, other.vt);
 	}
 	friend string makeStringOf(GeneralFact* obj);
 
@@ -606,11 +608,11 @@ public:
 class special_dt : public GeneralFact
 {
 	int				w{}, r{};
-	string			q{}, e{}, t{}, y{}, u{};
+	string			q{}, e{}, t{}, y{}, u{}, vt{};
 public:
 	special_dt(const int w1, const int r1, const string q1, const string e1, const string t1,
-		const string y1,const string u1)
-		:w(w1), r(r1), q(q1), e(e1), t(t1), y(y1), u(u1){}
+		const string y1, const string u1, const string vt1)
+		:w(w1), r(r1), q(q1), e(e1), t(t1), y(y1), u(u1), vt(vt1) {}
 	special_dt(const special_dt& other)
 	{
 		if (this != &other)
@@ -618,7 +620,7 @@ public:
 			this->q = other.q;	this->r = other.r;
 			this->t = other.t;	this->y = other.y;
 			this->u = other.u;	this->w = other.w;
-			this->e = other.e;
+			this->e = other.e;  this->vt = other.vt;
 		}
 	}
 	~special_dt()
@@ -626,7 +628,7 @@ public:
 		this->q.clear();	this->r = NULL;
 		this->t.clear();	this->y.clear();
 		this->u.clear();	this->w = NULL;
-		this->e.clear();
+		this->e.clear();	this->vt.clear();
 
 	}
 	void operator=(GeneralFact& other) override
@@ -635,15 +637,15 @@ public:
 		this->q = ptr->q; this->r = ptr->r;
 		this->t = ptr->t; this->y = ptr->y;
 		this->u = ptr->u; this->w = ptr->w;
-		this->e = ptr->e;
+		this->e = ptr->e; this->vt = ptr->vt;
 	}
 	special_dt(special_dt&& other)  noexcept
 		: q{ other.q }, e{ other.e }, t{ other.t }, u{ other.u },
-		w{ other.w }, r{ other.r }, y{ other.y } {}
+		w{ other.w }, r{ other.r }, y{ other.y }, vt{ other.vt } {}
 	void operator=(special_dt&& other)  noexcept
 	{
 		std::swap(q, other.q); std::swap(e, other.e); std::swap(t, other.t); std::swap(u, other.u);
-		std::swap(w, other.w); std::swap(r, other.r); std::swap(y, other.y);
+		std::swap(w, other.w); std::swap(r, other.r); std::swap(y, other.y); std::swap(vt, other.vt);
 	}
 	friend string makeStringOf(GeneralFact* obj);
 
@@ -1718,6 +1720,10 @@ public:
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
+
+	friend int last_from_global_declarations(GeneralFact* obj);
+
+	friend vector<local_object> first_from_global_declarations(GeneralFact* obj);
 };
 
 class source_is_normal_dt : public GeneralFact
@@ -1852,12 +1858,12 @@ public:
 
 class for_loop : public GeneralFact
 {
-	int				q{}, e{}, r{}, t{}, y{}, u{}, i{}, o{}, p{}, a{}, s{}, d{};
+	int				q{}, e{}, r{}, t{}, y{}, u{}, i{}, o{}, p{}, a{}, s{}, d{}, f{};
 	string			w{};
 public:
 	for_loop(const int q1, const string w1, const int e1, const int r1, const int t1, const int y1,
-		const int u1, const int i1, const int o1, const int p1, const int a1, const int s1, const int d1)
-		: q(q1), w(w1), e(e1), r(r1), t(t1), y(y1), u(u1), i(i1), o(o1), p(p1), a(a1), s(s1), d(d1) {}
+		const int u1, const int i1, const int o1, const int p1, const int a1, const int s1, const int d1, const int f1)
+		: q(q1), w(w1), e(e1), r(r1), t(t1), y(y1), u(u1), i(i1), o(o1), p(p1), a(a1), s(s1), d(d1), f(f1) {}
 
 	for_loop(const for_loop& other)
 	{
@@ -1869,7 +1875,7 @@ public:
 			this->u = other.u;	this->i = other.i;
 			this->o = other.o;	this->p = other.p;
 			this->a = other.a;	this->s = other.s;
-			this->d = other.d;
+			this->d = other.d;  this->f = other.f;
 		}
 	}
 	~for_loop()
@@ -1880,7 +1886,7 @@ public:
 		this->u = NULL;	this->i = NULL;
 		this->o = NULL;	this->p = NULL;
 		this->a = NULL;	this->s = NULL;
-		this->d = NULL;
+		this->d = NULL; this->f = NULL;
 
 	}
 	void operator=(GeneralFact& other) override
@@ -1892,14 +1898,14 @@ public:
 		this->u = ptr->u;	this->i = ptr->i;
 		this->o = ptr->o;	this->p = ptr->p;
 		this->a = ptr->a;	this->s = ptr->s;
-		this->d = ptr->d;
+		this->d = ptr->d;	this->f = ptr->f;
 	}
 
 	for_loop(for_loop&& other)  noexcept
 		: q{ other.q }, w{ other.w }, e{ other.e }, r{ other.r },
 		t{ other.t }, y{ other.y }, u{ other.u }, i{ other.i },
 		o{ other.o }, p{ other.p }, a{ other.a }, s{ other.s },
-		d{ other.d } {}
+		d{ other.d }, f{ other.f } {}
 
 	void operator=(for_loop&& other)  noexcept
 	{
@@ -1909,7 +1915,7 @@ public:
 		std::swap(u, other.u);	std::swap(i, other.i);
 		std::swap(o, other.o);	std::swap(p, other.p);
 		std::swap(a, other.a);	std::swap(s, other.s);
-		std::swap(d, other.d);
+		std::swap(d, other.d);  std::swap(f, other.f);
 	}
 	friend string makeStringOf(GeneralFact* obj);
 

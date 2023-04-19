@@ -47,6 +47,8 @@
 .vs/
 Debug/
 x64/
+rsa/
+pytharr/
 hdlmaker.pro
 test_functions.cpp
 clock.cpp

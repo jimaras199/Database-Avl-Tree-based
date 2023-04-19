@@ -358,8 +358,17 @@ string makeStringOf(GeneralFact* obj)
 		if ("data_stmt" == ALine)
 			{
 				data_stmt* ptr = dynamic_cast<data_stmt*>(obj);
-				ss << "data_stmt("  << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-					<< co << ptr->t << co << ptr->y;
+				ss << "data_stmt(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
+					<< co << ptr->t << co ;
+				if (ptr->vt == "i")
+					ss << "i(";
+				else if (ptr->vt == "sym")
+					ss << "sym(";
+				else if (ptr->vt == "bol")
+					ss << "bol(";
+				else if (ptr->vt == "bit_wire")
+					ss << "bit_wire(";
+				ss << ptr->y << pacl;
 			}
 		else if ("dataflow" == ALine)
 		{
@@ -416,7 +425,7 @@ string makeStringOf(GeneralFact* obj)
 			for_loop* ptr = dynamic_cast<for_loop*>(obj);
 			ss << "for_loop(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
 				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i << co << ptr->o
-				<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d;
+				<< co << ptr->p << co << ptr->a << co << ptr->s << co << ptr->d << co << ptr->f;
 		}
 		else if ("found_call_operator" == ALine)
 		{
@@ -1252,8 +1261,16 @@ string makeStringOf(GeneralFact* obj)
 		{
 			special_dt* ptr = dynamic_cast<special_dt*>(obj);
 			ss << "special_dt(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
-				<< co << ptr->t << co << ptr->y << co << ptr->u;
-
+				<< co << ptr->t << co << ptr->y << co;
+			if (ptr->vt == "i")
+				ss << "i(";
+			else if (ptr->vt == "sym")
+				ss << "sym(";
+			else if (ptr->vt == "bol")
+				ss << "bol(";
+			else if (ptr->vt == "bit_wire")
+				ss << "bit_wire(";
+			ss << ptr->u << pacl;
 		}
 		else if ("special_op" == ALine)
 		{
@@ -2352,7 +2369,7 @@ GeneralFact* makeInstanceOf(string inputline)
 	if (ALine == "data_stmt")
 	{
 	int				e, r;
-	string			q, w, t, y;
+	string			q, w, t, y, vt;
 
 	ALine = subl.substr(0, subl.find(co, 0));
 	q = ALine;
@@ -2380,9 +2397,19 @@ GeneralFact* makeInstanceOf(string inputline)
 	subl = inputline.substr(++pos, inputline.length() - pos);
 
 	ALine = subl.substr(0, subl.rfind(pacl, 0));
-	ALine.resize(ALine.size() - 1);
+	if (ALine.substr(0, 1) == "i")
+		vt = "i";
+	else if (ALine.substr(0, 3) == "bol")
+		vt = "bol";
+	else if (ALine.substr(0, 3) == "sym")
+		vt = "sym";
+	else if (ALine.substr(0, 8) == "bit_wire")
+		vt = "bit_wire";
+	ALine = subl.substr(subl.find(pa, 0) + 1, subl.find(pacl, 0));
+	ALine.resize(ALine.size() - 2);
 	y = ALine;
-	return new data_stmt(e, r, q, w, t, y);
+
+	return new data_stmt(e, r, q, w, t, y, vt);
 	}
 	else if (ALine == "debug_mode")
 	{
@@ -2433,7 +2460,7 @@ GeneralFact* makeInstanceOf(string inputline)
 	{
 		if (ALine == "for_loop")
 		{
-			int				q, e, r, t, y, u, i, o, p, a, s, d;
+			int				q, e, r, t, y, u, i, o, p, a, s, d, f;
 			string			w;
 
 			ALine = subl.substr(0, subl.find(co, 0));
@@ -2496,10 +2523,15 @@ GeneralFact* makeInstanceOf(string inputline)
 			pos += ALine.length();
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			ALine = subl.substr(0, subl.find(co, 0));
 			d = stoi(ALine);
+			pos += ALine.length();
+			subl = inputline.substr(++pos, inputline.length() - pos);
 
-			return new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d);
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			f = stoi(ALine);
+
+			return new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d, f);
 		}
 		else if (ALine == "found_call_operator")
 		{
@@ -4798,7 +4830,7 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 		else if (ALine == "special_dt")
 		{
 			int				w, r;
-			string			q, e, t, y, u;
+			string			q, e, t, y, u, vt;
 
 			ALine = subl.substr(0, subl.find(co, 0));
 			q = ALine;
@@ -4831,9 +4863,18 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
 			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			ALine.resize(ALine.size() - 1);
+			if (ALine.substr(0, 1) == "i")
+				vt = "i";
+			else if (ALine.substr(0, 3) == "bol")
+				vt = "bol";
+			else if (ALine.substr(0, 3) == "sym")
+				vt = "sym";
+			else if (ALine.substr(0, 8) == "bit_wire")
+				vt = "bit_wire";
+			ALine = subl.substr(subl.find(pa, 0) + 1, subl.find(pacl, 0));
+			ALine.resize(ALine.size() - 2);
 			u = ALine;
-			return new special_dt(w, r, q, e, t, y, u);
+			return new special_dt(w, r, q, e, t, y, u, vt);
 		}
 		else if (ALine == "special_op")
 	{
@@ -7221,7 +7262,7 @@ factstar makefactstar(string inputline)
 		if (ALine == "data_stmt")
 		{
 			int				e{}, r{};
-			string			q{}, w{}, t{}, y{};
+			string			q{}, w{}, t{}, y{}, vt{};
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
 			if ((subl.find(str, 0)) != 0)
@@ -7289,10 +7330,44 @@ factstar makefactstar(string inputline)
 					params++;
 					ALine = subl.substr(0, subl.rfind(pacl, 0));
 					ALine.resize(ALine.size() - 1);
+					if (ALine.substr(0, 1) == "i")
+					{
+						vt = "i";
+						pos++;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+					else if (ALine.substr(0, 3) == "sym")
+					{
+						vt = "sym";
+						pos += 3;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+					else if (ALine.substr(0, 3) == "bol")
+					{
+						vt = "bol";
+						pos += 3;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+					else if (ALine.substr(0, 8) == "bit_wire")
+					{
+						vt = "bit_wire";
+						pos += 8;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+				}
+				else stop = 0;
+			}
+			if (stop)
+			{
+				if ((subl.find(str, 0)) != 0)
+				{
+					params++;
+					ALine = subl.substr(0, subl.find(pacl, 0));
 					y = ALine;
 				}
 			}
-			ptr = new data_stmt(e, r, q, w, t, y);
+			ptr = new data_stmt(e, r, q, w, t, y, vt);
+
 		}
 		else if (ALine == "debug_mode")
 		{
@@ -7307,7 +7382,7 @@ factstar makefactstar(string inputline)
 			}
 			ptr = new debug_mode(q);
 		}
-
+	
 		break;
 	}
 	case 'e':
@@ -7365,7 +7440,7 @@ factstar makefactstar(string inputline)
 	{
 		if (ALine == "for_loop")
 		{
-			int				q{}, e{}, r{}, t{}, y{}, u{}, i{}, o{}, p{}, a{}, s{}, d{};
+			int				q{}, e{}, r{}, t{}, y{}, u{}, i{}, o{}, p{}, a{}, s{}, d{}, f{};
 			string			w{};
 
 			subl = inputline.substr(++pos, inputline.length() - pos);
@@ -7516,11 +7591,23 @@ factstar makefactstar(string inputline)
 				if ((subl.find(str, 0)) != 0)
 				{
 					params++;
-					ALine = subl.substr(0, subl.rfind(pacl, 0));
+					ALine = subl.substr(0, subl.find(co, 0));
 					d = stoi(ALine);
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+				}
+				else stop = 0;
+			}
+			if (stop)
+			{
+				if ((subl.find(str, 0)) != 0)
+				{
+					params++;
+					ALine = subl.substr(0, subl.rfind(pacl, 0));
+					f = stoi(ALine);
 				}
 			}
-			ptr = new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d);
+			ptr = new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d, f);
 		}
 		else if (ALine == "found_call_operator")
 		{
@@ -11608,7 +11695,7 @@ factstar makefactstar(string inputline)
 		else if (ALine == "special_dt")
 		{
 		int				w{}, r{};
-		string			q{}, e{}, t{}, y{}, u{};
+		string			q{}, e{}, t{}, y{}, u{}, vt;
 
 		subl = inputline.substr(++pos, inputline.length() - pos);
 
@@ -11688,10 +11775,43 @@ factstar makefactstar(string inputline)
 				params++;
 				ALine = subl.substr(0, subl.rfind(pacl, 0));
 				ALine.resize(ALine.size() - 1);
+				if (ALine.substr(0, 1) == "i")
+				{
+					vt = "i";
+					pos++;
+					subl = inputline.substr(++pos, inputline.length() - pos);
+				}
+				else if (ALine.substr(0, 3) == "sym")
+				{
+					vt = "sym";
+					pos += 3;
+					subl = inputline.substr(++pos, inputline.length() - pos);
+				}
+				else if (ALine.substr(0, 3) == "bol")
+				{
+					vt = "bol";
+					pos += 3;
+					subl = inputline.substr(++pos, inputline.length() - pos);
+				}
+				else if (ALine.substr(0, 8) == "bit_wire")
+				{
+					vt = "bit_wire";
+					pos += 8;
+					subl = inputline.substr(++pos, inputline.length() - pos);
+				}
+			}
+			else stop = 0;
+		}
+		if (stop)
+		{
+			if ((subl.find(str, 0)) != 0)
+			{
+				params++;
+				ALine = subl.substr(0, subl.find(pacl, 0));
 				u = ALine;
 			}
 		}
-		ptr = new special_dt(w, r, q, e, t, y, u);
+		ptr = new special_dt(w, r, q, e, t, y, u, vt);
 		}
 		else if (ALine == "special_op")
 		{
@@ -13333,6 +13453,7 @@ factstar makefactstar(string inputline)
 		break;
 	}
 	}
+
 	return factstar(ptr, params);
 }
 
@@ -15216,7 +15337,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 		if (ALine == "data_stmt")
 		{
 			int				e{}, r{};
-			string			q{}, w{}, t{}, y{};
+			string			q{}, w{}, t{}, y{}, vt{};
 			if (inputline != ALine)
 			{
 				subl = inputline.substr(++pos, inputline.length() - pos);
@@ -15294,13 +15415,49 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				if ((subl.find(us, 0)) != 0)
 				{
 					params.push_back(1);
-					ALine = subl.substr(0, subl.rfind(pacl, 0));
-					ALine.resize(ALine.size() - 1);
-					y = ALine;
+
+					if (subl.substr(0, 1) == "i")
+					{
+						vt = "i";
+						pos++;
+					}
+					else if (subl.substr(0, 3) == "bol")
+					{
+						vt = "bol";
+						pos += 3;
+					}
+					else if (subl.substr(0, 3) == "sym")
+					{
+						vt = "sym";
+						pos += 3;
+					}
+					else if (subl.substr(0, 8) == "bit_wire")
+					{
+						vt = "bit_wire";
+						pos += 8;
+					}
+
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(us, 0)) != 0)
+					{
+						params.push_back(1);
+
+						ALine = subl.substr(subl.find(pa, 0) + 1, subl.find(pacl, 0));
+						y = ALine;
+					}
+					else params.push_back(0);
+
 				}
-				else params.push_back(0);
+				else
+				{
+					params.push_back(0);
+					params.push_back(0);
+					++pos;
+				}
+
 			}
-			ptr = new data_stmt(e, r, q, w, t, y);
+			ptr = new data_stmt(e, r, q, w, t, y, vt);
 		}
 		else if (ALine == "debug_mode")
 		{
@@ -15395,7 +15552,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 	{
 		if (ALine == "for_loop")
 		{
-			int				q{}, e{}, r{}, t{}, y{}, u{}, i{}, o{}, p{}, a{}, s{}, d{};
+			int				q{}, e{}, r{}, t{}, y{}, u{}, i{}, o{}, p{}, a{}, s{}, d{}, f{};
 			string			w{};
 			if (inputline != ALine)
 			{
@@ -15572,12 +15729,26 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				if ((subl.find(us, 0)) != 0)
 				{
 					params.push_back(1);
-					ALine = subl.substr(0, subl.rfind(pacl, 0));
+					ALine = subl.substr(0, subl.find(co, 0));
 					d = stoi(ALine);
+					pos += ALine.length();
+				}
+				else
+				{
+					params.push_back(0);
+					++pos;
+				}
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(us, 0)) != 0)
+				{
+					params.push_back(1);
+					ALine = subl.substr(0, subl.rfind(pacl, 0));
+					f = stoi(ALine);
 				}
 				else params.push_back(0);
 			}
-			ptr = new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d);
+			ptr = new for_loop(q, w, e, r, t, y, u, i, o, p, a, s, d, f);
 		}
 		else if (ALine == "found_call_operator")
 		{
@@ -20850,7 +21021,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 		else if (ALine == "special_dt")
 		{
 		int				w{}, r{};
-		string			q{}, e{}, t{}, y{}, u{};
+		string			q{}, e{}, t{}, y{}, u{}, vt{};
 		if (inputline != ALine)
 		{
 			subl = inputline.substr(++pos, inputline.length() - pos);
@@ -20942,13 +21113,48 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 			if ((subl.find(us, 0)) != 0)
 			{
 				params.push_back(1);
-				ALine = subl.substr(0, subl.rfind(pacl, 0));
-				ALine.resize(ALine.size() - 1);
-				u = ALine;
+
+				if (subl.substr(0, 1) == "i")
+				{
+					vt = "i";
+					pos++;
+				}
+				else if (subl.substr(0, 3) == "bol")
+				{
+					vt = "bol";
+					pos += 3;
+				}
+				else if (subl.substr(0, 3) == "sym")
+				{
+					vt = "sym";
+					pos += 3;
+				}
+				else if (subl.substr(0, 8) == "bit_wire")
+				{
+					vt = "bit_wire";
+					pos += 8;
+				}
+
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(us, 0)) != 0)
+				{
+					params.push_back(1);
+
+					ALine = subl.substr(subl.find(pa, 0) + 1, subl.find(pacl, 0));
+					u = ALine;
+				}
+				else params.push_back(0);
+
 			}
-			else params.push_back(0);
+			else
+			{
+				params.push_back(0);
+				params.push_back(0);
+				++pos;
+			}
 		}
-		ptr = new special_dt(w, r, q, e, t, y, u);
+		ptr = new special_dt(w, r, q, e, t, y, u, vt);
 		}
 		else if (ALine == "special_op")
 		{
@@ -23109,7 +23315,6 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 	ALine = ALine.substr(6);
 	string ch = ALine.substr(0, 1);
 	const char* sh = ch.c_str();
-
 	switch (*sh)
 	{
 	case 'a':
@@ -23780,7 +23985,11 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 					if (ptr->t != ptr2->t) return 0;
 
 				if (tcmp[5])
-					if (ptr->y != ptr2->y) return 0;
+				{
+					if (ptr->vt != ptr2->vt) return 0;
+					if (tcmp[6])
+						if (ptr->y != ptr2->y) return 0;
+				}
 			}
 		}
 		else if (ALine == "debug_mode")
@@ -23870,6 +24079,9 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 
 				if (tcmp[12])
 					if (ptr->d != ptr2->d) return 0;
+
+				if (tcmp[13])
+					if (ptr->f != ptr2->f) return 0;
 			}
 		}
 		else if (ALine == "found_call_operator")
@@ -25760,7 +25972,11 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 					if (ptr->y != ptr2->y) return 0;
 
 				if (tcmp[6])
-					if (ptr->u != ptr2->u) return 0;
+				{
+					if (ptr->vt != ptr2->vt) return 0;
+					if (tcmp[7])
+						if (ptr->u != ptr2->u) return 0;
+				}
 			}
 		}
 		else if (ALine == "special_op")
@@ -26341,9 +26557,6 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 	GeneralFact*	fact = obj->fact;
 	size_t			p = obj->params;
 	string ALine{}, ALine2{};
-
-	//cout << typeid(*Treesfact).name() << endl;
-
 	ALine = typeid(*Treesfact).name();
 	ALine2 = typeid(*fact).name();
 
@@ -26917,8 +27130,10 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			{
 				switch (p)
 				{
-				case 6:
+				case 7:
 					if (ptr->y != ptr2->y) return 0;
+				case 6:
+					if (ptr->vt != ptr2->vt) return 0;
 				case 5:
 					if (ptr->t != ptr2->t) return 0;
 				case 4:
@@ -26981,6 +27196,8 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			{
 				switch (p)
 				{
+				case 14:
+					if (ptr->f != ptr2->f) return 0;
 				case 13:
 					if (ptr->d != ptr2->d) return 0;
 				case 12:
@@ -28642,8 +28859,10 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			{
 				switch (p)
 				{
-				case 7:
+				case 8:
 					if (ptr->u != ptr2->u) return 0;
+				case 7:
+					if (ptr->vt != ptr2->vt) return 0;
 				case 6:
 					if (ptr->y != ptr2->y) return 0;
 				case 5:

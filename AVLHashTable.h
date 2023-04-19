@@ -151,6 +151,7 @@ string HashTable::findandreturn(string Line)
 	size_t Treepos = 0;
 	bool flag = false;
 	bool* ptrflg = &flag;
+	string res;
 
 	if (Line.find("*", 0) != Line.npos)
 	{
@@ -161,10 +162,12 @@ string HashTable::findandreturn(string Line)
 		{
 			if (Table[i].NumNodes)
 			{
-				readnodesreturn(Table[i].Root, ptrfs, ptrflg);
-				//if (flag) return true;
+				res = readnodesreturn(Table[i].Root, ptrfs, ptrflg);
+				if (res != "")
+					return res;
 			}
 		}
+		return "";
 	}
 	else if (check4spec(Line))
 	{
@@ -175,10 +178,12 @@ string HashTable::findandreturn(string Line)
 		{
 			if (Table[i].NumNodes)
 			{
-				readnodesreturn(Table[i].Root, ptrfs, ptrflg);
-				//if (flag) return true;
+				res = readnodesreturn(Table[i].Root, ptrfs, ptrflg);
+				if (res != "")
+					return res;
 			}
 		}
+		return "";
 	}
 	else
 	{
@@ -186,12 +191,12 @@ string HashTable::findandreturn(string Line)
 		Treepos = Hash % N;
 		if (Table[Treepos].NumNodes)
 		{
-			readnodesreturn(Table[Treepos].Root, Hash, ptrflg);
-			//if (flag) return true;
+			res = readnodesreturn(Table[Treepos].Root, Hash, ptrflg);
+			if (res != "")
+				return res;
 		}
+		return "";
 	}
-	return "";
-
 }
 
 void HashTable::retractall(string Line)
@@ -621,13 +626,28 @@ string returnpar(string inputline, int pospar)
 }
 
 // returns the Value of data_stmt
-string last_from_data_stmt(string inputline)
+string last_from_lo(string inputline)
 {
 	string ALine;
-	ALine = inputline.substr(inputline.find(pa, 0) + 1, inputline.find(pacl, 0) - 1);
+	ALine = inputline.substr(inputline.find(pa, 0) + 1, inputline.find(pacl, 0));
 	ALine.resize(ALine.size() - 1);
 	return ALine;
 }
+
+// returns the second parameter of global_declarations
+int last_from_global_declarations(GeneralFact* obj)
+{
+		global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
+		return ptr->w;
+}
+
+// returns the first parameter of global_declarations
+vector<local_object> first_from_global_declarations(GeneralFact* obj)
+{
+	global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
+	return ptr->q;
+}
+
 
 //stores all data to list
 void readnodes(AVLTree::Node* n, list<string>* ptr)
