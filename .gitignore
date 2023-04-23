@@ -52,3 +52,5 @@ pytharr/
 hdlmaker.pro
 test_functions.cpp
 clock.cpp
+.tmp.driveupload/
+desktop.ini
