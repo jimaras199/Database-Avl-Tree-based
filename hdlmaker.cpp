@@ -65,6 +65,9 @@ string writevhdl(string HDL, string Module_name, string Dname, string Kind);
 string write_hdl_dep_operator_symbol(string Symbol, string HDL);
 string print_possible_return(string PModule, string ResData, string RightData, string Assignment_string, string HDL, int* int1);
 string write_mod_rem_operator(string HDL, string Symbol);
+string print_custom_record_index_parameters(string Module, string Module_name, vector<int> Rec_list, string Kind);
+string print_custom_record_index_parameter(string PModule, int Parameter, string Kind);
+string print_custom_record_index_comma_cond(vector<int> Rec_list, string Kind);
 /////////////////////
 
 bool generate_top(string pathln, string exec, string cmdl);
@@ -104,6 +107,7 @@ bool not_a_while_loop(string PModule, int Operation);
 void conv_kind(string PModule, string Data, string* Kind);
 bool is_relational_op(string str);
 bool mod_or_rem_operator(string Op_symbol);
+void push_cond_end(string PModule, int Entry, string Kind);
 
 //determ i=input o=output
 //in language add 16 on page search
@@ -111,7 +115,7 @@ bool mod_or_rem_operator(string Op_symbol);
 //D:\VSprojects\repos\ITF_lib
 int main(int argc, char* argv[])
 {
-	int ch = 0;
+	int ch = 5;
 	switch (ch)
 	{
 	case 0:
@@ -260,7 +264,7 @@ int main(int argc, char* argv[])
 		//FUI = makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))");
 		//cout << matchfactsstar(makeInstanceOf("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(\"std_logic\"))"), &FUI) << endl;
 
-		//// (special_dt) done: makeStringOf, makeInstanceOf, makefactstar, makeInstanceOfSpecFact, makeInstanceOfSpecFact, matchfactsstar
+		//// (special_dt) done: makeStringOf, makeInstanceOf, makefactstar, makeInstanceOfSpecFact, matchfactsSpec, matchfactsstar
 		
 		//cout <<		 makeStringOf(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))")) << endl;
 		//cout << 			makeStringOf(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))")) << endl;
@@ -281,6 +285,49 @@ int main(int argc, char* argv[])
 		//makefactstar("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",*)");
 		//makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",*)");
 		//makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",*)");
+		//
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))");
+		//
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(_))");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(_))");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(_))");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(_))");
+		//
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",_)");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",_)");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",_)");
+		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",_)");
+		//
+		//factUnderInspection FUI{};
+		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(_))");
+		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))"), & FUI);
+		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",_)");
+		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))"), & FUI);
+		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(0))");
+		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))"), & FUI);
+		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bol(1))");
+		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))"), &FUI);
+		//
+		//factstar FUI{};
+		//FUI = makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(*))");
+		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))"), &FUI);
+		//FUI = makefactstar("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",*)");
+		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))"), &FUI);
+		//FUI = makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(0))");
+		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))"), &FUI);
+		//FUI = makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bol(1))");
+		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))"), &FUI);
+
+		//// (nested_cond_fact) done: makeStringOf, makeInstanceOf
+
+		//cout << makeStringOf(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])")) << endl;
+		//cout << makeStringOf(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",9,\"bzxc\"])")) << endl;
+		
+		makefactstar("nested_cond_fact(*)");
+		makefactstar("nested_cond_fact(\"garlic\",*)");
 		//
 		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))");
 		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))");
@@ -3617,7 +3664,7 @@ string print_custom_body(string Module, string PModule, int Oentry, string Inten
 string print_custom_statement(string str, string PModule, int var3, string Intend, string* Next_intend, string Lang)
 {
 	stringstream ss;
-	int Op, Left, Right, Result;
+	int Op, Left, Right, Result, Previous_of_result, PRop;
 	string OpString, Rdata, ResData, Right_kind{}, Ldata, REsType, Left_kind{}, Res_kind;
 	vector<int> Rec_list;
 	if (Lang == "vhdl")
@@ -3744,8 +3791,62 @@ string print_custom_statement(string str, string PModule, int var3, string Inten
 						{
 							if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"))
 							{
-								Rec_list = stoi(returnpar(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"), 2));
-
+								Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)")),1);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+									{
+										Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << print_possible_return(PModule, ResData, Ldata, " := ", "vhdl", 0);
+										ss << " (";
+										print_custom_record_index_parameters("", PModule, Rec_list, "record");
+										ss << ");" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 103 || Op == 104 || Op == 105)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+						{
+							Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+							{
+								Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+								*Next_intend = Intend;
+								if(Op == 105)
+									ss << Intend << Rdata << " := " << Ldata << " - " << Right << ";" << endl;
+								else
+									ss << Intend << Rdata << " := " << Ldata << " + " << Right << ";" << endl;
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 106)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						Previous_of_result = Result - 1;
+						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
+						{
+							PRop = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2));
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+								push_cond_end(PModule, Result, "END IF");
 							}
 						}
 					}
@@ -4372,3 +4473,155 @@ string write_mod_rem_operator(string HDL, string Symbol)
 	}
 	return ss.str();
 }
+
+string print_custom_record_index_parameters(string Module, string Module_name, vector<int> Rec_list, string Kind)
+{
+	stringstream ss;
+	if (!Rec_list.empty())
+	{
+		ss << print_custom_record_index_parameter(Module_name, Rec_list.front(), Kind);
+		Rec_list.erase(Rec_list.begin()); //transforming Rec_list to Par_tail
+		ss << print_custom_record_index_comma_cond(Rec_list, Kind);
+		ss << print_custom_record_index_parameters(Module, Module_name, Rec_list, Kind);
+	}
+	return ss.str();
+}
+
+string print_custom_record_index_parameter(string PModule, int Parameter, string Kind)
+{
+	stringstream ss;
+	string HDL, Par_name, Type_kind;
+	int Type;
+	if (Kind == "record")
+	{
+		if (HT.findfact("hdl_style(\"c\")"))
+		{
+			if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+			{
+				Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+				ss << Par_name;
+			}
+		}
+	}
+	else if (Kind != "constants")
+	{
+		if (Kind != "function")
+		{
+			if (HT.findfact("hdl_style(*)"))
+			{
+				HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+				if (HDL != "c")
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+					{
+						Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+						ss << Par_name;
+					}
+				}
+			}
+		}
+		else if (Kind == "function")
+		{
+			if (HT.findfact("hdl_style(\"c\")"))
+			{
+				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+				{
+					Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+					Type = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 4));
+					Kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 5);
+					if (Kind == "par_in")
+						ss << Par_name;
+					else if (HT.findfact("type_def(" + to_string(Type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+					{
+						if (Kind != "par_in")
+							ss << Par_name;
+					}
+					else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+					{
+						Type_kind = returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 6);
+						if (Type_kind != "vectorarray_t")
+						{
+							if (Kind != "par_in")
+								ss << "&" << Par_name;
+						}
+					}
+				}
+			}
+			else if (HT.findfact("hdl_style(*)"))
+			{
+				HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+				if (HDL != "vhdl")
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+					{
+						Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+						ss << Par_name;
+					}
+				}
+				else if (HDL == "vhdl")
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+					{
+						Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+						Kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 5);
+						if (Kind != "const")
+							ss << Par_name;
+						if (Kind == "const")
+							ss << "var" << Par_name;
+					}
+				}
+			}
+		}
+	}
+	else if (Kind == "constants")
+	{
+		if (HT.findfact("hdl_style(*)"))
+		{
+			HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+			if (HDL != "c")
+			{
+				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+				{
+					Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+					Kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 5);
+					if (Kind != "const")
+						ss << "     var" << Par_name << " := " << Par_name << ";" << endl;
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string print_custom_record_index_comma_cond(vector<int> Rec_list, string Kind)
+{
+	stringstream ss;
+	if (!Rec_list.empty() && Kind != "constants")
+		ss << ", ";
+	return ss.str();
+}
+
+void push_cond_end(string PModule, int Entry, string Kind)
+{
+	vector<int> Org_stack;
+	if (HT.findfact("nested_cond_fact(" + PModule + ",*)"))
+	{
+		Org_stack = returnVec(makeInstanceOf(HT.findandreturn("nested_cond_fact(" + PModule + ",*)")), 1);
+		if (!Org_stack.empty())
+		{
+			HT.retractall("nested_cond_fact(" + PModule + ",*)");
+			HT.assertz("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Entry) + "," + Kind + "])");
+		}
+		else
+		{
+			vector<nested_conditional_end> New_stack;
+			//New_stack.push_back(PModule);
+		}
+	}
+	else if (!HT.findfact("nested_cond_fact(" + PModule + ",*)"))
+	{
+		HT.assertz("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Entry) + "," + Kind + "])");
+	}
+}
+
+// required a function nested_cond_fact to return its last parameter - list

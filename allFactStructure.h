@@ -2172,13 +2172,65 @@ public:
 	friend vector<int> returnVec(GeneralFact* obj, size_t vec);
 };
 
+class nested_conditional_end
+{
+	int				w{};
+	string			q{}, e{};
+public:
+	nested_conditional_end(const string q1, const int w1, const string e1)
+		: q(q1), w(w1), e(e1) {}
+	nested_conditional_end(const nested_conditional_end& other)
+	{
+		if (this != &other)
+		{
+			this->q = other.q;	this->w = other.w;
+			this->e = other.e;
+		}
+	}
+	~nested_conditional_end()
+	{
+		this->q.clear(); this->w = NULL;
+		this->e.clear();
+	}
+	void operator=(nested_conditional_end& other)
+	{
+		this->q = other.q;	this->w = other.w;
+		this->e = other.e;
+	}
+
+	nested_conditional_end(nested_conditional_end&& other)  noexcept
+		: q{ other.q }, w{ other.w }, e{ other.e } {}
+
+	void operator=(nested_conditional_end&& other)  noexcept
+	{
+		std::swap(q, other.q);	std::swap(w, other.w);
+		std::swap(e, other.e);
+	}
+	bool operator==(nested_conditional_end other)
+	{
+		if (this->q == other.q && this->w == other.w && this->e == other.e)return true;
+		else return false;
+	}
+	friend GeneralFact* makeInstanceOf(string inputline);
+	
+	friend factUnderInspection makeInstanceOfSpecFact(string inputline);
+
+	friend factstar makefactstar(string inputline);
+
+	friend string makeStringOf(GeneralFact* obj);
+
+	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
+
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
+};
+
 //vector
 class nested_cond_fact : public GeneralFact
 {
 	string			q{};
-	vector<int>		w{};
+	vector<nested_conditional_end>		w{};
 public:
-	nested_cond_fact(const string q1, const vector<int> w1)
+	nested_cond_fact(const string q1, const vector<nested_conditional_end> w1)
 		: q(q1), w(w1) {
 		w.shrink_to_fit();
 	}
@@ -4016,10 +4068,9 @@ public:
 
 class nil_node 
 {
-public:
 	int				q{};
 	string			w{};
-
+public:
 	nil_node(const int q1, const string w1)
 		: q(q1), w(w1) {}
 	nil_node(const nil_node& other)
@@ -4050,6 +4101,12 @@ public:
 		if (this->q == other.q && this->w == other.w)return true;
 		else return false;
 	}
+	friend GeneralFact* makeInstanceOf(string inputline);
+
+	friend factUnderInspection makeInstanceOfSpecFact(string inputline);
+
+	friend factstar makefactstar(string inputline);
+
 	friend string makeStringOf(GeneralFact* obj);
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
@@ -6148,3 +6205,4 @@ public:
 
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
+

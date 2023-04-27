@@ -33,8 +33,7 @@ public:
 	/// @return true if dound else false
 	bool findfact(string Line);
 
-	/// @brief looks for fact and returns the posisioned parameter
-	/// @param pos <-- position 
+	/// @brief looks for fact and returns it
 	/// @return the parameter in string form
 	string findandreturn(string Line);
 
@@ -825,15 +824,6 @@ vector<int> returnVec(GeneralFact* obj, size_t vec)
 					}
 					break;
 				}
-			}
-		}
-		break;
-		case 'n':
-		{
-			if ("nested_cond_fact" == ALine)
-			{
-				nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
-				res = ptr->w;
 			}
 		}
 		break;

@@ -10,7 +10,6 @@
 #include <typeinfo>
 #include <functional>
 
-//
 
 using namespace std;
 
@@ -867,7 +866,7 @@ string makeStringOf(GeneralFact* obj)
 	}
 	case 'n':
 	{
-		if ("nested_cond_fact" == ALine)
+	if ("nested_cond_fact" == ALine)
 	{
 	nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
 	ss << "nested_cond_fact(" << ptr->q << co << br;
@@ -877,9 +876,13 @@ string makeStringOf(GeneralFact* obj)
 		prlst = ptr->w.size() - 1;
 		for (int ii = 0; ii < prlst; ++ii) // loop until pre-last element.
 		{
-			ss << ptr->w[ii] << co;
+			ss << ptr->w[ii].q << co;
+			ss << ptr->w[ii].w << co;
+			ss << ptr->w[ii].e << co;
 		}
-		ss << ptr->w.back();
+		ss << ptr->w.back().q << co;
+		ss << ptr->w.back().w << co;
+		ss << ptr->w.back().e;
 	}
 	ss << brcl;
 	}
@@ -1534,6 +1537,7 @@ GeneralFact* makeInstanceOf(string inputline)
 	size_t          pos, brpos;
 	vector<int>				vq, vw, ve, vr, vt, vy;
 	vector<local_object>	vobj;  // for these three specific facts global_declarations, module_local_list_parcs and module_local_list
+	vector<nested_conditional_end> vnce;
 
 	pos = 0;
 	ALine = inputline.substr(0, inputline.find(pa, 0));
@@ -3765,36 +3769,76 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 	}
 	case 'n':
 	{
-		 if (ALine == "nested_cond_fact")
-	{
-	vq.clear();
-	string			q;
-
-	ALine = subl.substr(0, subl.find(co, 0));
-	q = ALine;
-	pos += ALine.length() + 1;
-	subl = inputline.substr(++pos, inputline.length() - pos);
-
-
-	//vector
-	if ((subl.find(brcl, 0)) != 0)
-	{
-		brpos = subl.find(brcl, 0);
-		while (subl.find(co, 0) < brpos)
+		if (ALine == "nested_cond_fact")
 		{
+			vq.clear();
+			string			q, tmpln; //temporarely used to clutch the coma position
+
 			ALine = subl.substr(0, subl.find(co, 0));
-			vq.push_back(stoi(ALine));
-			pos += ALine.length();
+			q = ALine;
+			pos += ALine.length() + 1;
 			subl = inputline.substr(++pos, inputline.length() - pos);
-			brpos -= ALine.length();
-			brpos--;
+
+
+			//vector
+			vector<nested_conditional_end> vnce;
+			nested_conditional_end nce("", 0, "");
+			//
+
+			//vector
+			if ((subl.find(brcl, 0)) != 0)
+			{
+				//reserve till last nested_conditional_end
+				brpos = subl.find(brcl, 0);
+				tmpln = subl.substr(0, subl.rfind(co, subl.npos));
+				tmpln = tmpln.substr(0, tmpln.rfind(co, subl.npos));
+				brpos = tmpln.rfind(co, subl.npos);
+				brpos++;
+				//
+				while (subl.find(co, 0) < brpos)
+				{
+					ALine = subl.substr(0, subl.find(co, 0));
+					nce.q = ALine;
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+					//2
+					ALine = subl.substr(0, subl.find(co, 0));
+					nce.w = stoi(ALine);
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+					//3
+					ALine = subl.substr(0, subl.find(co, 0));
+					nce.e = ALine;
+					pos += ALine.length();
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					brpos -= ALine.length();
+					brpos--;
+
+					vnce.push_back(nce);
+				}
+				//1
+				ALine = subl.substr(0, subl.find(co, 0));
+				nce.q = ALine;
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				//2
+				ALine = subl.substr(0, subl.find(co, 0));
+				nce.w = stoi(ALine);
+				pos += ALine.length();
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				//3
+				ALine = subl.substr(0, subl.find(brcl, 0));
+				nce.e = ALine;
+
+				vnce.push_back(nce);
+			}
+			return new nested_cond_fact(q, vnce);
 		}
-		ALine = subl.substr(0, subl.find(brcl, 0));
-		vq.push_back(stoi(ALine));
-	}
-	return new nested_cond_fact(q, vq);
-	}
-		 else if (ALine == "new_schedule")
+		else if (ALine == "new_schedule")
 		 {
 			 string			q;
 
@@ -9762,8 +9806,10 @@ factstar makefactstar(string inputline)
 	{
 		if (ALine == "nested_cond_fact")
 		{
-			string			q{};
+			string			q{}, tmpln;
 			vector<int>		vq;
+			vector<nested_conditional_end> vnce;
+			nested_conditional_end nce("", 0, "");
 
 			subl = inputline.substr(++pos, inputline.length() - pos);
 
@@ -9784,27 +9830,61 @@ factstar makefactstar(string inputline)
 
 					subl = inputline.substr(++pos, inputline.length() - pos);
 					params++;
+
 					//vector
 					if ((subl.find(brcl, 0)) != 0)
 					{
+						//reserve till last nested_conditional_end
 						brpos = subl.find(brcl, 0);
+						tmpln = subl.substr(0, subl.rfind(co, subl.npos));
+						tmpln = tmpln.substr(0, tmpln.rfind(co, subl.npos));
+						brpos = tmpln.rfind(co, subl.npos);
+						brpos++;
+						//
 						while (subl.find(co, 0) < brpos)
 						{
 							ALine = subl.substr(0, subl.find(co, 0));
-							vq.push_back(stoi(ALine));
+							nce.q = ALine;
 							pos += ALine.length();
+							subl = inputline.substr(++pos, inputline.length() - pos);
 							brpos -= ALine.length();
 							brpos--;
+							//2
+							ALine = subl.substr(0, subl.find(co, 0));
+							nce.w = stoi(ALine);
+							pos += ALine.length();
 							subl = inputline.substr(++pos, inputline.length() - pos);
+							brpos -= ALine.length();
+							brpos--;
+							//3
+							ALine = subl.substr(0, subl.find(co, 0));
+							nce.e = ALine;
+							pos += ALine.length();
+							subl = inputline.substr(++pos, inputline.length() - pos);
+							brpos -= ALine.length();
+							brpos--;
+
+							vnce.push_back(nce);
 						}
-						ALine = subl.substr(0, brpos);
-						vq.push_back(stoi(ALine));
-						pos += ALine.size();
-						pos++;
+						//1
+						ALine = subl.substr(0, subl.find(co, 0));
+						nce.q = ALine;
+						pos += ALine.length();
+						subl = inputline.substr(++pos, inputline.length() - pos);
+						//2
+						ALine = subl.substr(0, subl.find(co, 0));
+						nce.w = stoi(ALine);
+						pos += ALine.length();
+						subl = inputline.substr(++pos, inputline.length() - pos);
+						//3
+						ALine = subl.substr(0, subl.find(brcl, 0));
+						nce.e = ALine;
+
+						vnce.push_back(nce);
 					}
 				}
 			}
-			ptr = new nested_cond_fact(q, vq);
+			ptr = new nested_cond_fact(q, vnce);
 		}
 		else if (ALine == "new_schedule")
 		{
@@ -18605,7 +18685,11 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 		if (ALine == "nested_cond_fact")
 		{
 			vq.clear();
-			string			q{};
+			string			q{},tmpln;
+
+			vector<nested_conditional_end> vnce;
+			nested_conditional_end nce("", 0, "");
+
 			if (inputline != ALine)
 			{
 				subl = inputline.substr(++pos, inputline.length() - pos);
@@ -18624,48 +18708,120 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 				paramsV.resize(paramsV.size() + 1);
+
+
 				if ((subl.find(brcl, 0)) != 0)
 				{
 					//vector
 					params.push_back(1);
+
+					//reserve till last nested_conditional_end
 					brpos = subl.find(brcl, 0);
+					tmpln = subl.substr(0, subl.rfind(co, subl.npos));
+					tmpln = tmpln.substr(0, tmpln.rfind(co, subl.npos));
+					brpos = tmpln.rfind(co, subl.npos);
+					brpos++;
+					//
+
 					while (subl.find(co, 0) < brpos)
 					{
 						if (subl.find(us, 0) != 0)
 						{
 							paramsV[0].push_back(1);
 							ALine = subl.substr(0, subl.find(co, 0));
-							vq.push_back(stoi(ALine));
+							nce.q = ALine;
 							pos += ALine.length();
 							brpos -= ALine.length();
 						}
 						else
 						{
 							paramsV[0].push_back(0);
-							vq.push_back(0);
+							nce.q = "";
 							pos++;
 							brpos--;
 						}
 						brpos--;
 						subl = inputline.substr(++pos, inputline.length() - pos);
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							nce.w = stoi(ALine);
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							nce.w = 0;
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							nce.e = ALine;
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							nce.e = "";
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+
 					}
 					if (subl.find(us, 0) != 0)
 					{
-						ALine = subl.substr(0, brpos);
-						vq.push_back(stoi(ALine));
+						ALine = subl.substr(0, subl.find(co, 0));
+						nce.q = ALine;
+						pos += ALine.length();
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+					else
+					{
+						paramsV[0].push_back(0);
+						nce.q = "";
+						pos++;
+					}
+					if (subl.find(us, 0) != 0)
+					{
+						ALine = subl.substr(0, subl.find(co, 0));
+						nce.w = stoi(ALine);
+						pos += ALine.length();
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
+					else
+					{
+						paramsV[0].push_back(0);
+						nce.w = 0;
+						pos++;
+					}
+					if (subl.find(us, 0) != 0)
+					{
+						ALine = subl.substr(0, subl.find(brcl, 0));
+						nce.e = ALine;
 						paramsV[0].push_back(1);
 						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
-						vq.push_back(0);
+						nce.e = "";
 						pos++;
 					}
+
 				}
 				else params.push_back(0);
 			}
-			ptr = new nested_cond_fact(q, vq);
+			ptr = new nested_cond_fact(q, vnce);
 		}
 		else if (ALine == "new_schedule")
 		{
@@ -25151,8 +25307,14 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 
 					size_t	siz = tcmpV[0].size();
 					for (int i = 0; i < siz; i++)
+					{
 						if (tcmpV[0][i])
-							if (!(ptr->w[i] == ptr2->w[i])) return 0;
+							if (!(ptr->w[i].q == ptr2->w[i].q)) return 0;
+						if (tcmpV[0][i])
+							if (!(ptr->w[i].w == ptr2->w[i].w)) return 0;
+						if (tcmpV[0][i])
+							if (!(ptr->w[i].e == ptr2->w[i].e)) return 0;
+					}
 				}
 			}
 		}
@@ -28143,7 +28305,11 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 					else if (ptr2->w.empty() != ptr->w.empty()) return 0;
 					else if (!(ptr2->w.empty() && ptr->w.empty()))
 						for (int i = 0; i < siz; i++)
-							if (!(ptr->w[i] == ptr2->w[i])) return 0;
+						{
+							if (!(ptr->w[i].q == ptr2->w[i].q)) return 0;
+							if (!(ptr->w[i].w == ptr2->w[i].w)) return 0;
+							if (!(ptr->w[i].e == ptr2->w[i].e)) return 0;
+						}
 				case 1:
 					if (ptr->q != ptr2->q) return 0;
 				}
