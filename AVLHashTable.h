@@ -625,6 +625,415 @@ string returnpar(string inputline, int pospar)
 	return "";
 }
 
+/// @brief search for a vector from a fact and returns it
+/// @param obj target fact
+/// @param vec vector place
+/// @return vector from a fact
+vector<int> returnVec(GeneralFact* obj, size_t vec)
+{
+	vector<int> res;
+	string ALine;
+	ALine = typeid(*obj).name();
+	ALine = ALine.substr(6);
+	string ch = ALine.substr(0, 1);
+	const char* sh = ch.c_str();
+	switch (*sh)
+	{
+		case 'c':
+		{
+			if ("call_stmt" == ALine)
+			{
+				call_stmt* ptr = dynamic_cast<call_stmt*>(obj);
+				res = ptr->r;
+			}
+			else if ("calls_list" == ALine)
+			{
+				calls_list* ptr = dynamic_cast<calls_list*>(obj);
+				res = ptr->r;
+			}
+			else if ("cessor_kind" == ALine)
+			{
+				cessor_kind* ptr = dynamic_cast<cessor_kind*>(obj);
+				res = ptr->u;
+			}
+			else if ("compo_stmt" == ALine)
+			{
+				compo_stmt* ptr = dynamic_cast<compo_stmt*>(obj);
+				res = ptr->r;
+			}
+			else if ("composites_list" == ALine)
+			{
+				composites_list* ptr = dynamic_cast<composites_list*>(obj);
+				res = ptr->e;
+			}
+			else if ("conditional_incomplete" == ALine)
+			{
+				conditional_incomplete* ptr = dynamic_cast<conditional_incomplete*>(obj);
+				switch (vec)
+				{
+					case 1:
+					{
+						res = ptr->t;
+					}
+					break;
+					case 2:
+					{
+						res = ptr->y;
+					}
+					break;
+					case 3:
+					{
+						res = ptr->u;
+					}
+					break;
+					case 4:
+					{
+						res = ptr->i;
+					}
+					break;
+					case 5:
+					{
+						res = ptr->o;
+					}
+					break;
+					case 6:
+					{
+						res = ptr->p;
+					}
+					break;
+				}
+			}
+			else if ("conditional_operations" == ALine)
+			{
+				conditional_operations* ptr = dynamic_cast<conditional_operations*>(obj);
+				switch (vec)
+				{
+					case 1:
+					{
+						res = ptr->t;
+					}
+					break;
+					case 2:
+					{
+						res = ptr->y;
+					}
+					break;
+					case 3:
+					{
+						res = ptr->u;
+					}
+					break;
+					case 4:
+					{
+						res = ptr->i;
+					}
+					break;
+				}
+			}
+		}
+		break;
+		case 'd':
+		{
+			if ("dataflow" == ALine)
+			{
+				dataflow* ptr = dynamic_cast<dataflow*>(obj);
+				res = ptr->q;
+			}
+		}
+		break;
+		case 'e':
+		{
+			if ("end_if" == ALine)
+			{
+				end_if* ptr = dynamic_cast<end_if*>(obj);
+				res = ptr->w;
+			}
+
+		}
+		break;
+		case 'i':
+		{
+			if ("ifthen" == ALine)
+			{
+				ifthen* ptr = dynamic_cast<ifthen*>(obj);
+				switch (vec)
+				{
+					case 1:
+					{
+						res = ptr->q;
+					}
+					break;
+					case 2:
+					{
+						res = ptr->w;
+					}
+					break;
+					case 3:
+					{
+						res = ptr->e;
+					}
+					break;
+				}
+			}
+		}
+		break;
+		case 'j':
+		{
+			if ("jump" == ALine)	//losing align after 15 else if 
+			{
+				jump* ptr = dynamic_cast<jump*>(obj);
+				res = ptr->q;
+			}
+		}
+		break;
+		case 'l':
+		{
+			if ("linear_incomplete_node" == ALine)
+			{
+				linear_incomplete_node* ptr = dynamic_cast<linear_incomplete_node*>(obj);
+				switch (vec)
+				{
+					case 1:
+					{
+						res = ptr->r;
+					}
+					break;
+					case 2:
+					{
+						res = ptr->t;
+					}
+					break;
+				}
+			}
+		}
+		break;
+		case 'm':
+		{
+			if ("mixed_incomplete_state_lists" == ALine)
+			{
+				mixed_incomplete_state_lists* ptr = dynamic_cast<mixed_incomplete_state_lists*>(obj);
+				switch (vec)
+				{
+					case 1:
+					{
+						res = ptr->r;
+					}
+					break;
+					case 2:
+					{
+						res = ptr->t;
+					}
+					break;
+				}
+			}
+		}
+		break;
+		case 'n':
+		{
+			if ("nested_cond_fact" == ALine)
+			{
+				nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
+				res = ptr->w;
+			}
+		}
+		break;
+		case 'o':
+		{
+			if ("op_guards" == ALine)
+			{
+				op_guards* ptr = dynamic_cast<op_guards*>(obj);
+				switch (vec)
+				{
+					case 1:
+					{
+						res = ptr->e;
+					}
+					break;
+					case 2:
+					{
+						res = ptr->r;
+					}
+					break;
+				}
+			}
+		}
+		break;
+		case 'p':
+		{
+			if ("possible_end_if" == ALine)
+			{
+				possible_end_if* ptr = dynamic_cast<possible_end_if*>(obj);
+				res = ptr->w;
+			}
+			else if ("predecessors" == ALine)
+			{
+				predecessors* ptr = dynamic_cast<predecessors*>(obj);
+				res = ptr->e;
+			}
+		}
+		break;
+		case 'r':
+		{
+			if ("raw_dependencies" == ALine)
+			{
+				raw_dependencies* ptr = dynamic_cast<raw_dependencies*>(obj);
+				switch (vec)
+				{
+				case 1:
+				{
+					res = ptr->e;
+				}
+				break;
+				case 2:
+				{
+					res = ptr->r;
+				}
+				break;
+				}
+			}
+			else if ("rec_stmt" == ALine)
+			{
+				rec_stmt* ptr = dynamic_cast<rec_stmt*>(obj);
+				res = ptr->e;
+			}
+			else if ("record_aggregates_list" == ALine)
+			{
+				record_aggregates_list* ptr = dynamic_cast<record_aggregates_list*>(obj);
+				res = ptr->e;
+			}
+			else if ("reentrant_triangle" == ALine)
+			{
+				reentrant_triangle* ptr = dynamic_cast<reentrant_triangle*>(obj);
+				switch (vec)
+				{
+				case 1:
+				{
+					res = ptr->t;
+				}
+				break;
+				case 2:
+				{
+					res = ptr->y;
+				}
+				break;
+				case 3:
+				{
+					res = ptr->u;
+				}
+				break;
+				case 4:
+				{
+					res = ptr->i;
+				}
+				break;
+				case 5:
+				{
+					res = ptr->o;
+				}
+				break;
+				case 6:
+				{
+					res = ptr->p;
+				}
+				break;
+				}
+			}
+			else if ("return_cos" == ALine)
+			{
+				return_cos* ptr = dynamic_cast<return_cos*>(obj);
+				res = ptr->q;
+			}
+		}
+		break;
+		case 's':
+		{
+			if ("state" == ALine)
+			{
+				state* ptr = dynamic_cast<state*>(obj);
+				switch (vec)
+				{
+				case 1:
+				{
+					res = ptr->u;
+				}
+				break;
+				case 2:
+				{
+					res = ptr->i;
+				}
+				break;
+				}
+			}
+			else if ("subprogram_call" == ALine)
+			{
+				subprogram_call* ptr = dynamic_cast<subprogram_call*>(obj);
+				res = ptr->q;
+			}
+		}
+		break;
+		case 'v':
+		{
+			if ("var_guards" == ALine)
+			{
+				var_guards* ptr = dynamic_cast<var_guards*>(obj);
+				switch (vec)
+				{
+				case 1:
+				{
+					res = ptr->e;
+				}
+				break;
+				case 2:
+				{
+					res = ptr->r;
+				}
+				break;
+				}
+			}
+		}
+		break;
+		case 'w':
+		{
+			if ("war_dependencies" == ALine)
+			{
+				war_dependencies* ptr = dynamic_cast<war_dependencies*>(obj);
+				switch (vec)
+				{
+				case 1:
+				{
+					res = ptr->e;
+				}
+				break;
+				case 2:
+				{
+					res = ptr->r;
+				}
+				break;
+				}
+			}
+			else if ("waw_dependencies" == ALine)
+			{
+				waw_dependencies* ptr = dynamic_cast<waw_dependencies*>(obj);
+				switch (vec)
+				{
+				case 1:
+				{
+					res = ptr->e;
+				}
+				break;
+				case 2:
+				{
+					res = ptr->r;
+				}
+				break;
+				}
+			}
+		}
+		break;
+	}
+	return res;
+}
+
 // returns the Value of data_stmt
 string last_from_lo(string inputline)
 {

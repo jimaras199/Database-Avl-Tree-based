@@ -3619,86 +3619,133 @@ string print_custom_statement(string str, string PModule, int var3, string Inten
 	stringstream ss;
 	int Op, Left, Right, Result;
 	string OpString, Rdata, ResData, Right_kind{}, Ldata, REsType, Left_kind{}, Res_kind;
-	if (HT.findfact("prog_stmt("+PModule+","+to_string(var3)+", *)"))
+	vector<int> Rec_list;
+	if (Lang == "vhdl")
 	{
-		Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 4));
-		Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 5));
-		Right = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 6));
-		Result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 7));
-		if (Op < 102)
+		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"))
 		{
-			if (not_a_for_loop(PModule, var3))
+			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 4));
+			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 5));
+			Right = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 6));
+			Result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 7));
+			if (Op < 102)
 			{
-				if (not_a_while_loop(PModule, var3))
+				if (not_a_for_loop(PModule, var3))
 				{
-					if (HT.findfact("op_def(" + to_string(Op) + ",_,\"unop\",_,_,_,_)"))
+					if (not_a_while_loop(PModule, var3))
 					{
-						OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"unop\", _, _, _, _)"), 2);
-						if (OpString == "not")
+						if (HT.findfact("op_def(" + to_string(Op) + ",_,\"unop\",_,_,_,_)"))
+						{
+							OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"unop\", _, _, _, _)"), 2);
+							if (OpString == "not")
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+									{
+										ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+										conv_kind(PModule, Rdata, &Right_kind);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << Rdata << " := NOT " << ResData << "; " << endl;
+									}
+								}
+							}
+							else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+									*Next_intend = Intend;
+									ss << Intend;
+									ss << print_possible_return(PModule, ResData, Rdata, " := ", "vhdl", 0);
+									ss << OpString << " " << Rdata << ";" << endl;
+								}
+							}
+						}
+						else if (HT.findfact("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"))
+						{
+							OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"), 2);
+							if (is_relational_op(OpString))
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+									{
+										Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+										{
+											ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+											REsType = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 4);
+											if (HT.findfact("type_def(" + REsType + ",_,1,_,_,_,_,_,_)"))
+											{
+												conv_kind(PModule, Rdata, &Right_kind);
+												conv_kind(PModule, Ldata, &Left_kind);
+												*Next_intend = Intend;
+												ss << Intend;
+												ss << "IF " << Ldata << " " << OpString << " " << Rdata << " THEN " << ResData << " :='1'; ELSE " <<
+													ResData << " := '0'; END IF; " << endl;
+											}
+										}
+									}
+								}
+							}
+							else if (!is_relational_op(OpString))
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+									{
+										Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+										{
+											ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+											Res_kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 5);
+											conv_kind(PModule, Rdata, &Right_kind);
+											conv_kind(PModule, Ldata, &Left_kind);
+											*Next_intend = Intend;
+											ss << Intend;
+											ss << type_op_triple(PModule, ResData, Ldata, Rdata,
+															 Res_kind, Left_kind, Right_kind,
+															 OpString, " := ", "vhdl") << endl;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 102)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (Right > 0)
 						{
 							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
 							{
 								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
 								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 								{
-									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
-									conv_kind(PModule, Rdata, &Right_kind);
 									*Next_intend = Intend;
 									ss << Intend;
-									ss << Rdata << " := NOT " << ResData << "; " << endl;
+									ss << print_possible_return(PModule, ResData, Rdata, " := ", "vhdl", 0);
+									ss << Rdata << ";" << endl;
 								}
 							}
 						}
-					}
-					else if (HT.findfact("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"))
-					{
-						OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"), 2);
-						if (is_relational_op(OpString))
+						else if (Right < 0)
 						{
-							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+							if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"))
 							{
-								Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
-								{
-									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
-									{
-										ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
-										REsType = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 4);
-										if (HT.findfact("type_def(" + REsType + ",_,1,_,_,_,_,_,_)"))
-										{
-											conv_kind(PModule, Rdata, &Right_kind);
-											conv_kind(PModule, Ldata, &Left_kind);
-											*Next_intend = Intend;
-											ss << Intend;
-											ss << "IF " << Ldata << " " << OpString << " " << Rdata << " THEN " << ResData << " :='1'; ELSE " <<
-												ResData << " := '0'; END IF; " << endl;
-										}
-									}
-								}
-							}
-						}
-						else if (!is_relational_op(OpString))
-						{
-							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
-							{
-								Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
-								{
-									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
-									{
-										ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
-										Res_kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 5);
-										conv_kind(PModule, Rdata, &Right_kind);
-										conv_kind(PModule, Ldata, &Left_kind);
-										*Next_intend = Intend;
-										ss << Intend;
-										ss << type_op_triple(PModule, ResData, Ldata, Rdata,
-														 Res_kind, Left_kind, Right_kind,
-														 OpString, " := ", "vhdl") << endl;
-									}
-								}
+								Rec_list = stoi(returnpar(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"), 2));
+
 							}
 						}
 					}
