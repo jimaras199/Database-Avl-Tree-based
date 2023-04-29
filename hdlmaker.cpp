@@ -321,49 +321,39 @@ int main(int argc, char* argv[])
 		//FUI = makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bol(1))");
 		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))"), &FUI);
 
-		//// (nested_cond_fact) done: makeStringOf, makeInstanceOf
+		//// (nested_cond_fact) done: makeStringOf, makeInstanceOf, makefactstar, makeInstanceOfSpecFact, matchfactsSpec, matchfactsstar
 
 		//cout << makeStringOf(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])")) << endl;
 		//cout << makeStringOf(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",9,\"bzxc\"])")) << endl;
-		
-		makefactstar("nested_cond_fact(*)");
-		makefactstar("nested_cond_fact(\"garlic\",*)");
 		//
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))");
+		//makefactstar("nested_cond_fact(*)");
+		//makefactstar("nested_cond_fact(\"garlic\",*)");
+		//makefactstar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])");
+		//makefactstar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
 		//
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(_))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(_))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(_))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(_))");
-		//
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",_)");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",_)");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",_)");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",_)");
+		//makeInstanceOfSpecFact("nested_cond_fact(_,[])");
+		//makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[])");
+		//makeInstanceOfSpecFact("nested_cond_fact(_,[\"asd\",8,\"zxc\"])");
+		//makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
 		//
 		//factUnderInspection FUI{};
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(_))");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))"), & FUI);
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",_)");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))"), & FUI);
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(0))");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))"), & FUI);
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bol(1))");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))"), &FUI);
+		//FUI = makeInstanceOfSpecFact("nested_cond_fact(_,[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
+		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
+		//FUI = makeInstanceOfSpecFact("nested_cond_fact(\"qe\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
+		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
+		//FUI = makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",128,\"bzxc\"])");
+		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
+		//FUI = makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])");
+		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
 		//
 		//factstar FUI{};
-		//FUI = makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(*))");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))"), &FUI);
-		//FUI = makefactstar("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",*)");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))"), &FUI);
-		//FUI = makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(0))");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))"), &FUI);
-		//FUI = makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bol(1))");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))"), &FUI);
-
+		//FUI = makefactstar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzdaxc\"])");
+		//cout << matchfactsstar(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), &FUI);
+		//FUI = makefactstar("nested_cond_fact(\"garlxic\",*)");
+		//cout << matchfactsstar(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), &FUI);
+		//FUI = makefactstar("nested_cond_fact(*)");
+		//cout << matchfactsstar(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), &FUI);
+		
 	}
 	break;
 	default:

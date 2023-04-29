@@ -18776,10 +18776,11 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 						}
 						brpos--;
 						subl = inputline.substr(++pos, inputline.length() - pos);
-
+						vnce.push_back(nce);
 					}
 					if (subl.find(us, 0) != 0)
 					{
+						paramsV[0].push_back(1);
 						ALine = subl.substr(0, subl.find(co, 0));
 						nce.q = ALine;
 						pos += ALine.length();
@@ -18793,6 +18794,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					}
 					if (subl.find(us, 0) != 0)
 					{
+						paramsV[0].push_back(1);
 						ALine = subl.substr(0, subl.find(co, 0));
 						nce.w = stoi(ALine);
 						pos += ALine.length();
@@ -18806,9 +18808,9 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					}
 					if (subl.find(us, 0) != 0)
 					{
+						paramsV[0].push_back(1);
 						ALine = subl.substr(0, subl.find(brcl, 0));
 						nce.e = ALine;
-						paramsV[0].push_back(1);
 						pos += ALine.size();
 					}
 					else
@@ -18817,7 +18819,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 						nce.e = "";
 						pos++;
 					}
-
+					vnce.push_back(nce);
 				}
 				else params.push_back(0);
 			}
@@ -25302,18 +25304,22 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 				//vector
 				if (tcmp[1])
 				{
-					if (tcmpV[0].size() > ptr->w.size())
+					if ((tcmpV[0].size()/3) > ptr->w.size())
 						return 0;
 
-					size_t	siz = tcmpV[0].size();
-					for (int i = 0; i < siz; i++)
+					size_t	siz = tcmpV[0].size()/3;
+
+					int j = 0;
+
+					for (int i = 0; j < siz; i = +3)
 					{
 						if (tcmpV[0][i])
-							if (!(ptr->w[i].q == ptr2->w[i].q)) return 0;
-						if (tcmpV[0][i])
-							if (!(ptr->w[i].w == ptr2->w[i].w)) return 0;
-						if (tcmpV[0][i])
-							if (!(ptr->w[i].e == ptr2->w[i].e)) return 0;
+							if (!(ptr->w[j].q == ptr2->w[j].q)) return 0;
+						if (tcmpV[0][i+1])
+							if (!(ptr->w[j].w == ptr2->w[j].w)) return 0;
+						if (tcmpV[0][i+2])
+							if (!(ptr->w[j].e == ptr2->w[j].e)) return 0;
+						j++;
 					}
 				}
 			}
