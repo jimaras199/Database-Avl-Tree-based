@@ -1029,6 +1029,23 @@ vector<nested_conditional_end> return_nested_conditional_end(GeneralFact* obj, s
 	vector<nested_conditional_end> res;
 	nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
 	res = ptr->w;
+	return res;
+}
+
+string nce_str(vector< nested_conditional_end> v)
+{
+	string s{};
+	s += br;
+	for (int i = 0; i < v.size()-1; i++)
+	{
+		s += v[i].q + co;
+		s += v[i].w + co;
+		s += v[i].e + co;
+	}
+	s += v.back().q + co;
+	s += v.back().w + co;
+	s += v.back().e + brcl;
+	return s;
 }
 
 // returns the Value of data_stmt

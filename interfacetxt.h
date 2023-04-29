@@ -25315,9 +25315,9 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 					{
 						if (tcmpV[0][i])
 							if (!(ptr->w[j].q == ptr2->w[j].q)) return 0;
-						if (tcmpV[0][i+1])
+						if (tcmpV[0][++i])
 							if (!(ptr->w[j].w == ptr2->w[j].w)) return 0;
-						if (tcmpV[0][i+2])
+						if (tcmpV[0][++++i])
 							if (!(ptr->w[j].e == ptr2->w[j].e)) return 0;
 						j++;
 					}

@@ -2222,6 +2222,8 @@ public:
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
 
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
+
+	friend string nce_str(vector< nested_conditional_end> v);
 };
 
 //vector
