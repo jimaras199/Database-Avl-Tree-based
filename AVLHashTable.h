@@ -1024,6 +1024,13 @@ vector<int> returnVec(GeneralFact* obj, size_t vec)
 	return res;
 }
 
+vector<nested_conditional_end> return_nested_conditional_end(GeneralFact* obj, size_t vec)
+{
+	vector<nested_conditional_end> res;
+	nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);
+	res = ptr->w;
+}
+
 // returns the Value of data_stmt
 string last_from_lo(string inputline)
 {

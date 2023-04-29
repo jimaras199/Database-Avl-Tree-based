@@ -4614,4 +4614,4 @@ void push_cond_end(string PModule, int Entry, string Kind)
 	}
 }
 
-// required a function nested_cond_fact to return its last parameter - list
+// required a function nested_cond_fact to return its last parameter(vector) - list

@@ -2265,7 +2265,7 @@ public:
 
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 	
-	friend vector<int> returnVec(GeneralFact* obj, size_t vec);
+	friend vector<nested_conditional_end> return_nested_conditional_end(GeneralFact* obj, size_t vec);
 };
 
 class top_level_call : public GeneralFact
