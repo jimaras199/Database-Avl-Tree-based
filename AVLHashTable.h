@@ -1024,7 +1024,10 @@ vector<int> returnVec(GeneralFact* obj, size_t vec)
 	return res;
 }
 
-vector<nested_conditional_end> return_nested_conditional_end(GeneralFact* obj, size_t vec)
+/// @brief returns the vector<return_nested_conditional_end> of a nested_cond_fact
+/// @param obj <- nested_cond_fact
+/// @return nested_cond_fact::w (2nd member)
+vector<nested_conditional_end> return_nested_conditional_end(GeneralFact* obj)
 {
 	vector<nested_conditional_end> res;
 	nested_cond_fact* ptr = dynamic_cast<nested_cond_fact*>(obj);

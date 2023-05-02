@@ -59,7 +59,7 @@ string print_local_variable_cond(string PModule, int Dentry, string HDL);
 string write_constant_type(int Type);
 string write_constant_value(int Type, string be, int af, string HDL);
 string print_custom_body(string Module, string PModule, int Oentry, string Intend, string HDL);
-string print_custom_statement(string str, string PModule, int var3, string Intend, string* Next_intend, string Lang);
+string print_custom_statement(string Module, string PModule, int var3, string Intend, string* Next_intend, string Lang);
 string type_op_triple(string Module_name, string Res_name, string Left_name, string Right_name, string Res_kind, string Left_kind, string Right_kind, string Op_string, string Assignment_string, string Hdl);
 string writevhdl(string HDL, string Module_name, string Dname, string Kind);
 string write_hdl_dep_operator_symbol(string Symbol, string HDL);
@@ -70,6 +70,20 @@ string print_custom_record_index_parameter(string PModule, int Parameter, string
 string print_custom_record_index_comma_cond(vector<int> Rec_list, string Kind);
 string print_custom_array_index_parameters(string Module_name, vector<int> Par_list, string HDL);
 string print_custom_array_index_parameter(string PModule, int Parameter, string HDL);
+string print_while_loop_tail_cond(string PModule, int Cond_stmt, int Condition_end, int End_of_loop, string Intend, string* Out_intend, string Lang);
+string write_end_of_loop(string Next_intend, string Lang);
+string print_after_return0(int var1, string var2, string var3);
+string print_after_return1(int var1, string var2);
+string print_after_return2(int var1, string var2);
+string print_after_return3(int var1, string var2, string var3);
+string write_c_star(string Kind);
+string print_after_return4(int var1, string var2, vector<int> var3);
+string print_after_return5(int var1, string var2, vector<int> var3);
+string print_after_return6(int var1, string var2, string var3);
+string print_after_return7(int var1, string var2, string var3, vector<int> var4);
+string print_after_return8(int var1, string var2, string var3, vector<int> var4, string var5);
+string lookahead_prog_entry(string PModule, int Oentry, string In_intend, string* Out_intend);
+string write_nested_cond_fact(string str);
 /////////////////////
 
 bool generate_top(string pathln, string exec, string cmdl);
@@ -110,6 +124,7 @@ void conv_kind(string PModule, string Data, string* Kind);
 bool is_relational_op(string str);
 bool mod_or_rem_operator(string Op_symbol);
 void push_cond_end(string PModule, int Entry, string Kind);
+void pop_cond_end(string PModule);
 
 //determ i=input o=output
 //in language add 16 on page search
@@ -1506,7 +1521,7 @@ string write_global_package(string Module, string str1, string str2)
 			ss << print_custom_functions_cond(Module, "vhdl") << endl;
 		}
 	}
-	return ss.str(); //temporary
+	return ss.str();
 }
 
 string  print_global_constants(int DEntry, string HDL)
@@ -3279,19 +3294,24 @@ string print_custom_function(int int1, string Module, string PModule, string HDL
 {
 	stringstream ss;
 	string Intend0;
-	if (int1 != 0 || (!HT.findfact("custom_block(" + PModule + ")")) && HDL == "vhdl")
+	if (int1 == 1)
 	{
-		if (custom_block(PModule))
+		if (HDL == "vhdl")
 		{
-			ss << print_custom_function_header(1, PModule, "variable", "IS", "vhdl", 0);
-			ss << print_local_variables(PModule, 1, "vhdl", 0);
-			ss << "    BEGIN" << endl;
-			Intend0 = "     ";
-			ss << print_custom_body(Module, PModule, 1, Intend0, "vhdl");
-			ss << "    END " << PModule << ";" << endl << endl;
-
+			if (custom_block(PModule))
+			{
+				ss << print_custom_function_header(1, PModule, "variable", "IS", "vhdl", 0);
+				ss << print_local_variables(PModule, 1, "vhdl", 0);
+				ss << "    BEGIN" << endl;
+				Intend0 = "     ";
+				ss << print_custom_body(Module, PModule, 1, Intend0, "vhdl");
+				ss << "    END " << PModule << ";" << endl << endl;
+			}
 		}
-
+		else if (HDL == "verilog")
+		{
+			//continue
+		}
 	}
 	return ss.str();
 }
@@ -3645,29 +3665,40 @@ string write_constant_value(int Type, string be, int af, string HDL)
 string print_custom_body(string Module, string PModule, int Oentry, string Intend, string HDL)
 {
 	stringstream ss;
-	string Next_intend0;
+	string Next_intend0, Next_intend;
+	int Next_entry;
 	if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Oentry) + ",*)"))
 	{
 		ss << print_custom_statement(Module, PModule, Oentry, Intend, &Next_intend0, HDL);
+		ss << lookahead_prog_entry(PModule, Oentry, Next_intend0, &Next_intend);
+		Next_entry = Oentry + 1;
+		ss << print_custom_body(Module, PModule, Next_entry, Next_intend, HDL);
 	}
 	return ss.str();
 }
 
-string print_custom_statement(string str, string PModule, int var3, string Intend, string* Next_intend, string Lang)
+string print_custom_statement(string Module, string PModule, int var3, string Intend, string* Next_intend, string Lang)
 {
 	stringstream ss;
-	int Op, Left, Right, Result, Previous_of_result, PRop, Jumptoop, Ltype, Offset, Child_type, Ctype, Rtype, Type;
+	int Op, Left, Right, Result, Previous_of_result, PRop, Jumptoop, Ltype, Offset, Child_type, Ctype, Rtype, Type,
+		Called_entry, Next_entry, Target, False_target, End_of_loop, Increment_variable, Start_d, End_d, Cond_result,
+		Cond_type, Cond_size, If_statement, Condition_start, Body_last, Condition_end, ResType, FunctionNameEntry;
+
+	int DoIt = 0; //TEMPORARY
+
 	string OpString, Rdata, ResData, Right_kind{}, Ldata, REsType, Left_kind{}, Res_kind, Index, ArrayName, RecName,
-		Child_type_name, Resdata, Source, Kind;
+		Child_type_name, Resdata, Source, Kind, Res_name, Called_name, Inc_var_name, Cond_name, Next_intend1, Next_intend2,
+		Rkind, ResTypeName, Result_type0, Result_target;
 	vector<int> Rec_list, Par_list, Rec_par_list;
 	if (Lang == "vhdl")
 	{
-		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"))
+		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
 		{
-			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 4));
-			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 5));
-			Right = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 6));
-			Result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ", *)"), 7));
+			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 4));
+			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 5));
+			Right = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 6));
+			Result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 8));
 			if (Op < 102)
 			{
 				if (not_a_for_loop(PModule, var3))
@@ -3836,12 +3867,15 @@ string print_custom_statement(string str, string PModule, int var3, string Inten
 						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
 						{
 							PRop = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2));
-							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							if (PRop != 110)
 							{
-								Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-								push_cond_end(PModule, Result, "END IF");
-								HT.concat(Intend, " ", *Next_intend);
-								ss << Intend << "IF " << Rdata << " = '1' THEN " << endl;
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
+									HT.concat(Intend, " ", *Next_intend);
+									ss << Intend << "IF " << Rdata << " = '1' THEN " << endl;
+								}
 							}
 						}
 						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
@@ -4053,7 +4087,7 @@ string print_custom_statement(string str, string PModule, int var3, string Inten
 								{
 									if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)"))
 									{
-										Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)")), 1);
+										Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)")), 3);
 										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*),  "))
 										{
 											*Next_intend = Intend;
@@ -4070,8 +4104,1155 @@ string print_custom_statement(string str, string PModule, int var3, string Inten
 					}
 				}
 			}
+			else if (Op == 109 && Intend == *Next_intend)
+			{
+				if (Result > 0)
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+					{
+						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+						if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
+						{
+							Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
+							Par_list = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)")), 4);
+							ss << print_custom_record_index_parameters("", PModule, Par_list, "constants");
+							if (HT.findfact("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"))
+							{
+								Called_name = stoi(returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 3));
+								ss << Intend;
+								ss << Called_name << "(";
+								ss << print_custom_record_index_parameters(Module, PModule, Par_list, "function");
+								ss << ", " << Res_name;
+								ss << ");" << endl;
+							}
+						}
+					}
+				}
+				else if (Result == 0)
+				{
+					if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
+					{
+						Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
+						Par_list = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)")), 4);
+						ss << print_custom_record_index_parameters("", PModule, Par_list, "constants");
+						if (HT.findfact("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"))
+						{
+							Called_name = stoi(returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 3));
+							ss << Intend << Called_name << "(";
+							ss << print_custom_record_index_parameters(Module, PModule, Par_list, "function");
+							ss << ");" << endl;
+						}
+					}
+				}
+			}
+			else if (Op == 110)
+			{
+				if (Result >= Next_entry)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"ELSE\",_,_,_])"))
+							{
+								string Out_intend;
+								pop_cond_end(PModule);
+								HT.concat(Out_intend, " ", Intend); //find in prologue 13187 and ask what is happening
+								ss << Out_intend << "ELSE " << endl;
+								push_cond_end(PModule, Result, "END IF");
+								HT.concat(Out_intend, " ", *Next_intend);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
+		{
+			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
+			if (Target < var3)
+			{
+				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+					{
+						pop_cond_end(PModule);
+						HT.concat(*Next_intend, " ", Intend);
+						ss << Next_intend << "END LOOP;" << endl;
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
+		{
+			Cond_result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 6));
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 7));
+			if (HT.findfact("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 5));
+				Increment_variable = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 8));
+				Start_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 9));
+				End_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 10));
+				if (False_target == End_of_loop + 1)
+				{
+					if(HT.findfact("data_stmt("+PModule+",_,"+ to_string(Increment_variable)+",_,\"var\",sym(_))"))
+					{
+						Inc_var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"), 2);
+						push_cond_end(PModule, False_target, "END LOOP");
+						ss << Intend << "FOR " << Inc_var_name << " IN ";
+						ss << type_value(PModule, Start_d, "vhdl");
+						ss << " TO ";
+						ss << type_value(PModule, End_d, "vhdl");
+						ss << " LOOP " << endl;
+						HT.concat(Intend, " ", *Next_intend);
+					}
+				}
+			}
+			else if (HT.findfact("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"), 5));
+				if (HT.findfact("data_stmt("+PModule+",_,"+to_string(Cond_result)+",_,_,_)"))
+				{
+					Cond_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 2);
+					Cond_type = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 4));
+					if (HT.findfact("type_def(" + to_string(Cond_type) + ",*)"))
+					{
+						Cond_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Cond_type) + ",*)"), 3));
+						if (Cond_size == 1)
+						{
+							if (False_target == End_of_loop + 1)
+							{
+								push_cond_end(PModule, False_target, "END LOOP");
+								ss << Intend << "WHILE (" << Cond_name << "='1') LOOP " << endl;
+								HT.concat(Intend, " ", *Next_intend);
+							}
+						}
+						else if (Cond_size > 1)
+						{
+							if (False_target == End_of_loop + 1)
+							{
+								push_cond_end(PModule, False_target, "END LOOP");
+								ss << Intend << "WHILE (" << Cond_name << "(0)='1') LOOP " << endl;
+								HT.concat(Intend, " ", *Next_intend);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"))
+		{
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 8));
+			if (False_target < var3)
+			{
+				if (HT.findfact("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"))
+				{
+					If_statement = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 3));
+					Condition_start = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 4));
+					Body_last = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 7));
+					if (var3 == Body_last + 1)
+					{
+						Condition_end = If_statement - 1;
+						if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+						{
+							pop_cond_end(PModule);
+							print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "vhdl");
+						}
+					}
+				}
+			}
 		}
 	}
+	if (Lang == "verilog")
+	{
+		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
+		{
+			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 4));
+			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 5));
+			Right = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 6));
+			Result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 8));
+			if (Op < 102)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (HT.findfact("op_def(" + to_string(Op) + ",_,\"unop\",_,_,_,_)"))
+						{
+							OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"unop\", _, _, _, _)"), 2);
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+
+									*Next_intend = Intend;
+									ss << Intend;
+									ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", 0);
+									ss << OpString << " " << Rdata << ";" << endl;
+								}
+							}
+						}
+						else if (HT.findfact("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"))
+						{
+							OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"), 2);
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+							{
+								Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+									{
+										ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+										Res_kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 5);
+										conv_kind(PModule, Rdata, &Right_kind);
+										conv_kind(PModule, Ldata, &Left_kind);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << type_op_triple(PModule, ResData, Ldata, Rdata, Res_kind, Left_kind, Right_kind, OpString, " = ", "verilog") << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 102)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (Right > 0)
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2));
+									*Next_intend = Intend;
+									ss << Intend;
+									ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", 0);
+									ss << Rdata << ";" << endl;
+								}
+							}
+						}
+						else if (Right < 0)
+						{
+							if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"))
+							{
+								Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)")), 1);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+									{
+										Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+										*Next_intend = Intend;
+										ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", 0);
+										ss << " (";
+										ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
+										ss << ");" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 103 || Op == 104 || Op == 105)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+						{
+							Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+							{
+								Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+								*Next_intend = Intend;
+								if (Op == 105)
+									ss << Intend << Rdata << " := " << Ldata << " - " << Right << ";" << endl;
+								else
+									ss << Intend << Rdata << " := " << Ldata << " + " << Right << ";" << endl;
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 106)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						Previous_of_result = Result - 1;
+						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
+						{
+							PRop = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2));
+							if (PRop != 110)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
+									HT.concat(Intend, " ", Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", Next_intend2);
+									ss << Next_intend2 << "begin" << endl;
+									HT.concat(Next_intend2, " ", *Next_intend);
+								}
+							}
+						}
+						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
+						{
+							Jumptoop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"), 7));
+							if (Jumptoop < Previous_of_result)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
+									HT.concat(Intend, " ", Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", Next_intend2);
+									ss << Next_intend2 << "begin" << endl;
+									HT.concat(Next_intend2, " ", *Next_intend);
+								}
+							}
+							else if (Jumptoop > Previous_of_result)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "ELSE");
+									HT.concat(Intend, " ", Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", Next_intend2);
+									ss << Next_intend2 << "begin" << endl;
+									HT.concat(Next_intend2, " ", *Next_intend);
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 107)
+			{
+				if (Right > 0)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+									{
+										Resdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << print_possible_return(PModule, ResData, ArrayName, " := ", "verilog", 0);
+										ss << ArrayName << "[" << Index << "];" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (Right < 0)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("compo_stmt(" + PModule + "," + to_string(Right) + ",_)"))
+							{
+								Par_list = returnVec(makeInstanceOf(HT.findandreturn("compo_stmt(" + PModule + "," + to_string(Right) + ",_)")), 1);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+									{
+										Resdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << print_possible_return(PModule, ResData, ArrayName, " = ", "verilog", 0);
+										ss << ArrayName;
+										ss << print_custom_array_index_parameters(PModule, Par_list, "verilog");
+										ss << ";" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 108)
+			{
+				if (Right > 0)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*),  "))
+									{
+										*Next_intend = Intend;
+										ss << Intend << ArrayName << "[" << Index << "] = " << Source << ";" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (Right < 0)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("compo_stmt(" + PModule + "," + to_string(Right) + ",*)"))
+							{
+								Par_list = returnVec(makeInstanceOf(HT.findandreturn("compo_stmt(" + PModule + "," + to_string(Right) + ",*)")), 1);
+								if (Left > 0)
+								{
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",*)"))
+									{
+										Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",*)"), 2);
+										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*),  "))
+										{
+											*Next_intend = Intend;
+											ss << Intend << ArrayName << "";
+											ss << print_custom_array_index_parameters(PModule, Par_list, "verilog");
+											ss << " = " << Source << ";" << endl;
+										}
+									}
+								}
+								else if (Left < 0)
+								{
+									if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)"))
+									{
+										Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)")), 3);
+										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*),  "))
+										{
+											*Next_intend = Intend;
+											ss << Intend << ArrayName << "";
+											ss << print_custom_array_index_parameters(PModule, Par_list, "verilog");
+											ss << " = (";
+											ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
+											ss << ");" << endl;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 109 && Intend == *Next_intend)
+			{
+				if (Result > 0)
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+					{
+						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+						if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
+						{
+							Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
+							Par_list = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)")), 4);
+							if (HT.findfact("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"))
+							{
+								Called_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+								ss << Intend;
+								ss << Called_name << "(";
+								ss << print_custom_record_index_parameters("", PModule, Par_list, "function");
+								ss << ", " << Res_name;
+								ss << ");" << endl;
+							}
+						}
+					}
+				}
+				else if (Result == 0)
+				{
+					if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
+					{
+						Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
+						Par_list = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)")), 4);
+						if (HT.findfact("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"))
+						{
+							Called_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+							ss << Intend << Called_name << "(";
+							ss << print_custom_record_index_parameters("", PModule, Par_list, "function");
+							ss << ");" << endl;
+						}
+					}
+				}
+			}
+			else if (Op == 110)
+			{
+				if (Result >= Next_entry)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"ELSE\",_,_,_])"))
+							{
+								string Out_intend, Out_intend1;
+								pop_cond_end(PModule);
+								ss << Intend << "end" << endl;
+								HT.concat(Out_intend1, " ", Intend);
+								ss << Out_intend1 << "else " << endl;
+								HT.concat(Out_intend1, " ", Out_intend);
+								ss << Out_intend << "begin " << endl;
+								push_cond_end(PModule, Target, "END IF");
+								HT.concat(Out_intend, " ", *Next_intend);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
+		{
+			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
+			if (Target < var3)
+			{
+				if (HT.findfact("for_loop(_,"+PModule+",_,_,"+to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+					{
+						pop_cond_end(PModule);
+						HT.concat(*Next_intend, " ", Intend);
+						ss << Next_intend << "end;" << endl;
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
+		{
+			Cond_result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 6));
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 7));
+			if (HT.findfact("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 5));
+				Increment_variable = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 8));
+				Start_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 9));
+				End_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 10));
+				if (False_target == End_of_loop + 1)
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"))
+					{
+						Inc_var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"), 2);
+						push_cond_end(PModule, False_target, "END LOOP");
+						ss << Intend << " for(" << Inc_var_name << "=";
+						ss << type_value(PModule, Start_d, "verilog");
+						ss << ";" << Inc_var_name << "<=";
+						ss << type_value(PModule, End_d, "verilog");
+						ss << ";" << Inc_var_name << "=" << Inc_var_name << "+1)" << endl;
+						HT.concat(Intend, " ", Next_intend1);
+						ss << Next_intend1 << " begin" << endl;
+						HT.concat(Next_intend1, " ", *Next_intend);
+					}
+				}
+			}
+			else if (HT.findfact("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"), 5));
+				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"))
+				{
+					Cond_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 2);
+					if (False_target == End_of_loop + 1)
+					{
+						push_cond_end(PModule, False_target, "END LOOP");
+						ss << Intend << " while (" << Cond_name << ") " << endl;
+						HT.concat(Intend, " ", Next_intend1);
+						ss << Next_intend1 << " begin" << endl;
+						HT.concat(Next_intend1, " ", *Next_intend);
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"))
+		{
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 8));
+			if (False_target < var3)
+			{
+				if (HT.findfact("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"))
+				{
+					If_statement = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 3));
+					Condition_start = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 4));
+					Body_last = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 7));
+					if (var3 == Body_last + 1)
+					{
+						if (End_of_loop == Body_last + 1)
+						{
+							Condition_end = If_statement - 1;
+							if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+							{
+								pop_cond_end(PModule);
+								print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "verilog");
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if (Lang == "c")
+	{
+		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
+		{
+			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 4));
+			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 5));
+			Right = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 6));
+			Result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 8));
+			if (Op < 102)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (HT.findfact("op_def(" + to_string(Op) + ",\"abs\",\"unop\",_,_,_,_)"))
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+									*Next_intend = Intend;
+									ss << Intend;
+									ss << print_possible_return(PModule, ResData, Rdata, " = ", "c", &DoIt);
+									ss << print_after_return2(DoIt, Rdata);
+									ss << ";" << endl;
+								}
+							}
+						}
+						else if (HT.findfact("op_def("+to_string(Op)+",\"not\",\"unop\",_,_,_,_)") || HT.findfact("op_def(" + to_string(Op) + ",\"abs\",\"unop\",_,_,_,_)"))
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+									*Next_intend = Intend;
+									ss << Intend;
+									ss << print_possible_return(PModule, ResData, Rdata, " = ", "c", &DoIt);
+									ss << print_after_return1(DoIt, Rdata);
+									ss << ";" << endl;
+								}
+							}
+						}
+						else if (HT.findfact("op_def(" + to_string(Op) + ",_,\"unop\",_,_,_,_)"))
+						{
+							OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"unop\", _, _, _, _)"), 2);
+							if (OpString != "not")
+							{
+								if (OpString != "abs")
+								{
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+									{
+										Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+										{
+											ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+											*Next_intend = Intend;
+											ss << Intend;
+											ss << print_possible_return(PModule, ResData, Rdata, " = ", "c", &DoIt);
+											ss << print_after_return0(DoIt, OpString, Rdata);
+											ss << ";" << endl;
+										}
+									}
+								}
+							}
+						}
+						else if (HT.findfact("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"))
+						{
+							OpString = returnpar(HT.findandreturn("op_def(" + to_string(Op) + ",_,\"binop\",_,_,_,_)"), 2);
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+							{
+								Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+									{
+										ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+										Res_kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 5);
+										conv_kind(PModule, Rdata, &Right_kind);
+										conv_kind(PModule, Ldata, &Left_kind);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << type_op_triple(PModule, ResData, Ldata, Rdata, Res_kind, Left_kind, Right_kind, OpString, " = ", "c") << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 102)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (Right > 0)
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
+								Rkind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 5);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2));
+									*Next_intend = Intend;
+									ss << Intend;
+									ss << print_possible_return(PModule, ResData, Rdata, " = ", "c", &DoIt);
+									ss << print_after_return3(DoIt, Rkind, Rdata);
+									ss << ";" << endl;
+								}
+							}
+						}
+						else if (Right < 0)
+						{
+							if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"))
+							{
+								Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)")), 3);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+								{
+									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+									ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 4));
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+									{
+										Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+										if (HT.findfact("type_def(" + to_string(ResType) + ",_,_,_,_,\"record_t\",_,_,_)"))
+										{
+											ResTypeName = returnpar(HT.findandreturn("type_def(" + to_string(ResType) + ",_,_,_,_,\"record_t\",_,_,_)"), 2);
+											*Next_intend = Intend;
+											ss << Intend;
+											HT.concat(ResTypeName, " ", Result_type0);
+											HT.concat(Result_type0, ResData, Result_target);
+											ss << print_possible_return(PModule, Result_target, Ldata, " = ", "c", &DoIt);
+											ss << print_after_return4(DoIt, PModule, Rec_list);
+											ss << ";" << endl;
+										}
+										else if (HT.findfact("type_def(" + to_string(ResType) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+										{
+											ResTypeName = returnpar(HT.findandreturn("type_def(" + to_string(ResType) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"), 2);
+											*Next_intend = Intend;
+											ss << Intend;
+											HT.concat(ResTypeName, " ", Result_type0);
+											HT.concat(Result_type0, ResData, Result_target);
+											ss << print_possible_return(PModule, Result_target, Ldata, " = ", "c", &DoIt);
+											ss << print_after_return5(DoIt, PModule, Rec_list);
+											ss << ";" << endl;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 103 || Op == 104 || Op == 105)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+						{
+							Ldata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+							{
+								Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+								*Next_intend = Intend;
+								if (Op == 105)
+									ss << Intend << Rdata << " = " << Ldata << " - " << Right << ";" << endl;
+								else
+									ss << Intend << Rdata << " = " << Ldata << " + " << Right << ";" << endl;
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 106)
+			{
+				if (not_a_for_loop(PModule, var3))
+				{
+					if (not_a_while_loop(PModule, var3))
+					{
+						Previous_of_result = Result - 1;
+						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
+						{
+							PRop = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2));
+							if (PRop != 110)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
+									HT.concat(Intend, " ", Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", Next_intend2);
+									ss << Next_intend2 << "{" << endl;
+									HT.concat(Next_intend2, " ", *Next_intend);
+								}
+							}
+						}
+						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
+						{
+							Jumptoop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"), 7));
+							if (Jumptoop < Previous_of_result)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
+									HT.concat(Intend, " ", Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", Next_intend2);
+									ss << Next_intend2 << "{" << endl;
+									HT.concat(Next_intend2, " ", *Next_intend);
+								}
+							}
+							else if (Jumptoop > Previous_of_result)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "ELSE");
+									HT.concat(Intend, " ", Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", Next_intend2);
+									ss << Next_intend2 << "{" << endl;
+									HT.concat(Next_intend2, " ", *Next_intend);
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 107)
+			{
+				if (Right > 0)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+									{
+										Resdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << print_possible_return(PModule, ResData, ArrayName, " = ", "c", &DoIt);
+										print_after_return6(DoIt, ArrayName, Index);
+										ss << ";" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (Right < 0)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("compo_stmt(" + PModule + "," + to_string(Right) + ",_)"))
+							{
+								Par_list = returnVec(makeInstanceOf(HT.findandreturn("compo_stmt(" + PModule + "," + to_string(Right) + ",_)")), 1);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+									{
+										Resdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+										*Next_intend = Intend;
+										ss << Intend;
+										ss << print_possible_return(PModule, ResData, ArrayName, " = ", "c", &DoIt);
+										ss << print_after_return7(DoIt, ArrayName, PModule, Par_list);
+										ss << ";" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 108)
+			{
+				if (Right > 0)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*),  "))
+									{
+										if (!HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",_)"))
+										{
+											*Next_intend = Intend;
+											ss << Intend << "(* " << ArrayName << ")[" << Index << "] = " << Source << ";" << endl;
+										}
+										else if (HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",_)"))
+										{
+											FunctionNameEntry = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",_)"), 3));
+											if (HT.findfact("prog_stmt(" + PModule + ",_,0,102,0," + to_string(Result) + "," + to_string(FunctionNameEntry) + ",_)"))
+											{
+												*Next_intend = Intend;
+												ss << Intend << " " << ArrayName << "[" << Index << "] = " << Source << ";" << endl;
+											}
+											else
+											{
+												*Next_intend = Intend;													
+												ss << Intend << "(* " << ArrayName << ")[" << Index << "] = " << Source << ";" << endl;
+											}
+										}
+									}
+								}
+								else if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
+								{
+									if (Left < 0)
+									{
+										if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
+										{
+											Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)")), 3);
+											*Next_intend = Intend;
+											ss << Intend << ArrayName << "[" << Index << "] = ";
+											ss << " {";
+											ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
+											ss << "};" << endl;
+										}
+									}
+								}
+								else if (Left < 0)
+								{
+									if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)"))
+									{
+										Rec_par_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)")), 1);
+										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
+										{
+											ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 4));
+											if (HT.findfact("type_def("+to_string(ResType)+","+ResTypeName+",_,_,_,\"record_t\",_,_,_)"))
+											{
+												*Next_intend = Intend;
+												HT.concat(ResTypeName, " ", Result_type0);
+												HT.concat(Result_type0, ArrayName, Result_target);
+												ss << Intend << Result_target << " ";
+												ss << print_custom_array_index_parameters(PModule, Par_list, "verilog");
+												ss << " = ";
+												ss << " {";
+												ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
+												ss << "};" << endl;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Op == 109 && Intend == *Next_intend)
+			{
+				if (Result > 0)
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+					{
+						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+						if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
+						{
+							Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
+							Par_list = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)")), 4);
+							if (HT.findfact("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"))
+							{
+								Called_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+								ss << Intend;
+								ss << print_possible_return(PModule, Res_name, Called_name, " = ", "c", &DoIt);
+								ss << print_after_return8(DoIt, Called_name, PModule, Par_list, Res_name);
+								ss << ";" << endl;
+							}
+						}
+					}
+				}
+				else if (Result == 0)
+				{
+					if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
+					{
+						Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
+						Par_list = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)")), 4);
+						if (HT.findfact("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"))
+						{
+							Called_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+							ss << Intend << Called_name << "(";
+							ss << print_custom_record_index_parameters("", PModule, Par_list, "function");
+							ss << ");" << endl;
+						}
+					}
+				}
+			}
+			else if (Op == 110)
+			{
+				if (Result >= Next_entry)
+				{
+					if (not_a_for_loop(PModule, var3))
+					{
+						if (not_a_while_loop(PModule, var3))
+						{
+							if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"ELSE\",_,_,_])"))
+							{
+								string Out_intend, Out_intend1;
+								pop_cond_end(PModule);
+								ss << Intend << "}" << endl;
+								HT.concat(Out_intend1, " ", Intend);
+								ss << Out_intend1 << "else " << endl;
+								HT.concat(Out_intend1, " ", Out_intend);
+								ss << Out_intend << "{ " << endl;
+								push_cond_end(PModule, Target, "END IF");
+								HT.concat(Out_intend, " ", Intend);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
+		{
+			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
+			if (Target < var3)
+			{
+				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+					{
+						pop_cond_end(PModule);
+						HT.concat(*Next_intend, " ", Intend);
+						ss << Next_intend << "}" << endl;
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
+		{
+			Cond_result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 6));
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 7));
+			if (HT.findfact("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 5));
+				Increment_variable = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 8));
+				Start_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 9));
+				End_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 10));
+				if (False_target == End_of_loop + 1)
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(*))"))
+					{
+						Inc_var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(*))"), 2);
+						push_cond_end(PModule, False_target, "END LOOP");
+						ss << Intend << " for(" << Inc_var_name << "=";
+						ss << type_value(PModule, Start_d, "verilog");
+						ss << ";" << Inc_var_name << "<=";
+						ss << type_value(PModule, End_d, "verilog");
+						ss << ";" << Inc_var_name << "=" << Inc_var_name << "+1)" << endl;
+						HT.concat(Intend, " ", Next_intend1);
+						ss << Next_intend1 << " {" << endl;
+						HT.concat(Next_intend1, " ", *Next_intend);
+					}
+				}
+			}
+			else if (HT.findfact("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"), 5));
+				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"))
+				{
+					Cond_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 2);
+					if (False_target == End_of_loop + 1)
+					{
+						push_cond_end(PModule, False_target, "END LOOP");
+						ss << Intend << " while (" << Cond_name << ") " << endl;
+						HT.concat(Intend, " ", Next_intend1);
+						ss << Next_intend1 << " {" << endl;
+						HT.concat(Next_intend1, " ", *Next_intend);
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"))
+		{
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 8));
+			if (False_target < var3)
+			{
+				if (HT.findfact("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"))
+				{
+					If_statement = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 3));
+					Condition_start = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 4));
+					Body_last = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_," + to_string(var3) + ",_,_)"), 7));
+					if (Condition_start < If_statement)
+					{
+						if (var3 == Body_last + 1)
+						{
+							if (End_of_loop == Body_last + 1)
+							{
+								Condition_end = If_statement - 1;
+								if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+								{
+									pop_cond_end(PModule);
+									print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "c");
+								}
+							}
+						}
+					}
+					else if (Condition_start == If_statement)
+					{
+						HT.concat(*Next_intend, " ", Intend);
+							ss <<write_end_of_loop(*Next_intend, Lang) << endl;
+					}
+				}
+			}
+		}
+	}
+
 	return ss.str();
 }
 
@@ -4824,7 +6005,7 @@ void push_cond_end(string PModule, int Entry, string Kind)
 	vector<nested_conditional_end> Org_stack;
 	if (HT.findfact("nested_cond_fact(" + PModule + ",*)"))
 	{
-		Org_stack = return_nested_conditional_end(makeInstanceOf(HT.findandreturn("nested_cond_fact(" + PModule + ",*)")), 1);
+		Org_stack = return_nested_conditional_end(makeInstanceOf(HT.findandreturn("nested_cond_fact(" + PModule + ",*)")));
 		if (!Org_stack.empty())
 		{
 			HT.retractall("nested_cond_fact(" + PModule + ",*)");
@@ -4870,6 +6051,230 @@ string print_custom_array_index_parameter(string PModule, int Parameter, string 
 			ss << "(CONV_INTEGER(" << Par_name << "))";
 		else if (HDL == "verilog")
 			ss << "[" << Par_name << "]";
+	}
+	return ss.str();
+}
+
+void pop_cond_end(string PModule)
+{
+	vector<nested_conditional_end> Tstack;
+	if (HT.findfact("nested_cond_fact(" + PModule + ",*)"))
+	{
+		Tstack = return_nested_conditional_end(makeInstanceOf(HT.findandreturn("nested_cond_fact(" + PModule + ",*)")));
+		if (!Tstack.empty())
+		{
+			HT.retractall("nested_cond_fact(" + PModule + ",*)");
+			HT.assertz("nested_cond_fact(" + PModule + "," + nce_str(Tstack) + ")");
+		}
+	}
+}
+
+string print_while_loop_tail_cond(string PModule, int Cond_stmt, int Condition_end, int End_of_loop, string Intend, string* Out_intend, string Lang)
+{
+	stringstream ss;
+	int If_then_stmt, Next_cond_stmt;
+	if (Cond_stmt == Condition_end)
+	{
+		If_then_stmt = Cond_stmt + 1;
+		if (HT.findfact("while_loop(_," + PModule + "," + to_string(If_then_stmt) + ",_,_,_,_)"))
+		{
+			ss << print_custom_statement("", PModule, Cond_stmt, Intend, Out_intend, Lang);
+			ss << write_end_of_loop(*Out_intend, Lang) << endl;
+		}
+	}
+	else if (Cond_stmt == End_of_loop)
+	{
+		If_then_stmt = Condition_end + 1;
+		if (HT.findfact("while_loop(_," + PModule + "," + to_string(If_then_stmt) + ",_,_,_,_)"))
+		{
+			HT.concat(*Out_intend, " ", Intend);
+			ss << write_end_of_loop(*Out_intend, Lang) << endl;
+		}
+	}
+	else if (Cond_stmt < End_of_loop)
+	{
+		if (Cond_stmt < Condition_end)
+		{
+			If_then_stmt = Condition_end + 1;
+			if (HT.findfact("while_loop(_," + PModule + "," + to_string(If_then_stmt) + ",_,_,_,_)"))
+			{
+				ss << print_custom_statement("", PModule, Cond_stmt, Intend, Out_intend, Lang);
+				Next_cond_stmt = Cond_stmt + 1;
+				print_while_loop_tail_cond(PModule, Next_cond_stmt, Condition_end, End_of_loop, *Out_intend, Out_intend, Lang);
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_end_of_loop(string Next_intend, string Lang)
+{
+	stringstream ss;
+	if (Lang == "vhdl")
+		ss << Next_intend << "END LOOP;";
+	else if (Lang == "verilog")
+		ss << Next_intend << "end;";
+	else if (Lang == "c")
+		ss << Next_intend << "}";
+	ss.str();
+}
+
+string print_after_return0(int var1, string var2, string var3)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << var2 << " " << var3;
+	}
+	return ss.str();
+}
+
+string print_after_return1(int var1, string var2)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << "! " << var2;
+	}
+	return ss.str();
+}
+
+string print_after_return2(int var1, string var2)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << "abs( " << var2;
+	}
+	return ss.str();
+}
+
+string print_after_return3(int var1, string var2, string var3)
+{
+	stringstream ss;
+	if(var1 == 1)
+	{
+		ss << write_c_star(var2);
+		ss << var3;
+	}
+	return ss.str();
+}
+
+string write_c_star(string Kind)
+{
+	stringstream ss;
+	if (Kind == "par_out" || Kind == "par_inout")
+		ss << "*";
+	return ss.str();
+}
+
+string print_after_return4(int var1, string var2, vector<int> var3)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << " {";
+		ss << print_custom_record_index_parameters("", var2, var3, "record");
+		ss << "}";
+	}
+	return ss.str();
+}
+
+string print_after_return5(int var1, string var2, vector<int> var3)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << " {";
+		ss << print_custom_record_index_parameters("", var2, var3, "function");
+		ss << "}";
+	}
+	return ss.str();
+}
+
+string print_after_return6(int var1, string var2, string var3)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << "(* " << var2 << ")[" << var3 << "]";
+	}
+	return ss.str();
+}
+
+string print_after_return7(int var1, string var2, string var3, vector<int> var4)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << "(* " << var2 << ")";
+		ss << print_custom_array_index_parameters(var3, var4, "verilog");
+		ss << ";";
+	}
+	return ss.str();
+}
+
+string print_after_return8(int var1, string var2, string var3, vector<int> var4, string var5)
+{
+	stringstream ss;
+	if (var1 == 1)
+	{
+		ss << var2 << "(";
+		ss << print_custom_record_index_parameters("", var3, var4, "function");
+		ss << ")";
+	}
+	return ss.str();
+}
+
+string lookahead_prog_entry(string PModule, int Oentry, string In_intend, string* Out_intend)
+{
+	stringstream ss;
+	vector<nested_conditional_end> nce;
+	int Next_entry, Top_target;
+	string Kind, Next_intend;
+	if (HT.findfact("nested_cond_fact(" + PModule + ",*)"))
+	{
+		nce = return_nested_conditional_end(makeInstanceOf(HT.findandreturn("nested_cond_fact(" + PModule + ",*)")));
+		if (!nce.empty())
+		{
+			if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Oentry) + ",*)"))
+			{
+				Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Oentry) + ",*)"), 8));
+				if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + ",_,_])"))
+				{
+					Top_target = stoi(returnpar(HT.findandreturn("nested_cond_fact(" + PModule + ",[" + PModule + ",_,_])"), 3));
+					Kind = returnpar(HT.findandreturn("nested_cond_fact(" + PModule + ",[" + PModule + ",_,_])"), 4);
+					if (Next_entry != Top_target)
+					{
+						pop_cond_end(PModule);
+						HT.concat(Next_intend, " ", In_intend);
+						ss << Next_intend;
+						ss << write_nested_cond_fact(Kind) << endl;	
+						ss << lookahead_prog_entry(PModule, Oentry, Next_intend, Out_intend);
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_nested_cond_fact(string str)
+{
+	stringstream ss;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (str == "END IF")
+			ss << "end if;";
+		else if (str == "END LOOP")
+			ss << "end loop;";
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (str == "END IF")
+			ss << "end;";
+		else if (str == "END LOOP")
+			ss << "end;";
 	}
 	return ss.str();
 }
