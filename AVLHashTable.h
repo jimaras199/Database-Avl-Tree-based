@@ -551,9 +551,9 @@ string returnpar(string inputline, int pospar)
 	{
 		if (subl.find(br, 0) == 0)
 			subl = inputline.substr(++pos, inputline.length() - pos);
-			ALine = subl.substr(0, subl.rfind(pacl, 0));
-			if(pospar == 1)
-				return ALine;
+		ALine = subl.substr(0, subl.rfind(pacl, 0));
+		if (pospar == 1)
+			return ALine;
 		if (subl.find(us, 0) == 0)
 		{
 			++pos;
@@ -616,11 +616,16 @@ string returnpar(string inputline, int pospar)
 	} while (subl.find(co, 0) != subl.npos);
 	if (subl.find(br, 0) == 0)
 		subl = inputline.substr(++pos, inputline.length() - pos);
-		ALine = subl.substr(0, subl.find(brcl, 0));
-		if (pospar == index)
-			return ALine;
-	if (subl.find(us, 0) == 0)
-		++pos;
+	ALine = subl.substr(0, subl.find(brcl, 0));
+	++index;
+	if (pospar == index)
+	{
+		if (ALine.length() > 2)
+			if (pacl == ALine[ALine.length() - 2])
+				if (pacl == ALine[ALine.length() - 1])
+					ALine.resize(ALine.size() - 1);
+		return ALine;
+	}
 	return "";
 }
 
