@@ -61,13 +61,13 @@ public:
 	//template<typename T>
 	//list<T> concat(list<T> list1, list<T> list2, list<T> list3);
 
-	/// @brief combines 2 strings into 1 string
-	/// @param T <- template parameter
-	/// @param list1 <- to be considered as the initial of the string
-	/// @param list2 <- to be considered as the sequel of the string
-	/// @param list3 <- to be considered as the extracted string
-	/// @returns string3
-	void concat(string string1, string string2, string string3);
+	bool concat(string string1, string string2, string string3);
+
+	bool concat(string* string1, string string2, string string3);
+
+	bool concat(string string1, string* string2, string string3);
+
+	void concat(string string1, string string2, string* string3);
 
 	/// @brief extracts all the loaded data to string
 	list<string> exportToList();
@@ -346,10 +346,54 @@ void HashTable::save(string filename)
 //	return list3;
 //}
 
-void HashTable::concat(string string1, string string2, string string3)
+bool HashTable::concat(string string1, string string2, string string3)
 {
-	string3 += string1;
-	string3 += string2;
+	if (string1.length()+string2.length() != string3.length())
+		return false;
+	size_t len;
+	string tmp;
+	len = string1.length();
+	tmp = string3.substr(0, len);
+	if (tmp != string1) 
+		return false;
+	tmp = string3.substr(len, string3.npos);
+	if (tmp != string2)
+		return false;
+	return true;
+}
+
+bool HashTable::concat(string* string1, string string2, string string3)
+{
+	if (string2.length() > string3.length()||(string2.empty() && string3.empty()))
+		return false;
+	size_t len;
+	string tmp;
+	len = string3.length() - string2.length();
+	tmp = string3.substr(len, string3.npos);
+	if (tmp != string2)
+		return false;
+	*string1 = string3.substr(0 , len);
+	return true;
+}
+
+bool HashTable::concat(string string1, string* string2, string string3)
+{
+	if (string1.length() > string3.length() || (string1.empty() && string3.empty()))
+		return false;
+	size_t len;
+	string tmp;
+	len = string1.length();
+	tmp = string3.substr(0, len);
+	if (tmp != string1)
+		return false;
+	*string2 = string3.substr(len , string3.npos);
+	return true;
+}
+
+void HashTable::concat(string string1, string string2, string* string3)
+{
+	*string3 += string1;
+	*string3 += string2;
 }
 
 list<string> HashTable::exportToList()

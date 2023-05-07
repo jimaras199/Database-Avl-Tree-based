@@ -278,7 +278,16 @@ int main(int argc, char* argv[])
 		//if (asd.substr(0, 3) == "abc")
 		//	cout << "ok" << endl;
 
-		cout << returnpar("local_object(\"pythagoras_test\",1,\"constant\",\"s_base\",1,\"integer\",\"standard\",32,i(0))", 9);
+		//cout << returnpar("local_object(\"pythagoras_test\",1,\"constant\",\"s_base\",1,\"integer\",\"standard\",32,i(0))", 9);
+
+		string str;
+		if (HT.concat("asd", "fgh", "asdfgh"))
+			cout << "same" << endl;
+		if (HT.concat(&str, "fgh", "asdfgh"))
+			cout << "same 1st*" << endl;
+		if (HT.concat("asd", &str, "asdfgh"))
+			cout << "same 2nd*" << endl;
+		HT.concat("asd", "fgh", &str);
 	}
 	break;
 	case 5:
@@ -1322,16 +1331,14 @@ void generate_hdl_recursive(string Hdlform, string Tool, int Entry)
 
 void store_package_name(int Entry, string Module)
 {
-	if (Entry > 1)
-		return;
-	else
+	if (Entry <= 1)
 	{
 		if (HT.findfact("hierarchy_part(1," + Module + ",_,_,_,_,_)"))
 		{
 			string Vcomscript1, Vcomscript_content, Logfile_content;
 			HT.assertz("package_name(" + Module + ")");
-			HT.concat("vcom_", Module, Vcomscript1);
-			HT.concat(Vcomscript1, ".bat", Vcomscript_content);
+			HT.concat("vcom_", Module, &Vcomscript1);
+			HT.concat(Vcomscript1, ".bat", &Vcomscript_content);
 
 			fstream     File("Vcomscript", ios::out | ios::in | ios::trunc);
 			if (File.is_open())
@@ -1342,7 +1349,7 @@ void store_package_name(int Entry, string Module)
 			else 
 				return;
 			
-			HT.concat(Vcomscript1, ".log", Logfile_content);
+			HT.concat(Vcomscript1, ".log", &Logfile_content);
 
 			fstream     File2("Logfile", ios::out | ios::in | ios::trunc);
 			if (File.is_open())
@@ -1487,7 +1494,7 @@ void write_custom_block(string Module_name, string hdlform, vector<local_object>
 		string Tool, Fname, Hdlform, Global_package, Entity_name;
 		Hdlform = "vhdl";
 		Tool = "synergy";
-		HT.concat(Module_name, ".vhd", Fname);
+		HT.concat(Module_name, ".vhd", &Fname);
 
 		
 
@@ -1506,7 +1513,7 @@ void write_custom_block(string Module_name, string hdlform, vector<local_object>
 			{
 				Global_package = returnpar(HT.findandreturn("hierarchy_part(1,_, 0,\"libpart\", _, _, _),"), 2);
 				File << "  USE WORK." << Global_package << ".ALL; " << endl << endl;
-				HT.concat(Module_name, "_cus_block", Entity_name);
+				HT.concat(Module_name, "_cus_block", &Entity_name);
 				File << write_custom_block_interface(Module_name, Entity_name, "vhdl", *Local_list) << endl;
 
 			}
@@ -2042,8 +2049,8 @@ string print_array_type(int Entry, string str)
 								{
 									if (Comp_size > 1)
 									{
-										HT.concat(".", Just_field_type_name, Type_name);
-										ss << "   TYPE " << Parent_Type_name << "_" << Just_field_type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(31 DOWNTO 0) ;" << endl << endl;
+										if(HT.concat(".", &Just_field_type_name, Type_name))
+											ss << "   TYPE " << Parent_Type_name << "_" << Just_field_type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(31 DOWNTO 0) ;" << endl << endl;
 									}
 								}
 							}
@@ -2112,9 +2119,11 @@ string print_records_fields_declarations_core(int First_entry, int Dimmension, i
 				Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 2));
 				Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 3));
 				MSB_ord = Size - 1;
-				HT.concat(".", Field_type, Type_name);
-				ss << "    " << Field_type << " : std_logic_vector(" << MSB_ord << " DOWNTO 0);" << endl;
-				*Next_entry = Current_entry + 1;
+				if (HT.concat(".", &Field_type, Type_name))
+				{
+					ss << "    " << Field_type << " : std_logic_vector(" << MSB_ord << " DOWNTO 0);" << endl;
+					*Next_entry = Current_entry + 1;
+				}
 			}
 			else if (HT.findfact("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"))
 			{
@@ -2126,9 +2135,11 @@ string print_records_fields_declarations_core(int First_entry, int Dimmension, i
 					if (HT.findfact("type_def(" + to_string(Inherent_type_entry) + ",*)"))
 					{
 						Inherent_type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Inherent_type_entry) + ",*)"), 9));
-						HT.concat(".", Field_type, Type_name);
-						ss << "    " << Field_type << " : " << Inherent_type_name << ";" << endl;
-						*Next_entry = Current_entry + 1;
+						if (HT.concat(".", &Field_type, Type_name))
+						{
+							ss << "    " << Field_type << " : " << Inherent_type_name << ";" << endl;
+							*Next_entry = Current_entry + 1;
+						}
 					}
 				}
 			}
@@ -2141,15 +2152,17 @@ string print_records_fields_declarations_core(int First_entry, int Dimmension, i
 			if (HT.findfact("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"))
 			{
 				Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 2));
-				HT.concat(".", Field_type, Type_name);
-				if (HT.findfact("type_def(_," + Type_name + ",*)"))
+				if (HT.concat(".", &Field_type, Type_name))
 				{
-					Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",*)"), 9));
-					if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
+					if (HT.findfact("type_def(_," + Type_name + ",*)"))
 					{
-						Parent_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",*)"), 2));
-						ss << "    " << Parent_type << " " << Field_type << ";" << endl;
-						*Next_entry = Current_entry + 1;
+						Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",*)"), 9));
+						if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
+						{
+							Parent_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",*)"), 2));
+							ss << "    " << Parent_type << " " << Field_type << ";" << endl;
+							*Next_entry = Current_entry + 1;
+						}
 					}
 				}
 			}
@@ -2163,9 +2176,11 @@ string print_records_fields_declarations_core(int First_entry, int Dimmension, i
 					if (HT.findfact("type_def(" + to_string(Inherent_type_entry) + ",*)"))
 					{
 						Inherent_type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Inherent_type_entry) + ",*)"), 2));
-						HT.concat(".", Field_type, Type_name);
-						ss << "    " << Inherent_type_name << " " << Field_type << " ;" << endl;
-						*Next_entry = Current_entry + 1;
+						if (HT.concat(".", &Field_type, Type_name))
+						{
+							ss << "    " << Inherent_type_name << " " << Field_type << " ;" << endl;
+							*Next_entry = Current_entry + 1;
+						}
 					}
 				}
 			}
@@ -3125,13 +3140,17 @@ string print_verilog_array_decl(int Type_number, string Local_name, string Separ
 			if (Child_size > 1)
 			{
 				Child_upper = Child_size - 1;
-				HT.concat(".", Just_field, Dotted_field);
-				HT.concat(Just_recname, Dotted_field, Local_name);
-				HT.concat("_", Just_field, Underscored_field);
-				HT.concat(Just_recname, Underscored_field, Underscored_name);
-				ss << " [" << Child_upper << ":0] " << Underscored_name << " ";
-				ss << write_verilog_dimmension_component_recursively(Type_number);
-				ss << Separator;
+				if (HT.concat(".", &Just_field, Dotted_field))
+				{
+					if (HT.concat(&Just_recname, Dotted_field, Local_name))
+					{
+						HT.concat("_", Just_field, &Underscored_field);
+						HT.concat(Just_recname, Underscored_field, &Underscored_name);
+						ss << " [" << Child_upper << ":0] " << Underscored_name << " ";
+						ss << write_verilog_dimmension_component_recursively(Type_number);
+						ss << Separator;
+					}
+				}
 			}
 		}
 
@@ -4015,7 +4034,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", *Next_intend);
+									HT.concat(Intend, " ", Next_intend);
 									ss << Intend << "IF " << Rdata << " = '1' THEN " << endl;
 								}
 							}
@@ -4029,7 +4048,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", *Next_intend);
+									HT.concat(Intend, " ", Next_intend);
 									ss << Intend << "IF " << Rdata << " = '1' THEN " << endl;
 								}
 							}
@@ -4039,7 +4058,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "ELSE");
-									HT.concat(Intend, " ", *Next_intend);
+									HT.concat(Intend, " ", Next_intend);
 									ss << Intend << "IF " << Rdata << " = '1' THEN " << endl;
 								}
 							}
@@ -4299,10 +4318,12 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 							{
 								string Out_intend;
 								pop_cond_end(PModule);
-								HT.concat(Out_intend, " ", Intend); //find in prologue 13187 and ask what is happening
-								ss << Out_intend << "ELSE " << endl;
-								push_cond_end(PModule, Result, "END IF");
-								HT.concat(Out_intend, " ", *Next_intend);
+								if (HT.concat(&Out_intend, " ", Intend)) 
+								{
+									ss << Out_intend << "ELSE " << endl;
+									push_cond_end(PModule, Result, "END IF");
+									HT.concat(Out_intend, " ", Next_intend);
+								}
 							}
 						}
 					}
@@ -4320,7 +4341,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
 					{
 						pop_cond_end(PModule);
-						HT.concat(*Next_intend, " ", Intend);
+						HT.concat(Next_intend, " ", Intend);
 						ss << Next_intend << "END LOOP;" << endl;
 					}
 				}
@@ -4347,7 +4368,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						ss << " TO ";
 						ss << type_value(PModule, End_d, "vhdl");
 						ss << " LOOP " << endl;
-						HT.concat(Intend, " ", *Next_intend);
+						HT.concat(Intend, " ", Next_intend);
 					}
 				}
 			}
@@ -4367,7 +4388,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 							{
 								push_cond_end(PModule, False_target, "END LOOP");
 								ss << Intend << "WHILE (" << Cond_name << "='1') LOOP " << endl;
-								HT.concat(Intend, " ", *Next_intend);
+								HT.concat(Intend, " ", Next_intend);
 							}
 						}
 						else if (Cond_size > 1)
@@ -4376,7 +4397,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 							{
 								push_cond_end(PModule, False_target, "END LOOP");
 								ss << Intend << "WHILE (" << Cond_name << "(0)='1') LOOP " << endl;
-								HT.concat(Intend, " ", *Next_intend);
+								HT.concat(Intend, " ", Next_intend);
 							}
 						}
 					}
@@ -4546,11 +4567,11 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", Next_intend1);
+									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", Next_intend2);
+									HT.concat(Next_intend1, " ", &Next_intend2);
 									ss << Next_intend2 << "begin" << endl;
-									HT.concat(Next_intend2, " ", *Next_intend);
+									HT.concat(Next_intend2, " ", Next_intend);
 								}
 							}
 						}
@@ -4563,11 +4584,11 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", Next_intend1);
+									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", Next_intend2);
+									HT.concat(Next_intend1, " ", &Next_intend2);
 									ss << Next_intend2 << "begin" << endl;
-									HT.concat(Next_intend2, " ", *Next_intend);
+									HT.concat(Next_intend2, " ", Next_intend);
 								}
 							}
 							else if (Jumptoop > Previous_of_result)
@@ -4576,11 +4597,11 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "ELSE");
-									HT.concat(Intend, " ", Next_intend1);
+									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", Next_intend2);
+									HT.concat(Next_intend1, " ", &Next_intend2);
 									ss << Next_intend2 << "begin" << endl;
-									HT.concat(Next_intend2, " ", *Next_intend);
+									HT.concat(Next_intend2, " ", Next_intend);
 								}
 							}
 						}
@@ -4625,10 +4646,10 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								Par_list = returnVec(makeInstanceOf(HT.findandreturn("compo_stmt(" + PModule + "," + to_string(Right) + ",_)")), 1);
 								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
 								{
-									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
 									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 									{
-										Resdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+										Resdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
 										*Next_intend = Intend;
 										ss << Intend;
 										ss << print_possible_return(PModule, ResData, ArrayName, " = ", "verilog", 0);
@@ -4762,12 +4783,14 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								string Out_intend, Out_intend1;
 								pop_cond_end(PModule);
 								ss << Intend << "end" << endl;
-								HT.concat(Out_intend1, " ", Intend);
-								ss << Out_intend1 << "else " << endl;
-								HT.concat(Out_intend1, " ", Out_intend);
-								ss << Out_intend << "begin " << endl;
-								push_cond_end(PModule, Target, "END IF");
-								HT.concat(Out_intend, " ", *Next_intend);
+								if (HT.concat(&Out_intend1, " ", Intend))
+								{
+									ss << Out_intend1 << "else " << endl;
+									HT.concat(Out_intend1, " ", &Out_intend);
+									ss << Out_intend << "begin " << endl;
+									push_cond_end(PModule, Target, "END IF");
+									HT.concat(Out_intend, " ", Next_intend);
+								}
 							}
 						}
 					}
@@ -4785,8 +4808,10 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
 					{
 						pop_cond_end(PModule);
-						HT.concat(*Next_intend, " ", Intend);
-						ss << Next_intend << "end;" << endl;
+						if (HT.concat(Next_intend, " ", Intend))
+						{
+							ss << Next_intend << "end;" << endl;
+						}
 					}
 				}
 			}
@@ -4812,9 +4837,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						ss << ";" << Inc_var_name << "<=";
 						ss << type_value(PModule, End_d, "verilog");
 						ss << ";" << Inc_var_name << "=" << Inc_var_name << "+1)" << endl;
-						HT.concat(Intend, " ", Next_intend1);
+						HT.concat(Intend, " ", &Next_intend1);
 						ss << Next_intend1 << " begin" << endl;
-						HT.concat(Next_intend1, " ", *Next_intend);
+						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
 			}
@@ -4828,9 +4853,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					{
 						push_cond_end(PModule, False_target, "END LOOP");
 						ss << Intend << " while (" << Cond_name << ") " << endl;
-						HT.concat(Intend, " ", Next_intend1);
+						HT.concat(Intend, " ", &Next_intend1);
 						ss << Next_intend1 << " begin" << endl;
-						HT.concat(Next_intend1, " ", *Next_intend);
+						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
 			}
@@ -4924,7 +4949,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 											ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
 											*Next_intend = Intend;
 											ss << Intend;
-											ss << print_possible_return(PModule, ResData, Rdata, " = ", "c", &DoIt);
+											ss << print_possible_return(PModule, ResData, Rdata, " = ", "c", &DoIt); // ask what value DoIt should get
 											ss << print_after_return0(DoIt, OpString, Rdata);
 											ss << ";" << endl;
 										}
@@ -4997,8 +5022,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 											ResTypeName = returnpar(HT.findandreturn("type_def(" + to_string(ResType) + ",_,_,_,_,\"record_t\",_,_,_)"), 2);
 											*Next_intend = Intend;
 											ss << Intend;
-											HT.concat(ResTypeName, " ", Result_type0);
-											HT.concat(Result_type0, ResData, Result_target);
+											HT.concat(ResTypeName, " ", &Result_type0);
+											HT.concat(Result_type0, ResData, &Result_target);
 											ss << print_possible_return(PModule, Result_target, Ldata, " = ", "c", &DoIt);
 											ss << print_after_return4(DoIt, PModule, Rec_list);
 											ss << ";" << endl;
@@ -5008,8 +5033,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 											ResTypeName = returnpar(HT.findandreturn("type_def(" + to_string(ResType) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"), 2);
 											*Next_intend = Intend;
 											ss << Intend;
-											HT.concat(ResTypeName, " ", Result_type0);
-											HT.concat(Result_type0, ResData, Result_target);
+											HT.concat(ResTypeName, " ", &Result_type0);
+											HT.concat(Result_type0, ResData, &Result_target);
 											ss << print_possible_return(PModule, Result_target, Ldata, " = ", "c", &DoIt);
 											ss << print_after_return5(DoIt, PModule, Rec_list);
 											ss << ";" << endl;
@@ -5059,11 +5084,11 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", Next_intend1);
+									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", Next_intend2);
+									HT.concat(Next_intend1, " ", &Next_intend2);
 									ss << Next_intend2 << "{" << endl;
-									HT.concat(Next_intend2, " ", *Next_intend);
+									HT.concat(Next_intend2, " ", Next_intend);
 								}
 							}
 						}
@@ -5076,11 +5101,11 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", Next_intend1);
+									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", Next_intend2);
+									HT.concat(Next_intend1, " ", &Next_intend2);
 									ss << Next_intend2 << "{" << endl;
-									HT.concat(Next_intend2, " ", *Next_intend);
+									HT.concat(Next_intend2, " ", Next_intend);
 								}
 							}
 							else if (Jumptoop > Previous_of_result)
@@ -5089,11 +5114,11 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "ELSE");
-									HT.concat(Intend, " ", Next_intend1);
+									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", Next_intend2);
+									HT.concat(Next_intend1, " ", &Next_intend2);
 									ss << Next_intend2 << "{" << endl;
-									HT.concat(Next_intend2, " ", *Next_intend);
+									HT.concat(Next_intend2, " ", Next_intend);
 								}
 							}
 						}
@@ -5215,11 +5240,12 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
 										{
 											ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 4));
-											if (HT.findfact("type_def("+to_string(ResType)+","+ResTypeName+",_,_,_,\"record_t\",_,_,_)"))
+											if (HT.findfact("type_def("+to_string(ResType)+",_,_,_,_,\"record_t\",_,_,_)"))
 											{
+												ResTypeName = returnpar(HT.findandreturn("type_def(" + to_string(ResType) + ",_,_,_,_,\"record_t\",_,_,_)"), 2);
 												*Next_intend = Intend;
-												HT.concat(ResTypeName, " ", Result_type0);
-												HT.concat(Result_type0, ArrayName, Result_target);
+												HT.concat(ResTypeName, " ", &Result_type0);
+												HT.concat(Result_type0, ArrayName, &Result_target);
 												ss << Intend << Result_target << " ";
 												ss << print_custom_array_index_parameters(PModule, Par_list, "verilog");
 												ss << " = ";
@@ -5286,12 +5312,14 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								string Out_intend, Out_intend1;
 								pop_cond_end(PModule);
 								ss << Intend << "}" << endl;
-								HT.concat(Out_intend1, " ", Intend);
-								ss << Out_intend1 << "else " << endl;
-								HT.concat(Out_intend1, " ", Out_intend);
-								ss << Out_intend << "{ " << endl;
-								push_cond_end(PModule, Target, "END IF");
-								HT.concat(Out_intend, " ", Intend);
+								if (HT.concat(&Out_intend1, " ", Intend))
+								{
+									ss << Out_intend1 << "else " << endl;
+									HT.concat(Out_intend1, " ", &Out_intend);
+									ss << Out_intend << "{ " << endl;
+									push_cond_end(PModule, Target, "END IF");
+									HT.concat(Out_intend, " ", Next_intend);
+								}
 							}
 						}
 					}
@@ -5309,8 +5337,10 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
 					{
 						pop_cond_end(PModule);
-						HT.concat(*Next_intend, " ", Intend);
-						ss << Next_intend << "}" << endl;
+						if (HT.concat(Next_intend, " ", Intend))
+						{
+							ss << Next_intend << "}" << endl;
+						}
 					}
 				}
 			}
@@ -5336,9 +5366,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						ss << ";" << Inc_var_name << "<=";
 						ss << type_value(PModule, End_d, "verilog");
 						ss << ";" << Inc_var_name << "=" << Inc_var_name << "+1)" << endl;
-						HT.concat(Intend, " ", Next_intend1);
+						HT.concat(Intend, " ", &Next_intend1);
 						ss << Next_intend1 << " {" << endl;
-						HT.concat(Next_intend1, " ", *Next_intend);
+						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
 			}
@@ -5352,9 +5382,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					{
 						push_cond_end(PModule, False_target, "END LOOP");
 						ss << Intend << " while (" << Cond_name << ") " << endl;
-						HT.concat(Intend, " ", Next_intend1);
+						HT.concat(Intend, " ", &Next_intend1);
 						ss << Next_intend1 << " {" << endl;
-						HT.concat(Next_intend1, " ", *Next_intend);
+						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
 			}
@@ -5387,14 +5417,13 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					}
 					else if (Condition_start == If_statement)
 					{
-						HT.concat(*Next_intend, " ", Intend);
-							ss <<write_end_of_loop(*Next_intend, Lang) << endl;
+						if (HT.concat(Next_intend, " ", Intend))
+							ss << write_end_of_loop(*Next_intend, Lang) << endl;
 					}
 				}
 			}
 		}
 	}
-
 	return ss.str();
 }
 
@@ -6229,8 +6258,8 @@ string print_while_loop_tail_cond(string PModule, int Cond_stmt, int Condition_e
 		If_then_stmt = Condition_end + 1;
 		if (HT.findfact("while_loop(_," + PModule + "," + to_string(If_then_stmt) + ",_,_,_,_)"))
 		{
-			HT.concat(*Out_intend, " ", Intend);
-			ss << write_end_of_loop(*Out_intend, Lang) << endl;
+			if (HT.concat(Out_intend, " ", Intend))  // reduce the intend by one / line 12774
+				ss << write_end_of_loop(*Out_intend, Lang) << endl;
 		}
 	}
 	else if (Cond_stmt < End_of_loop)
@@ -6389,10 +6418,12 @@ string lookahead_prog_entry(string PModule, int Oentry, string In_intend, string
 					if (Next_entry != Top_target)
 					{
 						pop_cond_end(PModule);
-						HT.concat(Next_intend, " ", In_intend);
-						ss << Next_intend;
-						ss << write_nested_cond_fact(Kind) << endl;	
-						ss << lookahead_prog_entry(PModule, Oentry, Next_intend, Out_intend);
+						if (HT.concat(&Next_intend, " ", In_intend))
+						{
+							ss << Next_intend;
+							ss << write_nested_cond_fact(Kind) << endl;
+							ss << lookahead_prog_entry(PModule, Oentry, Next_intend, Out_intend);
+						}
 					}
 				}
 			}
@@ -6648,7 +6679,7 @@ string write_io_ports_core_cond(local_object Local, string HDL, string Tool, str
 	{
 		Module = returnpar(HT.findandreturn("local_object(*)"), 1);
 		Name = returnpar(HT.findandreturn("local_object(*)"), 4);
-		Local1 = makeInstanceOf(HT.findandreturn("local_object(*)")); // find in hdlmaker.pro and ask if it assignment or logical(currently assignment)
+		Local1 = makeInstanceOf(HT.findandreturn("local_object(*)")); // find in hdlmaker.pro and ask if it assignment or logical(currently assignment) // used to analyze the arguments neither = or ==
 		local_object* ptr = dynamic_cast<local_object*>(Local1);
 		if (Module == Name)
 		{
@@ -7300,8 +7331,7 @@ string print_vhdl_par_out_name_cond(string Module_name, string Local_name)
 
 void replace_chars_in_string(string Local_name, string Ch1, string Ch2, string* NewName)
 {
-	size_t DotPos, Length;
-	int BefDot, AfDot, Name2Length;
+	size_t DotPos, Length, BefDot, AfDot, Name2Length;
 	string Name1, Name2, LLname;
 	if (searchstring(Local_name, Ch1, &DotPos))
 	{
@@ -7311,8 +7341,8 @@ void replace_chars_in_string(string Local_name, string Ch1, string Ch2, string* 
 		Name2Length = Length - DotPos;
 		substring(Local_name, 1, BefDot, &Name1);
 		substring(Local_name, AfDot, Name2Length, &Name2);
-		HT.concat(Name1, Ch2, LLname);
-		HT.concat(LLname, Name2, *NewName);
+		HT.concat(Name1, Ch2, &LLname);
+		HT.concat(LLname, Name2, NewName);
 	}
 	else
 		*NewName = Local_name;
@@ -7348,10 +7378,9 @@ string write_verilog_array_index_registers(string Module_name, string Local_name
 		{
 			Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Type_number) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"), 2);
 			Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_number) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"), 9));
-			//10170
-			HT.concat(".", Just_field, Type_name);
-			HT.concat(Just_parent, Type_name, Local_name);
-			ss << "   integer " << Just_parent << "_" << Just_field << "_i" << In_index << " ;" << endl;
+			if (HT.concat(".", &Just_field, Type_name))
+				if (HT.concat(&Just_parent, Type_name, Local_name))
+					ss << "   integer " << Just_parent << "_" << Just_field << "_i" << In_index << " ;" << endl;
 		}
 	}
 	return ss.str();
