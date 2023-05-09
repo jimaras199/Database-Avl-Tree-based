@@ -665,8 +665,8 @@ class local_object : public GeneralFact
 	int				w{}, t{}, i{};
 	string			q{}, e{}, r{}, y{}, u{}, o{};
 public:
-	local_object(const int t1, const int w1, const int i1, const string q1, const string e1,
-		const string y1, const string u1, const string r1, const string o1)
+	local_object(const string q1, const int w1, const string e1, const string r1, const int t1, const string y1, 
+		const string u1, const int i1, const string o1)
 		:t(t1), w(w1), i(i1), q(q1), e(e1), y(y1), u(u1), r(r1), o(o1){}
 	local_object()
 		:w(0),i(0),r(""),t(0),q(""),e(""),y(""),u(""),o(""){}
