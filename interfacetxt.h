@@ -2618,7 +2618,7 @@ GeneralFact* makeInstanceOf(string inputline)
 						ALine = subl.substr(0, subl.find(co, 0));
 						ALine.resize(ALine.size() - 1);
 						o = ALine;
-						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						vobj.push_back(local_object(q,w,e,r,t,y,u,i,o));
 						pos += ALine.length() + 1;
 						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
@@ -2628,7 +2628,7 @@ GeneralFact* makeInstanceOf(string inputline)
 						ALine = subl.substr(0, subl.find(brcl, 0));
 						ALine.resize(ALine.size() - 1);
 						o = ALine;
-						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						vobj.push_back(local_object(q, w, e, r, t, y, u, i, o));
 						pos += ALine.length();
 						subl = inputline.substr(++++++pos, inputline.length() - pos); // getting after »)],« 
 					}
@@ -3346,7 +3346,7 @@ GeneralFact* makeInstanceOf(string inputline)
 	ALine = subl.substr(0, subl.rfind(pacl, 0));
 	ALine.resize(ALine.size() - 1);
 	o = ALine;
-	return new local_object(t, w, i, q, e, y, u, r, o);
+	return new local_object(q, w, e, r, t, y, u, i, o);
 	}
 		else if (ALine == "last_while_loop_entry")
 	{
@@ -3670,7 +3670,7 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 						ALine = subl.substr(0, subl.find(co, 0));
 						ALine.resize(ALine.size() - 1);
 						o = ALine;
-						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						vobj.push_back(local_object(q, w, e, r, t, y, u, i, o));
 						pos += ALine.length() + 1;
 						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
@@ -3680,7 +3680,7 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 						ALine = subl.substr(0, subl.find(brcl, 0));
 						ALine.resize(ALine.size() - 1);
 						o = ALine;
-						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						vobj.push_back(local_object(q, w, e, r, t, y, u, i, o));
 						pos += ALine.length();
 					}
 				}
@@ -3747,7 +3747,7 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 						ALine = subl.substr(0, subl.find(co, 0));
 						ALine.resize(ALine.size() - 1);
 						o = ALine;
-						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						vobj.push_back(local_object(q, w, e, r, t, y, u, i, o));
 						pos += ALine.length() + 1;
 						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
@@ -3757,7 +3757,7 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 						ALine = subl.substr(0, subl.find(brcl, 0));
 						ALine.resize(ALine.size() - 1);
 						o = ALine;
-						vobj.push_back(local_object(t, w, i, q, e, y, u, r, o));
+						vobj.push_back(local_object(q, w, e, r, t, y, u, i, o));
 						pos += ALine.length();
 					}
 				}
@@ -7773,7 +7773,7 @@ factstar makefactstar(string inputline)
 								brpos -= ALine.length();
 								o = ALine;
 							}
-							vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+							vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 						}
 						else stop = 0;
 					}
@@ -9123,7 +9123,7 @@ factstar makefactstar(string inputline)
 				o = ALine;
 			}
 		}
-		ptr = new local_object(t, w, i, q, e, y, u, r, o);
+		ptr = new local_object(q, w, e, r, t, y, u, i, o);
 		}
 		else if (ALine == "last_while_loop_entry")
 		{
@@ -9692,7 +9692,7 @@ factstar makefactstar(string inputline)
 							ALine.resize(ALine.size() - 3);
 							o = ALine;
 						}
-						vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+						vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 					}
 					else stop = 0;
 				}
@@ -9789,7 +9789,7 @@ factstar makefactstar(string inputline)
 							ALine.resize(ALine.size() - 3);
 							o = ALine;
 						}
-						vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+						vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 					}
 					else stop = 0;
 				}
@@ -16062,11 +16062,11 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 									brpos--;
 								}
 							}
-							vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+							vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 						}
 						else
 						{
-							vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+							vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 						}
 						brpos--;
 						subl = inputline.substr(++pos, inputline.length() - pos);
@@ -17684,7 +17684,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 			}
 			else params.push_back(0);
 		}
-		ptr = new local_object(t, w, i, q, e, y, u, r, o);
+		ptr = new local_object(q, w, e, r, t, y, u, i, o);
 		}
 		else if (ALine == "last_while_loop_entry")
 		{
@@ -18459,11 +18459,11 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 							}
 							else paramsV[iv].push_back(0);
 						}
-						vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+						vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 					}
 					else
 					{
-						vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+						vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 					}
 					pos += 2;
 					brpos -= 2;
@@ -18661,11 +18661,11 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 							}
 							else paramsV[iv].push_back(0);
 						}
-						vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+						vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 					}
 					else
 					{
-						vobj.push_back(*(new local_object(t, w, i, q, e, y, u, r, o)));
+						vobj.push_back(*(new local_object(q, w, e, r, t, y, u, i, o)));
 					}
 					pos += 2;
 					brpos -= 2;
