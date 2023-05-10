@@ -1753,7 +1753,7 @@ public:
 
 	friend int last_from_global_declarations(GeneralFact* obj);
 
-	friend vector<local_object> first_from_global_declarations(GeneralFact* obj);
+	friend vector<local_object> return_vec_lo(GeneralFact* obj);
 };
 
 class source_is_normal_dt : public GeneralFact
@@ -5143,6 +5143,9 @@ public:
 	{
 		std::swap(q, other.q);
 	}
+
+	friend vector<local_object> return_vec_lo(GeneralFact* obj);
+
 	friend string makeStringOf(GeneralFact* obj);
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
@@ -5184,6 +5187,9 @@ public:
 	{
 		std::swap(q, other.q);
 	}
+
+	friend vector<local_object> return_vec_lo(GeneralFact* obj);
+	
 	friend string makeStringOf(GeneralFact* obj);
 
 	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
