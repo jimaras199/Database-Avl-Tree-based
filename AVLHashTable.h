@@ -818,19 +818,6 @@ void HashTable::save(string filename, string db)
 		}
 	}
 }
-//template<typename T>
- 
-//list<T> HashTable::concat(list<T> list1, list<T> list2, list<T> list3)
-
-//{
-//	if (!list1.empty())
-//		for (T x : list1)
-//			list3.push_back(x);
-//	if (!list2.empty())
-//		for (T x : list2)
-//			list3.push_back(x);
-//	return list3;
-//}
 
 bool HashTable::concat(string string1, string string2, string string3)
 {
@@ -1594,10 +1581,40 @@ int last_from_global_declarations(GeneralFact* obj)
 }
 
 // returns the first parameter of global_declarations
-vector<local_object> first_from_global_declarations(GeneralFact* obj)
+vector<local_object> return_vec_lo(GeneralFact* obj)
 {
-	global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
-	return ptr->q;
+	vector<local_object> res;
+	string ALine;
+	ALine = typeid(*obj).name();
+	ALine = ALine.substr(6);
+	string ch = ALine.substr(0, 1);
+	const char* sh = ch.c_str();
+	switch (*sh)
+	{
+		case 'g':
+		{
+			if ("global_declarations" == ALine)
+			{
+				global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
+				res = ptr->q;
+			}
+		}
+		break;
+		case 'm':
+		{
+			if ("module_local_list" == ALine)
+			{
+				module_local_list* ptr = dynamic_cast<module_local_list*>(obj);
+				res = ptr->q;
+			}
+			if ("module_local_list_parcs" == ALine)
+			{
+				module_local_list_parcs* ptr = dynamic_cast<module_local_list_parcs*>(obj);
+				res = ptr->q;
+			}
+		}
+	}
+	return res;
 }
 
 //stores all data to list
