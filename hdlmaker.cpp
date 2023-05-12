@@ -122,6 +122,20 @@ string write_standard_ports_for_called_module(string Module, string Schedule, in
 string write_polymorfic_IO_exression(string Module, string Schedule_name, int State, string Called_Module_name, string Signal_name, int Next_order, int Max_order, string First_space, string Condition_op_string, string Suffix_string, int InRealCount, int PruneLastString);
 string type_core_IO_expression(string Called_Module_name, int var2, string Signal_name, int var4, int Max_order, string var6, string Condition_op_string, string Suffix_string, int InRealCount, int* OutRealCount, int PruneLastString);
 string produce_real_same_calls_count(string First_space, int Called_module_entry, int State, string Signal_name, string Suffix_string, string Condition_op_string, int Same_order, int Same_total, int Next_order, int Total_order, int Max_order, int InRealCount, int* OutRealCount, int PruneLastString);
+string write_or_prune(int InRealCount, int Total_order, string Condition_op_string, int int1);
+string write_standard_verilog_call_decls(string Module, int Call_entry);
+string write_standard_verilog_decls_for_called_module(string Module, int Call_entry, int Called_module_entry);
+string write_verilog_call_ios(string Module, int Call_entry);
+string write_content_header(string Module_name, string HDL, string Tool);
+string print_states_type(int Last_state);
+string write_state_symbols(int Last_state, int var2);
+string write_state_symbols_core(int Last_state, int Current_number, int* Previous_state, int* Next_number);
+string new_state_symbols_line(int Current_number);
+string write_next_state_variable(string Module_name, string HDL, int Upper);
+string write_locals(string Module, int In_entry, string Hdl, string Tool);
+string write_local_conditionally(string Module, local_object Local, string Hdl, string Tool);
+string write_local(local_object Local, string HDL, string Tool, string str);
+string write_value(string Local_value, int Local_size, string Type_name, string HDL, string Tool);
 /////////////////////
 
 bool generate_top(string pathln, string exec, string cmdl);
@@ -177,6 +191,8 @@ void read_local_list(vector<local_object>* Local_list);
 void consult_permanent_conditionally(string Module);
 void write_unoptimised_hdl(string Module_name, int int1, int int2, string HDL, string Tool, int Last_st);
 void find_correct_max_call_order(string Module_name, int Called_Module_entry, int Input_order, int* Order);
+void make_order_string(int Same_order, int Same_total, string* Order);
+bool parcs_or_parcsif(string New_schedule);
 
 //essential functions
 bool Iscmdlinearg(string Line) 
@@ -314,14 +330,16 @@ int main(int argc, char* argv[])
 
 		//cout << returnpar("local_object(\"pythagoras_test\",1,\"constant\",\"s_base\",1,\"integer\",\"standard\",32,i(0))", 9);
 
-		string str;
-		if (HT.concat("asd", "fgh", "asdfgh"))
-			cout << "same" << endl;
-		if (HT.concat(&str, "fgh", "asdfgh"))
-			cout << "same 1st*" << endl;
-		if (HT.concat("asd", &str, "asdfgh"))
-			cout << "same 2nd*" << endl;
-		HT.concat("asd", "fgh", &str);
+		//string str;
+		//if (HT.concat("asd", "fgh", "asdfgh"))
+		//	cout << "same" << endl;
+		//if (HT.concat(&str, "fgh", "asdfgh"))
+		//	cout << "same 1st*" << endl;
+		//if (HT.concat("asd", &str, "asdfgh"))
+		//	cout << "same 2nd*" << endl;
+		//HT.concat("asd", "fgh", &str);
+
+		write_value("bol(1)", 1, "asd", "asdas", "jakfg");
 	}
 	break;
 	case 5:
@@ -6958,9 +6976,9 @@ string  write_io_port(local_object Local, string HDL, string tool)
 	Module = returnpar(makeStringOf(ptr), 1);
 	Current_entry = stoi(returnpar(makeStringOf(ptr), 2));
 	var3 = returnpar(makeStringOf(ptr), 3);
-	Local_name = returnpar(makeStringOf(ptr), 4);//4
+	Local_name = returnpar(makeStringOf(ptr), 4);
 	var5 = stoi(returnpar(makeStringOf(ptr), 5));
-	Local_type = returnpar(makeStringOf(ptr), 6);//6
+	Local_type = returnpar(makeStringOf(ptr), 6);
 	var7 = returnpar(makeStringOf(ptr), 7);
 	Local_size = stoi(returnpar(makeStringOf(ptr), 8));
 	var9 = returnpar(makeStringOf(ptr), 9);
@@ -8942,6 +8960,7 @@ void write_unoptimised_hdl(string Module_name, int int1, int int2, string HDL, s
 	if (int1 == 1 && int2 == 1)
 	{
 		string Schedule, Hdlform, Tool, Fname;
+		int Last_state_plus_one;
 		if (HDL == "vhdl")
 		{
 			if (HT.findfact("cac_mode(*)"))
@@ -8963,6 +8982,11 @@ void write_unoptimised_hdl(string Module_name, int int1, int int2, string HDL, s
 					File << write_ieee_packages("vhdl", "synergy") << endl;
 					File << write_global_package(Module_name, Hdlform, Tool);
 					File << write_interface(Module_name, "specials", 1, Hdlform, Tool) << endl;
+					HT.retractall("added_aux_call_ios1(" + Module_name + ",*)");
+					File << write_content_header(Module_name, Hdlform, Tool) << endl;
+					Last_state_plus_one = Last_st + 1;
+					File << print_states_type(Last_state_plus_one) << endl;
+					File << write_locals(Module_name, 1, Hdlform, Tool);
 				}
 			}
 		}
@@ -8982,11 +9006,42 @@ string write_interface(string Module_name, string Schedule, int var3, string HDL
 			{
 				Global_package = returnpar(HT.findandreturn("hierarchy_part(1,_,0,\"libpart\",_,_,_)"), 2);
 				HT.concat(Global_package, ".cus", &CustomFile);
-				ifstream File;
-				File.open(CustomFile, fstream::in);
-				if (!File.is_open())
+				if (!HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
 				{
-					if (HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
+					ss << write_ieee_packages("vhdl", "synergy");
+					ss << "  LIBRARY WORK; " << endl;
+					ss << "  USE WORK." << Global_package << ".ALL; " << endl << endl;
+					ss << "  ENTITY " << Module_name << " IS" << endl;
+					ss << write_interface_header("vhdl", "synergy");
+					ss << "        clock, reset, start, results_read : IN std_logic;" << endl;
+					HT.retractall("added_aux_call_ios(" + Module_name + ",_)");
+					ss << write_standard_call_ports(Module_name, Schedule, 1);
+					ss << write_io_ports(Module_name, 1, "vhdl", "synergy", "regular");
+					ss << "        done, busy : OUT std_logic" << endl;
+					ss << write_interface_tail(Module_name, "vhdl", "synergy");
+				}
+				else
+				{
+					ifstream File;
+					File.open(CustomFile, fstream::in);
+					if (!File.is_open())
+					{
+						if (HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
+						{
+							ss << write_ieee_packages("vhdl", "synergy");
+							ss << "  LIBRARY WORK; " << endl;
+							ss << "  USE WORK." << Global_package << ".ALL; " << endl << endl;
+							ss << "  ENTITY " << Module_name << " IS" << endl;
+							ss << write_interface_header("vhdl", "synergy");
+							ss << "        clock, reset, start, results_read : IN std_logic;" << endl;
+							HT.retractall("added_aux_call_ios(" + Module_name + ",_)");
+							ss << write_standard_call_ports(Module_name, Schedule, 1);
+							ss << write_io_ports(Module_name, 1, "vhdl", "synergy", "regular");
+							ss << "        done, busy : OUT std_logic" << endl;
+							ss << write_interface_tail(Module_name, "vhdl", "synergy");
+						}
+					}
+					else if (HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
 					{
 						ss << write_ieee_packages("vhdl", "synergy");
 						ss << "  LIBRARY WORK; " << endl;
@@ -8996,10 +9051,36 @@ string write_interface(string Module_name, string Schedule, int var3, string HDL
 						ss << "        clock, reset, start, results_read : IN std_logic;" << endl;
 						HT.retractall("added_aux_call_ios(" + Module_name + ",_)");
 						ss << write_standard_call_ports(Module_name, Schedule, 1);
+						ss << write_io_ports(Module_name, 1, "vhdl", "synergy", "regular");
+						ss << "        done, busy : OUT std_logic" << endl;
+						ss << write_interface_tail(Module_name, "vhdl", "synergy");
 					}
 				}
 			}
 		}
+		else if (HDL == "verilog")
+		{
+			ss << "  module " << Module_name << " (" << endl;
+			ss << "             clock, reset, start, results_read," << endl;
+			ss << write_verilog_ports(Module_name, 1, "verilog");
+			HT.retractall("added_aux_call_ios(" + Module_name + ",*)");
+			ss << write_standard_call_ports(Module_name, Schedule, 1);
+			ss << "             done, busy ); " << endl << endl;
+			ss << "   /*---- now list of module I/O types ----*/" << endl;
+			ss << "   input clock, reset, start, results_read;" << endl;
+			ss << "   output done, busy;" << endl;
+			ss << "   reg    done, busy;" << endl;
+			HT.retractall("added_aux_call_ios(" + Module_name + ",*)"); // why retracting all second time?
+			ss << write_standard_verilog_call_decls(Module_name, 1);
+			ss << write_verilog_call_ios(Module_name, 1);
+			ss << write_io_ports(Module_name, 1, "verilog", "synergy", "regular") << endl;
+			ss << "   /*---- now list of module internal signals ----*/" << endl;
+		}
+	}
+	else if (Tool == "gnu" && HDL == "c")
+	{
+		ss << "  void main() { " << endl;
+		ss << "   /*---- now list of module local declarations ----*/" << endl;
 	}
 	return ss.str();
 }
@@ -9007,12 +9088,13 @@ string write_interface(string Module_name, string Schedule, int var3, string HDL
 string write_standard_call_ports(string Module, string Schedule, int Call_entry)
 {
 	stringstream ss;
-	int Called_module_entry;
+	int Called_module_entry, Next_entry;
 	if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + ",_,_)"))
 	{
 		Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module + "," + to_string(Call_entry) + ",_,_)"), 3));
 		ss << write_standard_ports_for_called_module(Module, Schedule, Call_entry, Called_module_entry);
-
+		Next_entry = Call_entry + 1;
+		ss << write_standard_call_ports(Module, Schedule, Next_entry);
 	}
 	return ss.str();
 }
@@ -9021,7 +9103,7 @@ string write_standard_ports_for_called_module(string Module, string Schedule, in
 {
 	stringstream ss;
 	string Called_module_name, Module_name;
-	int Order, Orderout;
+	int Order, Orderout, Max_order, Max_order1;
 	if (HT.findfact("hierarchy_part("+to_string(Called_module_entry)+",_,_,_,_,_,_)"))
 	{
 		Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,_,_,_,_)"), 2);
@@ -9038,7 +9120,7 @@ string write_standard_ports_for_called_module(string Module, string Schedule, in
 		{
 			if (!HT.findfact("added_aux_call_ios("+Module+","+to_string(Called_module_entry)+")"))
 			{
-				if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",_,_,_,_,_)"))
+				if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
 				{
 					if (!custom_block(Called_module_name))
 					{
@@ -9099,7 +9181,7 @@ string write_standard_ports_for_called_module(string Module, string Schedule, in
 										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "start", 1, Orderout, "        ", "", " : OUT std_logic;", 1, 0) << "        ";
 										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "done", 1, Orderout, "        ", "", " : IN std_logic;", 1, 0) << "        ";
 										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "busy", 1, Orderout, "        ", "", " : IN std_logic;", 1, 0);
-
+										HT.assertz("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")");
 									}
 								}
 							}
@@ -9115,7 +9197,7 @@ string write_standard_ports_for_called_module(string Module, string Schedule, in
 					{
 						if (!HT.findfact("added_aux_call_ios(" + Module + "," + Schedule + ")"))
 						{
-							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",_,_,_,_,_)"))
+							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
 							{
 								if (!custom_block(Called_module_name))
 								{
@@ -9124,6 +9206,284 @@ string write_standard_ports_for_called_module(string Module, string Schedule, in
 									ss << "        " << Called_module_name << "_done :  IN std_logic;" << endl;
 									ss << "        " << Called_module_name << "_busy :  IN std_logic;" << endl;
 									HT.assertz("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (parcs_or_parcsif(Schedule))
+		{
+			if (HT.findfact("totalmax_call_order(" + Module + ",\"parcsif\",_)"))
+			{
+				Max_order = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module + ",\"parcsif\",_)"), 3));
+				if (!HT.findfact("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"))
+				{
+					if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+					{
+						if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+						{
+							if (!HT.findfact("max_op_order(" + Module + ",\"parcsif\",_)"))
+							{
+								if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+								{
+									if (!custom_block(Called_module_name))
+									{
+										ss << "        " << Called_module_name << "_results_read :  OUT std_logic;" << endl;
+										ss << "        " << Called_module_name << "_start :  OUT std_logic;" << endl;
+										ss << "        " << Called_module_name << "_done :  IN std_logic;" << endl;
+										ss << "        " << Called_module_name << "_busy :  IN std_logic;" << endl;
+										HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (Max_order == 1)
+				{
+					if (HT.findfact("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ","+to_string(Max_order)+")"))
+					{
+						if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+						{
+							if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+							{
+								if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+								{
+									if (!custom_block(Called_module_name))
+									{
+										ss << "        " << Called_module_name << "_results_read :  OUT std_logic;" << endl;
+										ss << "        " << Called_module_name << "_start :  OUT std_logic;" << endl;
+										ss << "        " << Called_module_name << "_done :  IN std_logic;" << endl;
+										ss << "        " << Called_module_name << "_busy :  IN std_logic;" << endl;
+										HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (Max_order > 1)
+				{
+					find_correct_max_call_order(Module, Called_module_entry, Max_order, &Orderout);
+					if (Orderout == 1)
+					{
+						if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+						{
+							if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+							{
+								if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+								{
+									if (!custom_block(Called_module_name))
+									{
+										ss << "        " << Called_module_name << "_results_read :  OUT std_logic;" << endl;
+										ss << "        " << Called_module_name << "_start :  OUT std_logic;" << endl;
+										ss << "        " << Called_module_name << "_done :  IN std_logic;" << endl;
+										ss << "        " << Called_module_name << "_busy :  IN std_logic;" << endl;
+										HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+									}
+								}
+							}
+						}
+					}
+					else if (Orderout > 1)
+					{
+						if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+						{
+							if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+							{
+								if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+								{
+									if (!custom_block(Called_module_name))
+									{
+										ss << "        ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "results_read", 1, Orderout, "        ", "", " : OUT std_logic;", 1, 0);
+										ss << "        ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "start", 1, Orderout, "        ", "", " : OUT std_logic;", 1, 0);
+										ss << "        ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "done", 1, Orderout, "        ", "", " : IN std_logic;", 1, 0);
+										ss << "        ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "busy", 1, Orderout, "        ", "", " : IN std_logic;", 1, 0);
+										HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+									}
+								}
+							}
+						}
+					}
+					else if (HT.findfact("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"))
+					{
+						Max_order1 = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"), 4));
+						if (Max_order1 <= Max_order)
+						{
+							if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+							{
+								if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+								{
+									if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+									{
+										if (!custom_block(Called_module_name))
+										{
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "results_read", 1, Max_order1, "        ", "", " : OUT std_logic;", 1, 0);
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "start", 1, Max_order1, "        ", "", " : OUT std_logic;", 1, 0);
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "done", 1, Max_order1, "        ", "", " : IN std_logic;", 1, 0);
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "busy", 1, Max_order1, "        ", "", " : IN std_logic;", 1, 0);
+											HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+										}
+									}
+								}
+							}
+						}
+						else if (Max_order1 >= Max_order)
+						{
+							if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+							{
+								if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+								{
+									if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+									{
+										if (!custom_block(Called_module_name))
+										{
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "results_read", 1, Max_order, "        ", "", " : OUT std_logic;", 1, 0);
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "start", 1, Max_order, "        ", "", " : OUT std_logic;", 1, 0);
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "done", 1, Max_order, "        ", "", " : IN std_logic;", 1, 0);
+											ss << "        ";
+											ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "busy", 1, Max_order, "        ", "", " : IN std_logic;", 1, 0);
+											HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (Schedule == "specials")
+	{
+		if (HT.findfact("hdl_style(\"verilog\")"))
+		{
+			if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+			{
+				if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+				{
+					if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+					{
+						if (!custom_block(Called_module_name))
+						{
+							ss << "                  " << Called_module_name << "_results_read," << endl;
+							ss << "                  " << Called_module_name << "_start," << endl;
+							ss << "                  " << Called_module_name << "_done," << endl;
+							ss << "                  " << Called_module_name << "_busy," << endl;
+							HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (parcs_or_parcsif(Schedule))
+		{
+			if (HT.findfact("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"))
+			{
+				Max_order = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"), 4));
+				if (Max_order == 1)
+				{
+					if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+					{
+						if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+						{
+							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+							{
+								if (!custom_block(Called_module_name))
+								{
+									ss << "                  " << Called_module_name << "_results_read," << endl;
+									ss << "                  " << Called_module_name << "_start," << endl;
+									ss << "                  " << Called_module_name << "_done," << endl;
+									ss << "                  " << Called_module_name << "_busy," << endl;
+									HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (HT.findfact("totalmax_call_order(" + Module + ",\"parcs\",_)"))
+			{
+				Max_order = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module + ",\"parcs\",_)"), 3));
+				if (!HT.findfact("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"))
+				{
+					if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+					{
+						if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+						{
+							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+							{
+								if (!custom_block(Called_module_name))
+								{
+									ss << "                  " << Called_module_name << "_results_read," << endl;
+									ss << "                  " << Called_module_name << "_start," << endl;
+									ss << "                  " << Called_module_name << "_done," << endl;
+									ss << "                  " << Called_module_name << "_busy," << endl;
+									HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+								}
+							}
+						}
+					}
+				}
+				else if (Max_order > 1)
+				{
+					if (HT.findfact("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"))
+					{
+						Max_order1 = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module + "," + Schedule + "," + to_string(Called_module_entry) + ",_)"), 4));
+						if (Max_order1 == 1)
+						{
+							if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+							{
+								if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+								{
+									if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+									{
+										if (!custom_block(Called_module_name))
+										{
+											ss << "                  " << Called_module_name << "_results_read," << endl;
+											ss << "                  " << Called_module_name << "_start," << endl;
+											ss << "                  " << Called_module_name << "_done," << endl;
+											ss << "                  " << Called_module_name << "_busy," << endl;
+											HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+										}
+									}
+								}
+							}
+						}
+						if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",_)"))
+						{
+							if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+							{
+								if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+								{
+									if (!custom_block(Called_module_name))
+									{
+										ss << "                  ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "results_read", 1, Max_order1, "                  ", "", ",", 1, 0);
+										ss << "                  ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "start", 1, Max_order1, "                  ", "", ",", 1, 0);
+										ss << "                  ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "done", 1, Max_order1,"                  ", "", ",", 1, 0);
+										ss << "                  ";
+										ss << write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "busy", 1, Max_order1,"                  ", "", ",", 1, 0);
+										HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+									}
 								}
 							}
 						}
@@ -9152,10 +9512,12 @@ void find_correct_max_call_order(string Module_name, int Called_Module_entry, in
 string write_polymorfic_IO_exression(string Module, string Schedule_name, int State, string Called_Module_name, string Signal_name, int Next_order, int Max_order, string First_space, string Condition_op_string, string Suffix_string, int InRealCount, int PruneLastString)
 {
 	stringstream ss;
-	int NextRealCount;
+	int NextRealCount, Order_plus_1;
 	if (Next_order <= Max_order)
 	{
 		ss << type_core_IO_expression(Called_Module_name, State, Signal_name, Next_order, Max_order, First_space, Condition_op_string, Suffix_string, InRealCount, &NextRealCount, PruneLastString);
+		Order_plus_1 = Next_order + 1;
+		ss << write_polymorfic_IO_exression(Module, Schedule_name, State, Called_Module_name, Signal_name, Order_plus_1, Max_order, First_space, Condition_op_string, Suffix_string, NextRealCount, PruneLastString);
 	}
 	return ss.str();
 }
@@ -9163,7 +9525,7 @@ string write_polymorfic_IO_exression(string Module, string Schedule_name, int St
 string type_core_IO_expression(string Called_Module_name, int var2, string Signal_name, int var4, int Max_order, string var6, string Condition_op_string, string Suffix_string, int InRealCount, int* OutRealCount, int PruneLastString)
 {
 	stringstream ss;
-	string Module_name;
+	string Module_name, Next_order_str, StrOrder;
 	int Called_module_entry, Same_order , Same_total, Total_order;
 	if (var4 > Max_order)
 		*OutRealCount = InRealCount;
@@ -9180,14 +9542,60 @@ string type_core_IO_expression(string Called_Module_name, int var2, string Signa
 			Module_name = stoi(returnpar(HT.findandreturn("current_module(*)"), 1));
 			if (var2 > 0)
 			{
-				if (HT.findfact("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_, _)"))
+				if (HT.findfact("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_,_)"))
 				{
-					Called_module_entry = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_, _)"), 5));
-					Same_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_, _)"), 6));
-					Same_total = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_, _)"), 7));
-					Total_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_, _)"), 9));
+					Called_module_entry = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_,_)"), 5));
+					Same_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_,_)"), 6));
+					Same_total = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_,_)"), 7));
+					Total_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_,1,_,_,_)"), 9));
 					ss << produce_real_same_calls_count(var6, Called_module_entry, var2, Signal_name, Suffix_string, Condition_op_string, Same_order, Same_total, 1, Total_order, Max_order, InRealCount, OutRealCount, PruneLastString);
+
 				}
+			}
+		}
+	}
+	else if (var2 == 0)
+	{
+		if (var4 > 1)
+		{
+			if (var4 < Max_order)
+			{
+				Next_order_str = to_string(InRealCount);
+				HT.concat("_", Next_order_str, &StrOrder);
+				ss << var6 << Called_Module_name << StrOrder << "_" << Signal_name << Suffix_string << " ";
+				ss << write_or_prune(InRealCount, Max_order, Condition_op_string, PruneLastString) << endl;
+				*OutRealCount = InRealCount + 1;
+			}
+		}
+		else if (var4 == Max_order)
+		{
+			if (var4 == 1)
+			{
+				Next_order_str = to_string(var4);
+				HT.concat("_", Next_order_str, &StrOrder);
+				ss << Called_Module_name << StrOrder << "_" << Signal_name << Suffix_string << endl;
+				*OutRealCount = InRealCount + 1;
+			}
+			else if (var4 > 1)
+			{
+				Next_order_str = to_string(var4);
+				HT.concat("_", Next_order_str, &StrOrder);
+				ss << var6 << Called_Module_name << StrOrder << "_" << Signal_name << Suffix_string << endl;
+				*OutRealCount = InRealCount + 1;
+			}
+		}
+	}
+	else if (HT.findfact("current_module(" + Module_name + ")"))
+	{
+		if (var2 > 0)
+		{
+			if (HT.findfact("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_," + to_string(var4) + ",_,_,_)"))
+			{
+				Called_module_entry = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_," + to_string(var4) + ",_,_,_)"), 5));
+				Same_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_," + to_string(var4) + ",_,_,_)"), 6));
+				Same_total = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_," + to_string(var4) + ",_,_,_)"), 7));
+				Total_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(var2) + ",_,_,_,_," + to_string(var4) + ",_,_,_)"), 9));
+				ss << produce_real_same_calls_count(var6, Called_module_entry, var2, Signal_name, Suffix_string, Condition_op_string, Same_order, Same_total, var4, Total_order, Max_order, InRealCount, OutRealCount, PruneLastString);
 			}
 		}
 	}
@@ -9207,5 +9615,633 @@ string write_or_prune(int InRealCount, int Total_order, string Condition_op_stri
 
 string produce_real_same_calls_count(string First_space, int Called_module_entry, int State, string Signal_name, string Suffix_string, string Condition_op_string, int Same_order, int Same_total, int Next_order, int Total_order, int Max_order, int InRealCount, int* OutRealCount, int PruneLastString)
 {
+	stringstream ss;
+	string Called_Module_name, StrOrder, Next_order_str;
+	if (State > 0)
+	{
+		if (Same_order > 0)
+		{
+			if (Same_total > 0)
+			{
+				if (InRealCount == 1)
+				{
+					if (Max_order > 0)
+					{
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\",_,_,_)"))
+						{
+							Called_Module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\",_,_,_)"), 1);
+							make_order_string(Same_order, Same_total, &StrOrder);
+							ss << Called_Module_name << StrOrder << "_" << Signal_name << Suffix_string << " ";
+							ss << write_or_prune(InRealCount, Total_order, Condition_op_string, PruneLastString) << endl;
+							*OutRealCount = InRealCount + 1;
+						}
+					}
+					else if (Max_order == 1)
+					{
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\",_,_,_)"))
+						{
+							Called_Module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\",_,_,_)"), 1);
+							Next_order_str = to_string(Same_order);
+							HT.concat("_", Next_order_str, &StrOrder);
+							ss << Called_Module_name << StrOrder << "_" << Signal_name << Suffix_string << endl;
+							*OutRealCount = InRealCount + 1;
+						}
+					}
+				}
+				else if (InRealCount > 1)
+				{
+					if (Max_order > 1)
+					{
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\",_,_,_)"))
+						{
+							make_order_string(Same_order, Same_total, &StrOrder);
+							ss << First_space << Called_Module_name << StrOrder << "_" << Signal_name << Suffix_string << " ";
+							ss << write_or_prune(InRealCount, Total_order, Condition_op_string, PruneLastString) << endl;
+							*OutRealCount = InRealCount + 1;
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (Same_order == 0 && Same_total == 0)
+		*OutRealCount = InRealCount;
+	return ss.str();
+}
 
+void make_order_string(int Same_order, int Same_total, string* Order)
+{
+	if (Same_total == 1)
+		*Order = "";
+	else if (Same_total > 1)
+	{
+		string Order1 =  to_string(Same_order);
+		HT.concat("_", Order1, Order);
+	}
+}
+
+bool parcs_or_parcsif(string New_schedule)
+{
+	return New_schedule == "parcs" || New_schedule == "parcsif";
+}
+
+string write_standard_verilog_call_decls(string Module, int Call_entry)
+{
+	stringstream ss;
+	int Called_module_entry, Next_entry;
+	if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + ",_,_)"))
+	{
+		Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module + "," + to_string(Call_entry) + ",_,_)"), 3));
+		ss << write_standard_verilog_decls_for_called_module(Module, Call_entry, Called_module_entry);
+		Next_entry = Call_entry + 1;
+		ss << write_standard_verilog_call_decls(Module, Next_entry);
+	}
+	return ss.str();
+}
+
+string write_standard_verilog_decls_for_called_module(string Module, int Call_entry, int Called_module_entry)
+{
+	stringstream ss;
+	string Called_module_name;
+	int Max_order;
+	if (HT.findfact("old_schedule(\"specials\")"))
+	{
+		if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",*)"))
+		{
+			if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+			{
+				if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+				{
+					Called_module_name= returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+					if (!custom_block(Called_module_name))
+					{
+						ss << "   output " << Called_module_name << "_results_read; " << endl;
+						ss << "   reg    " << Called_module_name << "_results_read; " << endl;
+						ss << "   output " << Called_module_name << "_start;" << endl;
+						ss << "   reg    " << Called_module_name << "_start;" << endl;
+						ss << "   input  " << Called_module_name << "_done; " << endl;
+						ss << "   input  " << Called_module_name << "_busy; " << endl;
+						HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+					}
+				}
+			}
+		}
+	}
+	else if (HT.findfact("new_schedule(\"parcsif\")"))
+	{
+		if (HT.findfact("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"))
+		{
+			Max_order = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"), 4));
+			if (Max_order == 1)
+			{
+				if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",*)"))
+				{
+					if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+					{
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+						{
+							Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+							if (!custom_block(Called_module_name))
+							{
+								ss << "   output " << Called_module_name << "_results_read; " << endl;
+								ss << "   reg    " << Called_module_name << "_results_read; " << endl;
+								ss << "   output " << Called_module_name << "_start;" << endl;
+								ss << "   reg    " << Called_module_name << "_start;" << endl;
+								ss << "   input  " << Called_module_name << "_done; " << endl;
+								ss << "   input  " << Called_module_name << "_busy; " << endl;
+								HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (HT.findfact("new_schedule(\"parcsif\")"))
+		{
+			if (HT.findfact("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"))
+			{
+				Max_order = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"), 4));
+				if (Max_order > 1)
+				{
+					if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",*)"))
+					{
+						if (!HT.findfact("added_aux_call_ios(" + Module + "," + to_string(Called_module_entry) + ")"))
+						{
+							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+							{
+								Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+								if (!custom_block(Called_module_name))
+								{
+									ss << "             output ";
+									write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "results_read", 1, Max_order, "             output ", "", ";", 1, 0);
+									ss << "             reg    ";
+									write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "results_read", 1, Max_order, "             reg    ", "", ";", 1, 0);
+									ss << "             output ";
+									write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "start", 1, Max_order, "             output ", "", ";", 1, 0);
+									ss << "             reg    ";
+									write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "start", 1, Max_order, "             reg    ", "", ";", 1, 0);
+									ss << "             input  ";
+									write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "done", 1, Max_order, "             input  ", "", ";", 1, 0);
+									ss << "             input  ";
+									write_polymorfic_IO_exression(Module, "parcs", 0, Called_module_name, "busy", 1, Max_order, "             input  ", "", ";", 1, 0);
+									HT.assertz("added_aux_call_ios( " + Module + "," + to_string(Called_module_entry) + ")");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_verilog_call_ios(string Module, int Call_entry)
+{
+	stringstream ss;
+	int Called_module_entry, Next_entry;
+	string Called_module_name;
+	if (HT.findfact("added_aux_call_ios(" + Module + ",*)"))
+	{
+		Called_module_entry= stoi(returnpar(HT.findandreturn("added_aux_call_ios(" + Module + ",*)"), 2));
+		if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+		{
+			Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+			ss << "   output " << Called_module_name << "_results_read; " << endl;
+			ss << "   reg    " << Called_module_name << "_results_read; " << endl;
+			ss << "   output " << Called_module_name << "_start; " << endl;
+			ss << "   reg    " << Called_module_name << "_start; " << endl;
+			Next_entry = Call_entry + 1;
+			ss << write_verilog_call_ios(Module, Next_entry);
+		}
+	}
+	return ss.str();
+}
+
+string write_content_header(string Module_name, string HDL, string Tool)
+{
+	stringstream ss;
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			ss << endl << "  ARCHITECTURE rtl OF " << Module_name << " IS " << endl << endl;
+			ss << "   SIGNAL done_int : std_logic;" << endl;
+		}
+		else if (HDL == "verilog")
+		{
+			ss << "   reg   done_int;" << endl;
+		}
+	}
+	return ss.str();
+}
+
+string print_states_type(int Last_state)
+{
+	stringstream ss;
+	string Module_name;
+	int All_states, Log2state, State_reg_upper_bound;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		ss << "   TYPE states_type IS (";
+		ss << write_state_symbols(Last_state, 1);
+		ss << ");" << endl;
+		ss << "   SIGNAL state : states_type;  -- this stores the current and next state of the circuit" << endl;
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (HT.findfact("current_module(*)"))
+		{
+			Module_name = returnpar(HT.findandreturn("current_module(*)"), 1);
+			ss << endl;
+			ss << "   /* now list the states  */" << endl;
+			ss << "   parameter ";
+			ss << write_state_symbols(Last_state, 1);
+			ss << "    ;" << endl;
+			All_states = Last_state + 1;
+			log2n(All_states, 1, 1, &Log2state);
+			State_reg_upper_bound = Log2state - 1;
+			ss << "   // The following state variable holds the current and next state of the FSM" << endl;
+			ss << "   (* safe_fsm *)" << endl;
+			ss << "   reg   [" << State_reg_upper_bound << ":0] state ;  // synthesis safe_fsm" << endl;
+			ss << write_next_state_variable(Module_name, "verilog", State_reg_upper_bound) << endl;
+		}
+	}
+
+	return ss.str();
+}
+
+string write_state_symbols(int Last_state, int var2)
+{
+	stringstream ss;
+	int Previous_state, Next_number;
+	if (Last_state == 0)
+		if (HT.findfact("hdl_style(\"vhdl\")"))
+			ss << "state_0";
+		else if (HT.findfact("hdl_style(\"verilog\")"))
+			ss << "state_0 = 0";
+	else
+	{
+		ss << write_state_symbols_core(Last_state, var2, &Previous_state, &Next_number);
+		ss << write_state_symbols(Previous_state, Next_number);
+	}
+	return ss.str();
+}
+
+string write_state_symbols_core(int Last_state, int Current_number, int* Previous_state, int* Next_number)
+{
+	stringstream ss;
+	int Modulo5;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (Last_state > 0)
+		{
+			ss << "state_" << Last_state << ", ";
+			Modulo5 = Current_number % 5;
+			ss << new_state_symbols_line(Modulo5);
+			*Previous_state = Last_state - 1;
+			*Next_number = Current_number + 1;
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (Last_state > 0)
+		{
+			Modulo5 = Current_number % 5;
+			ss << new_state_symbols_line(Modulo5);
+			ss << "state_" << Last_state << " = " << Last_state << ", ";
+			*Previous_state = Last_state - 1;
+			*Next_number = Current_number + 1;
+		}
+	}
+	return ss.str();
+}
+
+string new_state_symbols_line(int Current_number)
+{
+	stringstream ss;
+	if (Current_number == 1)
+	{
+		if (HT.findfact("hdl_style(\"vhdl\")"))
+			ss << endl << "                        ";
+		else if (HT.findfact("hdl_style(\"verilog\")"))
+			ss << endl << "          ";
+	}
+	return ss.str();
+}
+
+string write_next_state_variable(string Module_name, string HDL, int Upper)
+{
+	stringstream ss;
+	int TotalCallOrder;
+	if (HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"))
+	{
+		TotalCallOrder = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"), 3));
+		if (TotalCallOrder >= 1)
+		{
+			if (HDL == "vhdl")
+			{
+				ss << "     TYPE STATES_ARRAY IS ARRAY (integer RANGE <>) OF STATES_TYPE;" << endl;
+				ss << "     VARIABLE state_var : STATES_ARRAY(" << TotalCallOrder << " DOWNTO 1);" << endl;
+			}
+			else if (HDL == "verilog")
+				ss << "     reg [" << Upper << ":0] state_var [" << TotalCallOrder << ":1] ;" << endl;
+		}
+	}
+	return ss.str();
+}
+
+string write_locals(string Module, int In_entry, string Hdl, string Tool)
+{
+	stringstream ss;
+	GeneralFact* Local;
+	if (HT.findfact("local_object(" + Module + "," + to_string(In_entry) + ",*)"))
+	{
+		Local = makeInstanceOf(HT.findandreturn("local_object(" + Module + "," + to_string(In_entry) + ",*)"));
+		local_object* ptr = dynamic_cast<local_object*>(Local);
+		ss << write_local_conditionally(Module, *ptr, Hdl, Tool);
+
+	}
+	return ss.str();
+}
+
+string write_local_conditionally(string Module, local_object Local, string Hdl, string Tool)
+{
+	stringstream ss;
+	string Name, Package;
+	if (HT.findfact("data_stmt(" + Package + "," + Name + ",_,_,\"const\",_)"))
+	{
+		Package = returnpar(HT.findandreturn("package_name(*)"), 1);
+		GeneralFact* ptr;
+		ptr = &Local;
+		Name = returnpar(HT.findandreturn(makeStringOf(ptr)), 4);
+		if (HT.findfact("package_name(*)"))
+			ss << write_local(Local, Hdl, Tool, "");
+	}
+	return ss.str();
+}
+
+string write_local(local_object Local, string HDL, string Tool, string str)
+{
+	stringstream ss;
+	string Module, var3, Local_name, Type_name, var7, Local_value, Kind, Parent_name, Just_local_field, JustParent, Type_kind, NewName;
+	int Current_entry, var5, Local_size, Parent_type, Up_limit, Child_type;
+	GeneralFact* ptr;
+	ptr = &Local;
+	Module = returnpar(makeStringOf(ptr), 1);
+	Current_entry = stoi(returnpar(makeStringOf(ptr), 2));
+	var3 = returnpar(makeStringOf(ptr), 3);
+	Local_name = returnpar(makeStringOf(ptr), 4);
+	var5 = stoi(returnpar(makeStringOf(ptr), 5));
+	Type_name = returnpar(makeStringOf(ptr), 6);
+	var7 = returnpar(makeStringOf(ptr), 7);
+	Local_size = stoi(returnpar(makeStringOf(ptr), 8));
+	Local_value = returnpar(makeStringOf(ptr), 9);
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			if (var3 == "par_in" || var3 == "par_out" || var3 == "par_inout")
+				return ss.str();
+			if (var3 == "signal")
+			{
+				if (var7 == "standard")
+				{
+					if (Type_name == "bool")
+					{
+						ss << "   SIGNAL " << Local_name << " : std_logic;" << endl;
+					}
+					else if (Type_name == "std_logic")
+					{
+						ss << "   SIGNAL " << Local_name << " : ";
+						ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
+					}
+					else if (Type_name == "integer")
+					{
+						ss << "   SIGNAL " << Local_name << " : ";
+						ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
+					}
+					else if (HT.findfact("type_def(_," + Type_name + ",_,_,2,_,_,_,_)"))
+					{
+						ss << "   SIGNAL " << Local_name << " : ";
+						ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
+					}
+					else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",_,_,2)"))
+					{
+						Parent_type= stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"single_t\",_,_,2)"), 5));
+						if (HT.findfact("type_def(" + to_string(Parent_type) + ",_,_,_,_,\"record_t\",_,_,_)"))
+						{
+							ss << "   SIGNAL " << Local_name << " : ";
+							ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
+
+						}
+					}
+					else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
+					{
+						Parent_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 5));
+						if (Parent_type != 2)
+						{
+							ss << "   SIGNAL " << Local_name << " : ";
+							ss << Type_name << " ;" << endl;
+						}
+					}
+				}
+				else if (var7 == "userarray")
+				{
+					if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",_,_,\"vectorarray_t\",_," + to_string(Local_size) + ",1)"))
+					{
+						Up_limit = Local_size - 1;
+						ss << "   SIGNAL " << Local_name << " : Std_logic_vector(" << Up_limit << " DOWNTO 0) ; " << endl;
+					}
+					else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"vectorarray_t\",_,_,_)"))
+					{
+						Parent_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"vectorarray_t\",_,_,_)"), 5));
+						Child_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"vectorarray_t\",_,_,_)"), 9));
+						if (HT.findfact("type_def("+to_string(Parent_type)+",*)"))
+						{
+							Parent_name = returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",*)"), 2);
+							Kind = returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",*)"), 6);
+							if (Kind != "record_t")
+							{
+								if (Child_type != 1)
+								{
+									ss << "   SIGNAL " << Local_name << " : " << Type_name << " ; " << endl;
+								}
+							}
+							else if (Child_type != 1)
+								if (HT.concat(".", &Just_local_field, Type_name))
+									if (HT.concat(&JustParent, Type_name, Local_name))
+										ss << "   SIGNAL " << JustParent << "_" << Just_local_field << " : " << Parent_name << "_" << Just_local_field << " ; " << endl;
+						}
+					}
+					else if (Local_name != "boolean")
+					{
+						if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"vectorarray_t\",_,_,_)"))
+						{
+							ss << "   SIGNAL " << Local_name << " : " << Type_name << " ; " << endl;
+						}
+					}
+				}
+				else if (var7 == "userrecord") // might be a mistake confusing Local_name with Type_name
+				{
+					if( Type_name == "boolean")
+						ss << "   SIGNAL " << Local_name << " : boolean;" << endl;
+					else if (Local_name != "boolean")
+					{
+						if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",_,_,\"single_t\",_,_,_)"))
+						{
+							ss << "   SIGNAL " << Local_name << " : ";
+							ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
+						}
+						else if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",_,_,_,_,_,_)"))
+						{
+							Type_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 6);
+							if (Type_kind != "single_t")
+							{
+								ss << "   SIGNAL " << Local_name << " : " << Type_name << " ; " << endl;
+							}
+						}
+					}
+				}
+			}
+			else if (var3 == "constant")
+			{
+				if (var7 == "standard")
+				{
+					replace_chars_in_string(Local_name, ".", "_", &NewName);
+					if (NewName == Local_name)
+					{
+						ss << "   CONSTANT " << Local_name << " : ";
+						ss << write_value(Local_value, Local_size, Type_name, "vhdl", "synergy") << endl;
+					}
+					else
+					{
+						ss << "   CONSTANT " << NewName << " : ";
+						ss << write_value(Local_value, Local_size, Type_name, "vhdl", "synergy") << endl;
+					}
+				}
+			}
+		}
+		else if (HDL == "verilog")
+		{
+			Contilue
+		}
+	}
+	return ss.str();
+}
+
+string write_value(string Local_value, int Local_size, string Type_name, string HDL, string Tool)
+{
+	stringstream ss;
+	string be, af;
+	int Upper_limit, Const_size;
+	be = Local_value.substr(0, Local_value.find(pa, 0));
+	af = Local_value.substr(be.length()+1, Local_value.find(pacl, 0));
+	af.resize(af.size() - 1);
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			if (Local_size == 1)
+			{
+				if (be == "bol")
+				{
+					if (af == "1")
+						ss << " std_logic := '1' ; -- boolean value TRUE found";
+					else if (af == "0")
+						ss << " std_logic := '0' ; -- boolean value FALSE found";
+				}
+				else if (be == "i")
+				{
+					ss << " std_logic";
+					ss << " := '" << af << "'";
+					ss << ";  -- integer constants are converted into std_logic";
+				}
+			}
+			else if (Local_size > 1)
+			{
+				ss << " std_logic_vector(";
+				Upper_limit = Local_size - 1;
+				ss << Upper_limit << " DOWNTO 0) := std_logic_vector(conv_unsigned(" << af;
+				ss << ", " << Local_size << "));  -- integer constants are converted into std_logic";
+			}
+			else if (be == "chr")
+			{
+				ss << " character := std_logic_vector(conv_unsigned(" << af << " 8));  --ASCII code of a character value";
+			}
+			else if (be == "r")
+			{
+				ss << " real := " << af << ";  -- real values shouldn't be allowed in this version";
+			}
+			else if (be == "sym")
+			{
+				ss << " " << Type_name << " := " << af << ";";
+			}
+			else if (be == "str")
+			{
+				ss << " " << Type_name << " := " << af << ";  -- string values shouldn't allowed in this version";
+			}
+		}
+		else if (HDL == "verilog")
+		{
+			if (Local_size == 1)
+			{
+				if (be == "bol")
+				{
+					if (af == "1")
+						ss << "1'b1 ;";
+					else if (af == "0")
+						ss << "1'b0 ;";
+				}
+				else if (be == "i")
+				{
+					log2n(stoi(af), 1, 1, &Const_size);
+					if (Const_size == 1)
+					{
+						ss << " 1'b";
+						ss << af << ";";
+					}
+					else if (Const_size > 1)
+						ss << " " << af << ";";
+				}
+			}
+			else if (Local_size > 1)
+			{
+				ss << " " << af << ";";
+			}
+			else if (be == "chr")
+			{
+				ss << " " << af << ";";
+			}
+			else if (be == "r")
+			{
+				ss << " " << af << ";  // real values are not allowed in this version";
+			}
+			else if (be == "sym")
+			{
+				ss << " " << af << ";  // string names are not allowed as parameters";
+			}
+			else if (be == "str")
+			{
+				ss << " " << af << ";  // string values are not allowed in this version";
+			}
+		}
+	}
+	else if (Tool == "gnu")
+	{
+		if (be == "r")
+			ss << " " << af << ";";
+		else if (be == "chr")
+			ss << " " << af << ";";
+		else if (be == "i")
+			ss << af << ";";
+		else if (be == "bol")
+			ss << " " << af << ";";
+		else if (be == "str")
+			ss << " " << af << ";  // string values are not allowed in this version";
+	}
+	return ss.str();
 }
