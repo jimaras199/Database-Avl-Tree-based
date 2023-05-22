@@ -744,6 +744,13 @@ public:
 		:w(w1), q(q1) {}
 	state_node()
 		:w(0),q(""){}
+	state_node(const state_node& other)
+	{
+		if (this != &other)
+		{
+			this->q = other.q;  this->w = other.w;
+		}
+	}
 	~state_node()
 	{
 		this->q.clear();this->w = NULL; 
