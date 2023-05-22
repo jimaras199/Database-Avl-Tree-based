@@ -174,6 +174,15 @@ string write_record_reset_aggregate(int In_dim, int Number_of_dims, int In_comp)
 string write_array_end_loop(int Dimension_depth);
 string write_array_end_loop_core(int Dimension_depth, int* Next_dimension_depth);
 string write_depending_on_kind(string Local_name, string Local_kind, string* Local_name_app);
+string reset_struct_field(string Top_kind, string Prefix_name, int Field_number, int Number_of_fields, int Current_comp_type, string HDL);
+string reset_struct_field_cond(string Top_kind, string Prefix_name, int Current_comp_type, string HDL);
+string reset_call_ports_unopt(string Module_name, string HDL, int C_entry);
+string reset_call_ports_core_unopt(string Module_name, string HDL, int C_entry, int* Next_entry);
+string finds_par_and_resets_formal_ios_unopt(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int num);
+string resets_standard_call_ios_unopt(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int num);
+string write_fsm_clock_header(string HDL, string Tool);
+string write_states(string Module_name, int Number, string HDL, string Tool);
+string write_state(string Module_name, state_node SN, string HDL, string Tool);
 /////////////////////
 
 bool generate_top(string pathln, string exec, string cmdl);
@@ -282,7 +291,7 @@ void substring(string Str_in, size_t Pos, size_t Len, string* Str_out)
 //D:\VSprojects\repos\ITF_lib
 int main(int argc, char* argv[])
 {
-	int ch = 0;
+	int ch = 4;
 	switch (ch)
 	{
 	case 0:
@@ -382,7 +391,15 @@ int main(int argc, char* argv[])
 		//	cout << "same 2nd*" << endl;
 		//HT.concat("asd", "fgh", &str);
 
-		write_value("bol(1)", 1, "asd", "asdas", "jakfg");
+		//write_value("bol(1)", 1, "asd", "asdas", "jakfg");
+
+
+		GeneralFact* GF;
+		GF = makeInstanceOf("state_node(\"init_arrays\",1,dataflow([1],2))");
+		makeStringOf(makeInstanceOf("dataflow([1],2)"));
+		state_node* SN = dynamic_cast<state_node*>(GF);
+		cout << typeid(*SN).name();
+		cout << returnpar(makeStringOf(GF), 1);
 	}
 	break;
 	case 5:
@@ -12225,6 +12242,12 @@ string write_fsm(string Module_name, int int1, int State_number, string HDL, str
 	{
 		ss << write_fsm_header(Module_name, 1, HDL, Tool);
 		reset_locals(Module_name, "specials", 1, HDL, Tool);
+		HT.retractall("call_ios_have_been_reset(*)");
+		ss << reset_call_ports_unopt(Module_name, "vhdl", 1) << endl;
+		ss << endl;
+		ss << write_fsm_clock_header(HDL, Tool);
+		ss << write_states(Module_name, State_number, HDL, Tool);
+
 	}
 	return ss.str();
 }
@@ -12507,11 +12530,14 @@ string reset_locals(string Module_name, string Schedule, int Entry, string HDL, 
 {
 	stringstream ss;
 	GeneralFact* Local;
+	int Next_entry;
 	if (HT.findfact("local_object(" + Module_name + "," + to_string(Entry) + ",*)"))
 	{
 		Local = makeInstanceOf(HT.findandreturn("local_object(" + Module_name + "," + to_string(Entry) + ",*)"));
 		local_object* ptr = dynamic_cast<local_object*>(Local);
 		ss << reset_local(Schedule, *ptr, HDL, Tool);
+		Next_entry = Entry + 1;
+		ss << reset_locals(Module_name, Schedule, Next_entry, HDL, Tool);
 	}
 	return ss.str();
 }
@@ -12519,9 +12545,11 @@ string reset_locals(string Module_name, string Schedule, int Entry, string HDL, 
 string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 {
 	stringstream ss;
-	string Module, Local_kind, Local_name, Type_name, var7, Local_value, be, af, Type_kind, Kind, Local_name_app;
+	string Module, Local_kind, Local_name, Type_name, var7, Local_value, be, af, Type_kind, Kind, Local_name_app, Just_field,
+		Rec_name, Rec_underscored, Underscored_name, Name1, Name2, Prefix_name;
 	int Current_entry, var5, Local_size, Size, ParentType, TypeEntry, InferType, Comp_type, Firstd, Dimmension, Comp_type_size,
-		Lastd, Number_of_fields, First_comp_type, Type_entry, Dimension_depth, Last_comp_type, RecType, Inh_type;
+		Lastd, Number_of_fields, First_comp_type, Type_entry, Dimension_depth, Last_comp_type, RecType, Inh_type, Comp_type1,
+		Rec_field, Dim_minus_one;
 	GeneralFact* ptr;
 	ptr = &Local;
 	Module = returnpar(makeStringOf(ptr), 1);
@@ -13153,6 +13181,374 @@ string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 					}
 				}
 			}
+			else if (var7 == "userarray")
+			{
+				if (Local_kind != "variable")
+				{
+					if (Local_kind != "constant")
+					{
+						if (Local_kind != "par_in")
+						{
+							if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",0,\"vectorarray_t\",_,_,_)"))
+							{
+								Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
+								if (HT.findfact("type_def(" + to_string(Comp_type) + ",\"boolean\",1,\"standard\",0,\"single_t\",0,0,0)"))
+								{
+									ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+									ss << "       " << Local_name_app << " <= 0;" << endl;
+								}
+							}
+							else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"))
+							{
+								Type_entry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 1));
+								Firstd = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 7));
+								Dimmension = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 8));
+								Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
+								if (Comp_type > 1)
+								{
+									if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"))
+									{
+										Comp_type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"), 3));
+										if (Comp_type_size > 1)
+										{
+											Lastd = Firstd + Dimmension - 1;
+											ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 )" << endl;
+											ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+											ss << "        " << Local_name_app << "[" << Local_name << "_i] <= 0;" << endl;
+										}
+									}
+									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,1,_,_,\"single_t\",_,_,_)"))
+									{
+										Lastd = Firstd + Dimmension - 1;
+										ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+										ss << "       " << Local_name_app << " <= 0;" << endl;
+									}
+									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"))
+									{
+										Rec_field = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 9));
+										if (HT.findfact("type_def(" + to_string(Rec_field) + ",_,_,_,_,\"single_t\",_,_,_)"))
+										{
+											Lastd = Firstd + Dimmension - 1;
+											ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+											ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 )" << endl;
+											ss << "        " << Local_name_app << "[" << Local_name << "_i] <= 0;" << endl;
+										}
+									}
+									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+									{
+										ss << reset_multi_array(Local_name, Type_entry, 1, &Dimension_depth, &Last_comp_type, 1);
+										ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+										ss << "        " << Local_name_app;
+										ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+										ss << write_array_comp_reset_value(Last_comp_type);
+										ss << ";" << endl;
+									}
+								}
+							}
+							else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"vectorarray_t\",_,_,_)"))
+							{
+								Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"vectorarray_t\",_,_,_)"), 1));
+								Firstd = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"vectorarray_t\",_,_,_)"), 7));
+								Dimmension = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"vectorarray_t\",_,_,_)"), 8));
+								Comp_type1 = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"vectorarray_t\",_,_,_)"), 9));
+								if (Comp_type > 1)
+								{
+									if (HT.findfact("type_def(" + to_string(Comp_type1) + ",_,_,_,_,\"vectorarray_t\",_,_,2)"))
+									{
+										Comp_type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type1) + ",_,_,_,_,\"vectorarray_t\",_,_,2)"), 3));
+										if (Comp_type_size > 1)
+										{
+											Lastd = Firstd + Dimmension - 1;
+											if (HT.concat(".", &Just_field, Type_name))
+											{
+												if (HT.concat(&Rec_name, Type_name, Local_name))
+												{
+													HT.concat(Rec_name, "_", &Rec_underscored);
+													HT.concat(Rec_underscored, Just_field, &Underscored_name);
+													ss << "       for  (" << Underscored_name << "_i1 = " << Firstd << "; " << Underscored_name << "_i1 <= " << Lastd << "; " << Underscored_name << "_i1 = " << Underscored_name << "_i1 + 1 )" << endl;
+													ss << write_depending_on_kind(Underscored_name, Local_kind, &Local_name_app);
+													ss << "        " << Local_name_app << "[" << Underscored_name << "_i1] <= 0;" << endl;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (var7 == "userrecord")
+			{
+				if (Local_kind != "variable")
+				{
+					if (Local_kind != "constant")
+					{
+						if (Local_kind != "par_in")
+						{
+							if (Local_size == 1)
+							{
+								if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"record_t\",0,_,_)"))
+								{
+									ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+									ss << "       " << Local_name_app << " <= 1'b0;" << endl;
+								}
+								else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,1)"))
+								{
+									ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+									ss << "       " << Local_name_app << " <= 1'b0;" << endl;
+								}
+								else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
+								{
+									Inh_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"), 9));
+									if (Inh_type != 1)
+									{
+										ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+										ss << "       " << Local_name_app << " <= 1'b0;" << endl;
+									}
+								}
+							}
+							else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"record_t\",0,_,_)"))
+							{
+								ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+								ss << "       " << Local_name_app << " <= 0;" << endl;
+							}
+							else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
+							{
+								Inh_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"), 9));
+								if (Inh_type != 1)
+								{
+									ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+									ss << "       " << Local_name_app << " <= 1'b0;" << endl;
+								}
+							}
+						}
+					}
+				}				
+			}
+		}
+	}
+	else if (Tool == "gnu")
+	{
+		if (HDL == "c")
+		{
+			if (Local_kind != "variable")
+			{
+				if (Local_kind != "constant")
+				{
+					if (Local_kind != "par_in")
+					{
+						if (var7 == "standard")
+						{
+							if (Local_size == 1)
+							{
+								if (Type_name == "bool")
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+								else if (Type_name == "std_logic")
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+								else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"))
+								{
+									Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 3));
+									ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 5));
+									if (Size >= 1)
+									{
+										if (ParentType == 2)
+										{
+											ss << "       " << Local_name << " = 0;" << endl;
+										}
+									}
+								}
+								else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"))
+								{
+									TypeEntry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 1));
+									Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 3));
+									ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 5));
+									InferType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 9));
+									if (InferType == 2)
+									{
+										if (HT.findfact("type_def(" + to_string(ParentType) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
+										{
+											if (TypeEntry > ParentType)
+											{
+												ss << "       " << Local_name << " = 0;" << endl;
+											}
+										}
+									}
+								}
+								else if (be == "bit_wire" && af == "std_logic")
+								{
+									if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"))
+									{
+										Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 3));
+										Type_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 6);
+										if (Type_kind != "single_t")
+										{
+											if (Size != Local_size)
+											{
+												ss << "       " << Local_name << " = 0;" << endl;
+											}
+										}
+									}
+								}
+							}
+							else if (Local_size > 1)
+							{
+								if (Type_name == "std_logic")
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+								else if (Type_name == "std_logic")
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+								else if (Type_name == "natural")
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+								else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"))
+								{
+									Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 3));
+									ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 5));
+									if (Size >= 1)
+									{
+										if (ParentType == 2)
+										{
+											ss << "       " << Local_name << " = 0;" << endl;
+										}
+									}
+								}
+								else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"))
+								{
+									TypeEntry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 1));
+									Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 3));
+									ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 5));
+									InferType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 9));
+									if (InferType == 2)
+									{
+										if (HT.findfact("type_def(" + to_string(ParentType) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
+										{
+											if (TypeEntry > ParentType)
+											{
+												ss << "       " << Local_name << " = 0;" << endl;
+											}
+										}
+									}
+								}
+								else if (be == "bit_wire" && af == "std_logic")
+								{
+									if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"))
+									{
+										Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 3));
+										Type_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 6);
+										if (Type_kind != "single_t")
+										{
+											if (Size != Local_size)
+											{
+												ss << "       " << Local_name << " = 0;" << endl;
+											}
+										}
+									}
+								}
+							}
+						}
+						else if (var7 == "userarray")
+						{
+							if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",0,\"vectorarray_t\",_,_,_)"))
+							{
+								Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
+								if (HT.findfact("type_def(" + to_string(Comp_type) + ",\"boolean\",1,\"standard\",0,\"single_t\",0,0,0)"))
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+							}
+							else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"))
+							{
+								Type_entry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 1));
+								Firstd = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 7));
+								Dimmension = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 8));
+								Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
+								if (Comp_type > 1)
+								{
+									if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,1,_,_,\"single_t\",_,_,_)"))
+									{
+										Lastd = Firstd + Dimmension - 1;
+										ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 )" << endl;
+										ss << "        (*" << Local_name << ")[" << Local_name << "_i] = 0;" << endl;
+									}
+									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"))
+									{
+										Comp_type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"), 3));
+										if (Comp_type_size > 1)
+										{
+											Lastd = Firstd + Dimmension - 1;
+											ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 )" << endl;
+											ss << "        (* " << Local_name << ")[" << Local_name << "_i] = 0;" << endl;
+										}
+									}
+									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"))
+									{
+										Number_of_fields = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 8));
+										First_comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 9));
+										Lastd = Firstd + Dimmension - 1;
+										ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 ) {" << endl;
+										HT.concat(Local_name, ")[", &Name1);
+										HT.concat(Name1, Local_name, &Name2);
+										HT.concat(Name2, "_i]", &Prefix_name);
+										ss << reset_struct_field("vectorarray_t", Prefix_name, 1, Number_of_fields, First_comp_type, "c") << endl;
+										ss << "        }" << endl;
+									}
+									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+									{
+										ss << reset_multi_array(Local_name, Type_entry, 1, &Dimension_depth, &Last_comp_type, 1);
+										ss << "        " << Local_name;
+										ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+										ss << write_array_comp_reset_value(Last_comp_type);
+										Dim_minus_one = Dimension_depth - 1;
+										ss << write_array_end_loop(Dim_minus_one);
+									}
+								}
+							}
+						}
+						else if (var7 == "userrecord")
+						{
+							if (Local_size == 1)
+							{
+								if (HT.findfact("type_def(1," + Type_name + ",_,_,_,\"single_t\",0,_,1)"))
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+								else if (HT.findfact("type_def(1," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
+								{
+									ss << "       " << Local_name << " = 0;" << endl;
+								}
+								else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
+								{
+									Inh_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"), 9));
+									if (Inh_type != 1)
+									{
+										ss << "       " << Local_name << " = 0;" << endl;
+									}
+								}
+							}
+							else if (HT.findfact("type_def(_,"+Type_name+",_,\"user\",0,\"record_t\",0,_,_)"))
+							{
+								Number_of_fields = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"record_t\",0,_,_)"), 8));
+								First_comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"record_t\",0,_,_)"), 9));
+								ss << reset_struct_field("record_t", Local_name, 1, Number_of_fields, First_comp_type, "c") << endl;
+							}
+							else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
+							{
+								Inh_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"), 9));
+								ss << "       " << Local_name << " = 0;" << endl;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	return ss.str();
@@ -13290,12 +13686,15 @@ string declare_index(int Declare, string Local_name, int Dimension_depth)
 	return ss.str();
 }
 
-string write_array_dim_depth(string Local_name, int Input_index, int Dimension_depth)
+string write_array_dim_depth(string Local_name, int Input_index, int Dimension_depth) //recursive non stop?
 {
 	stringstream ss;
-	int Next_index;
-	ss << write_array_dim_depth_core(Local_name, Input_index, Dimension_depth, &Next_index);
-	ss << write_array_dim_depth(Local_name, Next_index, Dimension_depth);
+	if (Input_index != Dimension_depth)
+	{
+		int Next_index;
+		ss << write_array_dim_depth_core(Local_name, Input_index, Dimension_depth, &Next_index);
+		ss << write_array_dim_depth(Local_name, Next_index, Dimension_depth);
+	}
 	return ss.str();
 }
 
@@ -13527,6 +13926,277 @@ string write_depending_on_kind(string Local_name, string Local_kind, string* Loc
 	if (Local_kind == "par_inout")
 	{
 		HT.concat(Local_name, "_regout", Local_name_app);
+	}
+	return ss.str();
+}
+
+string reset_struct_field(string Top_kind, string Prefix_name, int Field_number, int Number_of_fields, int Current_comp_type, string HDL)
+{
+	stringstream ss;
+	string Comp_name;
+	int Next_field_number, Next_comp_type;
+	if (HDL == "c")
+	{
+		if (Field_number == Number_of_fields)
+		{
+			if (Top_kind == "vectorarray_t")
+			{
+				if (HT.findfact("type_def(" + to_string(Current_comp_type) + ",_,_,_,_,\"single_t\",0,0,_)"))
+				{
+					Comp_name = returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",_,_,_,_,\"single_t\",0,0,_)"), 2);
+					ss << "        (* " << Prefix_name << Comp_name << " = 0 ;" << endl;
+				}
+			}
+			else if (HT.findfact("type_def(" + to_string(Current_comp_type) + ",_,_,_,_,\"single_t\",0,0,_)"))
+			{
+				if (Top_kind != "vectorarray_t")
+				{
+					ss << "        " << Prefix_name << Comp_name << " = 0 ;" << endl;
+				}
+			}
+		}
+		else if (Field_number < Number_of_fields)
+		{
+			ss << reset_struct_field_cond(Top_kind, Prefix_name, Current_comp_type, "c");
+			Next_field_number = Field_number + 1;
+			Next_comp_type = Current_comp_type + 1;
+			ss << reset_struct_field(Top_kind, Prefix_name, Next_field_number, Number_of_fields, Next_comp_type, "c");
+		}
+	}
+	return ss.str();
+}
+
+string reset_struct_field_cond(string Top_kind, string Prefix_name, int Current_comp_type, string HDL)
+{
+	stringstream ss;
+	string Comp_name;
+	if (HDL == "c")
+	{
+		if (Top_kind != "vectorarray_t")
+		{
+			if (HT.findfact("type_def(" + to_string(Current_comp_type) + ",_,_,_,_,\"single_t\",0,0,_)"))
+			{
+				Comp_name = returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",_,_,_,_,\"single_t\",0,0,_)"), 2);
+				ss << "        " << Prefix_name << Comp_name << " = 0 ;" << endl;
+			}
+		}
+		else if (Top_kind == "vectorarray_t")
+		{
+			if (HT.findfact("type_def(" + to_string(Current_comp_type) + ",_,_,_,_,\"single_t\",0,0,_)"))
+			{
+				Comp_name = returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",_,_,_,_,\"single_t\",0,0,_)"), 2);
+				ss << "        (* " << Prefix_name << Comp_name << " = 0 ;" << endl;
+			}
+		}
+	}
+	return ss.str();
+}
+
+string reset_call_ports_unopt(string Module_name, string HDL, int C_entry)
+{
+	stringstream ss;
+	int Next_entry;
+	if (HDL == "vhdl")
+	{
+		if (HT.findfact("call_stmt(" + Module_name + "," + to_string(C_entry) + ",_,_)"))
+		{
+			ss << reset_call_ports_core_unopt(Module_name, "vhdl", C_entry, &Next_entry);
+			ss << reset_call_ports_unopt(Module_name, "vhdl", Next_entry);
+		}
+	}
+	return ss.str();
+}
+
+string reset_call_ports_core_unopt(string Module_name, string HDL, int C_entry, int* Next_entry)
+{
+	stringstream ss;
+	int Called_mod_entry;
+	string Cmodule_name;
+	if (HDL == "vhdl")
+	{
+		if (HT.findfact("call_stmt(" + Module_name + "," + to_string(C_entry) + ",_,_)"))
+		{
+			Called_mod_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(C_entry) + ",_,_)"), 3));
+			if (HT.findfact("hierarchy_part(" + to_string(Called_mod_entry) + ",*)"))
+			{
+				Cmodule_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_mod_entry) + ",*)"), 2);
+				if (custom_block(Cmodule_name))
+				{
+					*Next_entry = C_entry + 1;
+				}
+				else if (HT.findfact("call_ios_have_been_reset(" + Cmodule_name + ")"))
+				{
+					*Next_entry = C_entry + 1;
+				}
+				else
+				{
+					finds_par_and_resets_formal_ios_unopt(Module_name, "vhdl", C_entry, Called_mod_entry, 1, 1);
+					HT.assertz("call_ios_have_been_reset(" + Cmodule_name + ")");
+					*Next_entry = C_entry + 1;
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string finds_par_and_resets_formal_ios_unopt(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int num)
+{
+	stringstream ss;
+	if (num == 1 && HDL == "vhdl")
+		ss << resets_standard_call_ios_unopt(Module_name, "vhdl", C_entry, Function_entry, 1, 1);
+	return ss.str();
+}
+
+string resets_standard_call_ios_unopt(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int num)
+{
+	stringstream ss;
+	string Called_module_name;
+	if (HDL == "vhdl")
+	{
+		if (Function_max_calls == 1)
+		{
+			if (HT.findfact("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"))
+			{
+				Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+				if (custom_block(Called_module_name))
+				{
+					if (HT.findfact("hdl_style(\"vhdl\")"))
+					{
+						ss << "       " << Called_module_name << "_results_read_int <= '0';" << endl;
+						ss << "       " << Called_module_name << "_start_int <= '0';" << endl;
+					}
+					else if (HT.findfact("hdl_style(\"verilog\")"))
+					{
+						ss << "       " << Called_module_name << "_results_read_int <= 1'b0;" << endl;
+						ss << "       " << Called_module_name << "_start_int <= 1'b0;" << endl;
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_fsm_clock_header(string HDL, string Tool)
+{
+	stringstream ss;
+	string ResetStyle;
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			if (HT.findfact("resetstyle(\"syncreset\")"))
+			{
+				ss << "      ELSE" << endl << endl;
+				ss << "        CASE state IS " << endl << endl;
+				ss << "          WHEN state_0 => " << endl;
+				ss << "           IF results_read = '1' THEN done_int <= '0'; END IF;" << endl;
+				ss << "           IF start = '1' THEN " << endl;
+				ss << "            IF done_int = '0' OR results_read = '1' THEN " << endl;
+				ss << "             busy <= '1';   -- processing started" << endl;
+				ss << "             state <= state_1;" << endl;
+				ss << "            END IF;" << endl;
+				ss << "           ELSE" << endl;
+				ss << "            state <= state_0;" << endl;
+				ss << "           END IF ;" << endl << endl;
+			}
+			else if (HT.findfact("resetstyle(*)"))
+			{
+				ResetStyle = returnpar(HT.findandreturn("resetstyle(*)"), 1);
+				if (ResetStyle != "syncreset")
+				{
+					ss << "      ELSIF clock = '1' AND clock'EVENT THEN " << endl << endl;
+					ss << "        CASE state IS " << endl << endl;
+					ss << "          WHEN state_0 => " << endl;
+					ss << "           IF results_read = '1' THEN done_int <= '0'; END IF;" << endl;
+					ss << "           IF start = '1' THEN " << endl;
+					ss << "            IF done_int = '0' OR results_read = '1' THEN " << endl;
+					ss << "             busy <= '1';   -- processing started" << endl;
+					ss << "             state <= state_1;" << endl;
+					ss << "            END IF;" << endl;
+					ss << "           ELSE" << endl;
+					ss << "            state <= state_0;" << endl;
+					ss << "           END IF ;" << endl << endl;
+				}
+			}
+		}
+		else if (HDL == "verilog")
+		{
+			ss << "       end" << endl << endl;
+			ss << "      else if (clock)" << endl << endl;
+			ss << "        (* safe_fsm, full_case, parallel_case *)" << endl;
+			ss << "        case (state)  // synthesis full_case" << endl << endl;
+			ss << "          state_0 : " << endl;
+			ss << "           begin " << endl;
+			ss << "            if (results_read) done_int <= 1'b0; " << endl;
+			ss << "            if (start) begin " << endl;
+			ss << "             if (~done_int || results_read)" << endl;
+			ss << "              begin " << endl;
+			ss << "               busy <= 1'b1; //-- processing started " << endl;
+			ss << "               state <= state_1;" << endl;
+			ss << "              end " << endl;
+			ss << "             end " << endl;
+			ss << "            else" << endl;
+			ss << "             state <= state_0;" << endl;
+			ss << "           end " << endl << endl;
+		}
+	}
+	else if (Tool == "gnu")
+	{
+		if (HDL == "c")
+		{
+			ss << "      case 'n': {" << endl;
+			ss << "       switch (state) {" << endl;
+			ss << "        case 0:" << endl;
+			ss << "         printf(" << '"' << " initial state 0" << '\\' << 'n' << '"' << ");" << endl;
+			ss << "         printf(" << '"' << " reading the design's inputs and synchronizing with the outside world..." << '\\' << 'n' << '"' << ");" << endl;
+			ss << "         printf(" << '"' << " by pressing n you move to state 1" << '\\' << 'n' << '"' << ");" << endl;
+			ss << "         state = 1; " << endl;
+			ss << "         run_clock_cycles = run_clock_cycles + 1;" << endl;
+			ss << "         break;" << endl;
+		}
+	}
+	return ss.str();
+}
+
+string write_states(string Module_name, int Number, string HDL, string Tool)
+{
+	stringstream ss;
+	GeneralFact *SN;
+	if (HT.findfact("state_node(" + Module_name + "," + to_string(Number) + ",*)"))
+	{
+		SN = makeInstanceOf(HT.findandreturn("state_node(" + Module_name + "," + to_string(Number) + ",*)"));
+		state_node* ptr = dynamic_cast<state_node*>(SN);
+		ss << write_state(Module_name, *ptr, HDL, Tool);
+	}
+	return ss.str();
+}
+
+string write_state(string Module_name, state_node SN, string HDL, string Tool)
+{
+	stringstream ss;
+	GeneralFact* GF;
+	GF = &SN;
+	state_node* ptr = &SN;
+	string sntype, state;
+	vector<int> Op_list;
+	sntype = typeid(*ptr).name();
+	sntype = sntype.substr(6);
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			if (sntype == "dataflow")
+			{
+				state = to_string(return_par_of_sn(ptr, 1));
+				Op_list = returnVec(GF, 1);
+				ss << "          WHEN state_" << returnpar(HT.findandreturn(makeStringOf(GF)), 2) << " =>" << endl;
+				ss << "            state <= state_" << state << ";" << endl;
+				ss << write_state_operations(Module_name, state , Op_list);
+
+			}
+		}
 	}
 	return ss.str();
 }
