@@ -815,6 +815,8 @@ public:
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 
 	friend vector<int> returnVec(GeneralFact* obj, size_t vec);
+
+	friend int return_par_of_sn(state_node* sn, int pos);
 };
 
 //vector
@@ -856,6 +858,8 @@ public:
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 
 	friend vector<int> returnVec(GeneralFact* obj, size_t vec);
+
+	friend int return_par_of_sn(state_node* sn, int pos);
 };
 
 //vector
@@ -907,6 +911,8 @@ public:
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 
 	friend vector<int> returnVec(GeneralFact* obj, size_t vec);
+
+	friend int return_par_of_sn(state_node* sn, int pos);
 };
 
 //vector
@@ -948,6 +954,8 @@ public:
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 
 	friend vector<int> returnVec(GeneralFact* obj, size_t vec);
+
+	friend int return_par_of_sn(state_node* sn, int pos);
 };
 
 //vector

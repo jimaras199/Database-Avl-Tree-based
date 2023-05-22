@@ -1546,6 +1546,43 @@ vector<int> returnVec(GeneralFact* obj, size_t vec)
 	return res;
 }
 
+int return_par_of_sn(state_node* sn, int pos)
+{
+	int res{};
+	string ALine;
+	ALine = typeid(sn).name();
+	ALine = ALine.substr(6);
+	
+	if (ALine == "jump")
+	{
+		jump* ptr = dynamic_cast<jump*>(sn);
+		res = ptr->w;
+	}
+	else if (ALine == "dataflow")
+	{
+		dataflow* ptr = dynamic_cast<dataflow*>(sn);
+		res = ptr->w;
+	}
+	else if (ALine == "subprogram_call")
+	{
+		subprogram_call* ptr = dynamic_cast<subprogram_call*>(sn);
+		res = ptr->w;
+	}
+	else if (ALine == "ifthen")
+	{
+		ifthen* ptr = dynamic_cast<ifthen*>(sn);
+		if (pos == 1)
+		{
+			res = ptr->r;
+		}
+		else if (pos == 2)
+		{
+			res = ptr->t;
+		}
+	}
+	return res;
+}
+
 /// @brief returns the vector<return_nested_conditional_end> of a nested_cond_fact
 /// @param obj <- nested_cond_fact
 /// @return nested_cond_fact::w (2nd member)
