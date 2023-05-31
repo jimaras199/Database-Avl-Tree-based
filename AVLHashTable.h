@@ -1546,6 +1546,10 @@ vector<int> returnVec(GeneralFact* obj, size_t vec)
 	return res;
 }
 
+/// @brief looks in the type of a state_node
+/// @param sn <- state_node pointer
+/// @param pos <- parameter position of type
+/// @return the parameter of the type
 int return_par_of_sn(state_node* sn, int pos)
 {
 	int res{};
