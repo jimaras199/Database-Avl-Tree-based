@@ -212,14 +212,14 @@ string  print_special_triplet_op(string HDL, string Operator, string Rd_name, in
 string print_right_side_multdiv(string Operator, string Left, string Right, int Data_width, string HDL);
 /////////////////////
 
-bool generate_top(string pathln, string exec, string cmdl);
+void generate_top(string pathln, string exec, string cmdl);
 void assert_global_constraint_conditionally0(string Line = "");
 void assert_global_constraint_conditionally1(string Line = "");
 void assert_global_constraint_conditionally2(string Line = "");
 void assert_global_constraint_conditionally3(string Line = "");
 void assert_mp_conditionally(string Line = "");
 void assert_hdl_conditionally(string Line = "");
-bool check_for_program_name(string path = "", string exename = "");
+void check_for_program_name(string path = "", string exename = "");
 void extract_loops_from_all_modules(int entry);
 void extract_loops(string name, int entry);
 void build_loop_cond(string name, int entry);
@@ -232,7 +232,6 @@ void generate_hdl_recursive(string Hdlform, string Tool, int Entry);
 void store_package_name(int Entry, string Module);
 void increment_module_counter();
 void generate_hdl_2(string Hdlform, string tool, string Module_name, int Level);
-bool custom_block(string* Module_name);
 void get_and_append_local(string Module_name, vector<local_object> LList, int Onumber, vector<local_object>* cosLList, int* cosOnumber);
 void add_local_conditionally(string Module_name, vector<local_object> In_local_list, int In_local_entry, vector<local_object>* Out_list, int* Last_entry);
 void append_local(vector<local_object> T1, local_object Local1, vector<local_object>* T2);
@@ -277,7 +276,7 @@ void find_rec_field_string(int First_field_type, int Field_num, string* Field_st
 bool one_of_two_not_same_array(string str1, string str2, int int1, int int2);
 void find_record_field_bounds(int Acc_lower_bound, int Field_num, int In_field_count, int In_field_type, int* Upper_bound, int* Lower_bound);
 void translate_operator_symbol(string Op_string, string* C_op_string, string* CloseParenthesis, string* ExtraAss);
-void get_data_name(string Module, int Entry_number, string* LowName, int* Width);
+bool get_data_name(string Module, int Entry_number, string* LowName, int* Width);
 
 //essential functions
 bool Iscmdlinearg(string Line)
@@ -653,7 +652,7 @@ int main(int argc, char* argv[])
 }
 
 
-bool generate_top(string pathln, string exec, string cmdl)
+void generate_top(string pathln, string exec, string cmdl)
 {
 	//line 33885
 	string Line; //a line from the call in cmd
@@ -681,8 +680,6 @@ bool generate_top(string pathln, string exec, string cmdl)
 			generate_hdl_recursive(Hdlform, "synergy", 1);
 		}
 	}
-	return 0;
-
 }
 
 void itf_not_found_message()
@@ -923,7 +920,7 @@ void assert_global_constraint_conditionally3(string Command_line_args)
 	}
 }
 
-bool check_for_program_name(string pathln, string exec)
+void check_for_program_name(string pathln, string exec)
 {
 	fstream File("hdlmaker.log", ios::app);
 	stringstream line;
@@ -947,8 +944,6 @@ bool check_for_program_name(string pathln, string exec)
 		exit(0);
 	}
 	File.close();
-
-	return true;
 }
 
 void extract_loops_from_all_modules(int Entry)
@@ -1462,7 +1457,7 @@ bool trace_back(string Module, int Previous, int Variable, int* Result)
 	if (!HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",*)"))
 	{
 		*Result = 0;
-		return false;
+		return true;
 	}
 	else if (HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",_,_,_,_," + to_string(Variable) + ",_)"))
 	{
@@ -1473,19 +1468,21 @@ bool trace_back(string Module, int Previous, int Variable, int* Result)
 		if (Operator != 110)
 		{
 			calc_target_var(Module, Operator, Left, Right, Result);
+			return true;
 		}
 	}
-	else if (HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",_,_,_,_,_,_)"))
+	else if (HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",*)"))
 	{
 		int Target, Next_previous;
-		Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Previous) + ",_,_,_,_,_,_)"), 7));
+		Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Previous) + ",*)"), 7));
 		if (Target != Variable)
 		{
 			Next_previous = Previous - 1;
 			trace_back(Module, Next_previous, Variable, Result);
+			return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 /* Calculate the value of variable on a targeting operation */
@@ -1615,7 +1612,7 @@ void generate_hdl_2(string Hdlform, string tool, string Module_name, int Level)
 	}
 	else if (Level > 0)
 	{
-		if (custom_block(&Module_name))
+		if (custom_block(Module_name))
 		{
 			if (HT.findfact("global_declarations(*)"))
 			{
@@ -2019,24 +2016,25 @@ bool parent_type_is_integer(int Type, int* Par_Size)
 {
 	if (Type == 2)
 	{
-		if (HT.findfact("type_def(2,_,_,_,_,_,_,_,_)"))
+		if (HT.findfact("type_def(2,*)"))
 		{
 			int Parent;
-			Parent = stoi(returnpar(HT.findandreturn("type_def(2,_,_,_,_,_,_,_,_)"), 5));
+			Parent = stoi(returnpar(HT.findandreturn("type_def(2,*)"), 5));
+			*Par_Size = stoi(returnpar(HT.findandreturn("type_def(2,*)"), 3));
 			if (Parent == 0)
 			{
-				*Par_Size = stoi(returnpar(HT.findandreturn("type_def(2,_,_,_,_,_,_,_,_)"), 3));
 				return true;
 			}
 		}
 	}
-	else if (HT.findfact("type_def(" + to_string(Type) + ",_,_,_,_,_,_,_,_)"))
+	else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
 	{
 		int Parent;
-		Parent = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",_,_,_,_,_,_,_,_)"), 5));
+		Parent = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 5));
 		if (Type != 2 && Parent != 0)
 		{
 			parent_type_is_integer(Parent, Par_Size);
+			return true;
 		}
 	}
 	return false;
@@ -3700,7 +3698,7 @@ string print_custom_functions(string Module, int Entry, string HDL)
 
 bool custom_block(string Module_name)
 {
-	if (HT.findfact("combo(_," + Module_name + ",_)") || HT.findfact("combo(_," + Module_name + ",_)"))
+	if (HT.findfact("combo(_," + Module_name + ",_)") || HT.findfact("sequence(_," + Module_name + ",_)"))
 		return true;
 	return false;
 }
@@ -5795,8 +5793,8 @@ void conv_kind(string PModule, string Data, string* Kind)
 
 bool is_relational_op(string str)
 {
-	return str == "=" && str == "<" && str == "<=" && str == ">"
-		&& str == ">=" && str == "and" && str == "or" && str == "xor" && str == "not";
+	return str == "=" || str == "<" || str == "<=" || str == ">"
+		|| str == ">=" || str == "and" || str == "or" || str == "xor" || str == "not";
 }
 
 string type_op_triple(string Module_name, string Res_name, string Left_name, string Right_name, string Res_kind, string Left_kind, string Right_kind, string Op_string, string Assignment_string, string Hdl)
@@ -8339,11 +8337,12 @@ bool is_it_the_last_io(string Module_name, string HDL, int Current_entry, int* L
 		*Last = 1;
 		return true;
 	}
-	else
+	else if (HT.findfact("local_object(" + Module_name + "," + to_string(Next_entry) + ",*)"))
 	{
 		*Last = 0;
-		return false;
+		return true;
 	}
+	return false;
 }
 
 string print_conditional_end_of_statement(int num)
@@ -15812,7 +15811,7 @@ bool derived_type(int Type, int Ref)
 {
 	int Type1;
 	if (Type == Ref || HT.findfact("type_def(" + to_string(Type) + ",_,_,_," + to_string(Ref) + ",_,_,_,_)"))
-		return false;
+		return true;
 	else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
 	{
 		Type1 = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 5));
@@ -17194,7 +17193,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 	return ss.str();
 }
 
-void get_data_name(string Module, int Entry_number, string* LowName, int* Width)
+bool get_data_name(string Module, int Entry_number, string* LowName, int* Width)
 {
 	string Name;
 	int Data_type;
@@ -17205,6 +17204,7 @@ void get_data_name(string Module, int Entry_number, string* LowName, int* Width)
 			Name = returnpar(HT.findandreturn("special_dt(" + Module + "," + to_string(Entry_number) + ",_,_,\"std_logic\",_,_)"), 3);
 			*Width = stoi(returnpar(HT.findandreturn("special_dt(" + Module + "," + to_string(Entry_number) + ",_,_,\"std_logic\",_,_)"), 4));
 			upper_lower(Name, LowName);
+			return true;
 		}
 	}
 	else if (Entry_number > 0)
@@ -17217,9 +17217,11 @@ void get_data_name(string Module, int Entry_number, string* LowName, int* Width)
 			{
 				*Width = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Data_type) + ",*)"), 3));
 				upper_lower(Name, LowName);
+				return true;
 			}
 		}
 	}
+	return false;
 }
 
 string write_special_comment(string HDL)
