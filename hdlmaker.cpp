@@ -208,7 +208,7 @@ string print_record_fields_concatenation(string Sd_name, int Sd_type, int Field_
 string write_assignment_to_a_record(string Module, string Operator, string Sd_name, string Rd_name, int Num_of_elements, int Input_elem_number, int Input_shift_offset, string HDL);
 string write_assignment_to_a_record_core(string Module, string Operator, string Sd_name, string Rd_name, int Input_elem_number, int Num_of_elements, int Input_shift_offset, int* Element_width, string HDL);
 string write_record_field_target_assignment(string op, string Rd_name, string Element_name, int Input_shift_offset, string Sd_name, string HDL);
-string  print_special_triplet_op(string HDL, string Operator, string Rd_name, int Rd_width, string Left_name, int Left_width, string Right_name, int Right_width);
+string print_special_triplet_op(string HDL, string Operator, string Rd_name, int Rd_width, string Left_name, int Left_width, string Right_name, int Right_width);
 string print_right_side_multdiv(string Operator, string Left, string Right, int Data_width, string HDL);
 string write_record_assignment_to_variable(string Module, string Sd_name, int Left_op, int Left_type, int No_of_fields, int First_field_type);
 string conditionally_write_shift(string Total_name, int Shifts);
@@ -219,6 +219,33 @@ string type_field_shifts(string Module, vector<int> List1, vector<int> List2, in
 string write_output_state_assignments(string Module_name, int State, vector<int> List);
 string write_output_state_assignment(string Module_name, int State, int Op);
 string write_call(string WS, string Module_name, int State, int Next_state, int int1, vector<int> Total_ops, int Operation, string HDL, string Order);
+string print_call_input_par_assignments_parcs(string Module_name, vector<int> List, string Order);
+string print_call_input_par_assignment_parcs(string Module_name, int Head_op, int Par_entry, string Order);
+string print_call_input_par_assignment_parcs_core(string Module_name, int Head_op, int Par_entry, string Order, int* Next_entry);
+string write_conditionally_next_state(string Module, int Next_state);
+string print_call_output_par_assignments_parcs(string Module_name, vector<int> List, string Order);
+string print_call_output_par_assignment_parcs(string Module_name, int Head_op, int Par_entry, string Order);
+string print_call_output_par_assignment_parcs_core(string Module_name, int Head_op, int Par_entry, string Order, int* Next_entry);
+string print_function_input_assignment(string Module_name, string Called_module_name, string Actual_param_name, int Actual_par_entry, string Formal_param_name, int Target_entry);
+string write_total_order_assignment_conditional(string WS, int Total_order, int CurrentDepth);
+string write_next_state_conditionally(string WS, int CurrentDepth, int Next_state);
+string write_cus_block_call_input_var_assignments(string Module_name, string Called_module_name, int Entry, vector<int> List1, string WS, int* One_after, vector<int>* Rest_params, string HDL);
+string write_cus_block_call_input_var_assignments_core(string Module_name, string Called_module_name, int Entry, vector<int> List, string WS, string HDL, int* Next_entry);
+string write_cus_block_call_input_var_assignment(string Module_name, string Called_module_name, int Entry, int Actual_param, string WS, string HDL);
+string write_cus_block_call_output_var_assignments(string Module_name, string Called_module_name, int Formal_entry, vector<int> List, string WS);
+string write_cus_block_call_output_var_assignments_core(string Module_name, string Called_module_name, int Formal_entry, vector<int> List, string WS, int* Next_entry);
+string write_cus_block_call_output_var_assignment(string Module_name, string Called_module_name, int Formal_entry, int Actual_param, string WS);
+string write_custom_call_actuals(string Module_name, int Call_entry, string HDL);
+string write_procedure_task_call_actuals(string Module_name, int Call_entry, string HDL);
+string write_procedure_actual_parameters(string Module_name, string Called_module, vector<int> List, int In_formal_entry);
+string write_function_out_param_aux_cond(string Called_module);
+string write_parameter_assignments(string Module_name, string Called_module, vector<int> List, int In_formal_entry);
+string write_parameter_assignment(string Module_name, string Called_module, int Actual, int Formal);
+string write_function_task_call_actuals(string Module_name, int Op_entry, int Call_entry, string HDL);
+string write_actual_or_formal_parameter(string Module, string Called_module, int Actual, int Formal);
+string write_c_actual_parameters(string Module_name, string Called_module, vector<int> List, int In_formal_entry);
+string write_parkind_c(string str);
+string write_c_parameter(string Module, string Called_module, int Actual, int Formal);
 /////////////////////
 
 void generate_top(string pathln, string exec, string cmdl);
@@ -291,6 +318,8 @@ void total_number_of_aggregate_fields(string Module, vector<int> List, int In_sh
 void append_list(vector<int> List1, int Local, vector<int>* List2);
 bool is_exception_output_operator(int Op_numb);
 void read_current_depth(int* CurrentDepth);
+bool it_is_input_kind(string str);
+bool it_is_output_kind(string str);
 
 //essential functions
 bool Iscmdlinearg(string Line)
@@ -17121,11 +17150,9 @@ string output_special_operation(string Module, int Operation, string HDL, string
 									if (get_data_name(Module, Left_op, &Sd_name, 0))
 									{
 										ss << write_special_comment(HDL) << endl;
-										if (Next_shift_offset == 0)
-										{
-											ss << write_assignment_to_a_record(Module, Operator, Sd_name, Rd_name, Num_of_elements, 0, Next_shift_offset, HDL);
-											ss << "         printf(" << '"' << Rd_name << " = " << Sd_name << " = %d" << '\\' << "n" << '"' << ", " << Rd_name << "); " << endl;
-										}
+										Next_shift_offset = 0;
+										ss << write_assignment_to_a_record(Module, Operator, Sd_name, Rd_name, Num_of_elements, 0, Next_shift_offset, HDL);
+										ss << "         printf(" << '"' << Rd_name << " = " << Sd_name << " = %d" << '\\' << "n" << '"' << ", " << Rd_name << "); " << endl;
 									}
 								}
 							}
@@ -18498,9 +18525,12 @@ bool is_exception_output_operator(int Op_numb)
 string write_call(string WS, string Module_name, int State, int Next_state, int int1, vector<int> Total_ops, int Operation, string HDL, string Order)
 {
 	stringstream ss;
-	int Op_type, Call_entry, Called_module_entry, CurrentDepth, MaxOrder;
-	string Called_module_name;
-	vector<int> vecOp;
+	int Op_type, Call_entry, Called_module_entry, CurrentDepth, MaxOrder, Same_order, Total_order, Gross, Res_entry, Res_type, Max_order, Same_total;
+	string Called_module_name, Ordercus, New_schedule, Res_name, WS1;
+	vector<int> vecOp, Actual_params;
+	vecOp.push_back(Operation);
+	vector<int> emptv;
+
 	if(int1 == 0)
 		return ss.str();
 	if (Operation > 0)
@@ -18551,10 +18581,542 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 									if (MaxOrder <= 1)
 									{
 										ss << WS << "------ this is a call to module : " << Called_module_name << " -----" << endl;
-										vecOp.push_back(Operation);
 										ss << print_call_input_par_assignments_parcs(Module_name, vecOp, "");
-
+										ss << endl;
+										ss << WS << "           IF " << Called_module_name << "_busy = '0' AND " << Called_module_name << "_done = '0' THEN" << endl;
+										ss << WS << "            IF " << Called_module_name << "_results_read_int = '1' THEN" << endl;
+										ss << WS << "              ";
+										ss << WS << Called_module_name << "_start_int" << " <= '0';" << endl;
+										ss << WS << "              ";
+										ss << WS << Called_module_name << "_results_read_int" << " <= '0';" << endl;
+										ss << WS << "              state <= state_";
+										ss << write_conditionally_next_state(Module_name, Next_state);
+										ss << WS << "             ELSE" << endl;
+										ss << WS << "              " << Called_module_name << "_start_int <= '1';" << endl;
+										ss << WS << "              state <= state_" << State << ";" << endl;
+										ss << WS << "             END IF;" << endl;
+										ss << WS << "           ELSIF " << Called_module_name << "_busy = '1' AND " << Called_module_name << "_start_int = '1'	THEN   -- when it begins" << endl;
+										ss << WS << "            " << Called_module_name << "_start_int <= '0';" << endl;
+										ss << WS << "            state <= state_" << State << ";" << endl;
+										ss << WS << "           ELSIF " << Called_module_name << "_done = '1' 	THEN   -- when it is completed then read the results" << endl;
+										ss << print_call_output_par_assignments_parcs(Module_name, vecOp, "");
+										ss << WS << "            " << Called_module_name << "_start_int <= '0';" << endl;
+										ss << WS << "            IF " << Called_module_name << "_results_read_int = '0' THEN  -- if it is done then indicate that the results are read" << endl;
+										ss << WS << "             " << Called_module_name << "_results_read_int <= '1';" << endl;
+										ss << WS << "             state <= state_" << State << ";" << endl;
+										ss << WS << "            ELSIF ";
+										ss << WS << Called_module_name << "_results_read_int" << " = '1'";
+										ss << WS << "  THEN -- all calls are synchronized and completed " << endl;
+										ss << WS << "             ";
+										ss << WS << Called_module_name << "_results_read_int" << " <= '0';" << endl;
+										ss << WS << "             state <= state_";
+										ss << write_conditionally_next_state(Module_name, Next_state);
+										ss << WS << "            END IF;" << endl;
+										ss << WS << "           ELSE " << endl;
+										ss << WS << "            state <= state_" << State << ";" << endl;
+										ss << WS << "           END IF; " << endl;
 									}
+								}
+							}
+							if (!custom_block(Called_module_name))
+							{
+								read_current_depth(&CurrentDepth);
+								if (HT.findfact("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"))
+								{
+									Same_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 6));
+									Total_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 9));
+									Gross = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 10));
+
+									if (Total_order > 1)
+									{
+										if (HT.findfact("new_schedule(*)"))
+										{
+											New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+											make_order_string(Same_order, Same_order, &Ordercus);
+											find_correct_order(Module_name, Call_entry, &MaxOrder);
+											if (MaxOrder > 1)
+											{
+												ss << print_call_input_par_assignments_parcs(Module_name, vecOp, Ordercus) << endl;
+												ss << WS << "           IF " << Called_module_name << Ordercus << "_busy = '0' AND " << Called_module_name << Ordercus << "_done = '0' THEN" << endl;
+												ss << WS << "            IF " << Called_module_name << Ordercus << "_results_read_int = '1' THEN" << endl;
+												ss << WS << "             IF ";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                ", " AND ", " = '1'", 1, 1);
+												ss << WS << "             THEN " << endl;
+												ss << WS << "              ";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "start_int", 1, Gross, "                                ", "", " <= '0';", 1, 0);
+												ss << WS << "              ";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                ", "", " <= '0';", 1, 0);
+												ss << write_next_state_conditionally(WS, CurrentDepth, Next_state);
+												ss << WS << "             END IF;" << endl;
+												ss << WS << "            ELSE" << endl;
+												ss << WS << "              " << Called_module_name << Ordercus << "_start_int <= '1';" << endl;
+												ss << WS << "              state_var(" << CurrentDepth << ") := state_" << State << ";" << endl;
+												ss << WS << "            END IF;" << endl;
+												ss << WS << "           ELSIF " << Called_module_name << Ordercus << "_busy = '1' AND " << Called_module_name << Ordercus << "_start_int = '1'	THEN   -- when it begins" << endl;
+												ss << WS << "            " << Called_module_name << Ordercus << "_start_int <= '0';" << endl;
+												ss << WS << "            state_var(" << CurrentDepth << ") := state_" << State << ";" << endl;
+												ss << WS << "           ELSIF " << Called_module_name << Ordercus << "_done = '1' 	THEN   -- when it is completed then read the results" << endl;
+												ss << print_call_output_par_assignments_parcs(Module_name, vecOp, Ordercus);
+												ss << WS << "            " << Called_module_name << Ordercus << "_start_int <= '0';" << endl;
+												ss << WS << "            IF " << Called_module_name << Ordercus << "_results_read_int = '0' THEN  -- if it is done then indicate that the results are read" << endl;
+												ss << WS << "             " << Called_module_name << Ordercus << "_results_read_int <= '1';" << endl;
+												ss << WS << "             state_var(" << CurrentDepth << ") := state_" << State << ";" << endl;
+												ss << WS << "            ELSIF ";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                        ", " AND ", " = '1'", 1, 1);
+												ss << WS << "            THEN -- all calls are synchronized and completed " << endl;
+												ss << WS << "              ";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                        ", "", " <= '0';", 1, 0);
+												ss << write_next_state_conditionally(WS, CurrentDepth, Next_state);
+												ss << WS << "            END IF;" << endl;
+												ss << WS << "           ELSE " << endl;
+												ss << WS << "            state_var(" << CurrentDepth << ") := state_" << State << ";" << endl;
+												ss << WS << "           END IF; " << endl;
+												ss << write_total_order_assignment_conditional(WS, Total_order, CurrentDepth);
+											}
+										}
+									}
+									else if (Same_order == 1)
+									{
+										find_correct_order(Module_name, Call_entry, &MaxOrder);
+										if (MaxOrder > 1)
+										{
+											ss << WS << "------ this is a call to module : " << Called_module_name << " -----" << endl;
+											ss << print_call_input_par_assignments_parcs(Module_name, vecOp, "_1") << endl;
+											ss << WS << "           IF " << Called_module_name << "_1_busy = '0' AND " << Called_module_name << "_1_done = '0' THEN" << endl;
+											ss << WS << "             IF " << Called_module_name << "_1_results_read_int = '1' THEN" << endl;
+											ss << WS << "              ";
+											ss << WS << Called_module_name << "_1_start_int" << " <= '0';" << endl;
+											ss << WS << "              ";
+											ss << WS << Called_module_name << "_1_results_read_int" << " <= '0';" << endl;
+											ss << WS << "              state <= state_";
+											ss << write_conditionally_next_state(Module_name, Next_state);
+											ss << WS << "             ELSE" << endl;
+											ss << WS << "              " << Called_module_name << "_1_start_int <= '1';" << endl;
+											ss << WS << "              state <= state_" << State << ";" << endl;
+											ss << WS << "             END IF;" << endl;
+											ss << WS << "           ELSIF " << Called_module_name << "_1_busy = '1' AND " << Called_module_name << "_1_start_int = '1'	THEN   -- when it begins" << endl;
+											ss << WS << "            " << Called_module_name << "_1_start_int <= '0';" << endl;
+											ss << WS << "            state <= state_" << State << ";" << endl;
+											ss << WS << "           ELSIF " << Called_module_name << "_1_done = '1' 	THEN   -- when it is completed then read the results" << endl;
+											ss << print_call_output_par_assignments_parcs(Module_name, vecOp, "_1");
+											ss << WS << "            " << Called_module_name << "_1_start_int <= '0';" << endl;
+											ss << WS << "            IF " << Called_module_name << "_1_results_read_int = '0' THEN  -- if it is done then indicate that the results are read" << endl;
+											ss << WS << "             " << Called_module_name << "_1_results_read_int <= '1';" << endl;
+											ss << WS << "             state <= state_" << State << ";" << endl;
+											ss << WS << "            ELSIF ";
+											ss << WS << Called_module_name << "_1_results_read_int" << " = '1'";
+											ss << WS << "  THEN -- all calls are synchronized and completed " << endl;
+											ss << WS << "             ";
+											ss << WS << Called_module_name << "_1_results_read_int" << " <= '0';" << endl;
+											ss << WS << "             state <= state_";
+											write_conditionally_next_state(Module_name, Next_state);
+											ss << WS << "            END IF;" << endl;
+											ss << WS << "           ELSE " << endl;
+											ss << WS << "            state <= state_" << State << ";" << endl;
+											ss << WS << "           END IF; " << endl;
+										}
+									}
+									find_correct_order(Module_name, Call_entry, &MaxOrder);
+									if (MaxOrder <= 1)
+									{
+										ss << WS << "------ this is a call to module : " << Called_module_name << " -----" << endl;
+										ss << print_call_input_par_assignments_parcs(Module_name, vecOp, "") << endl;
+										ss << WS << "           IF " << Called_module_name << "_busy = '0' AND " << Called_module_name << "_done = '0' THEN" << endl;
+										ss << WS << "            IF " << Called_module_name << "_results_read_int = '1' THEN" << endl;
+										ss << WS << "              ";
+										ss << WS << Called_module_name << "_start_int" << " <= '0';" << endl;
+										ss << WS << "              ";
+										ss << WS << Called_module_name << "_results_read_int" << " <= '0';" << endl;
+										ss << WS << "              state <= state_";
+										ss << write_conditionally_next_state(Module_name, Next_state);
+										ss << WS << "             ELSE" << endl;
+										ss << WS << "              " << Called_module_name << "_start_int <= '1';" << endl;
+										ss << WS << "              state <= state_" << State << ";" << endl;
+										ss << WS << "             END IF;" << endl;
+										ss << WS << "           ELSIF " << Called_module_name << "_busy = '1' AND " << Called_module_name << "_start_int = '1'	THEN   -- when it begins" << endl;
+										ss << WS << "            " << Called_module_name << "_start_int <= '0';" << endl;
+										ss << WS << "            state <= state_" << State << ";" << endl;
+										ss << WS << "           ELSIF " << Called_module_name << "_done = '1' 	THEN   -- when it is completed then read the results" << endl;
+										ss << print_call_output_par_assignments_parcs(Module_name, vecOp, "");
+										ss << WS << "            " << Called_module_name << "_start_int <= '0';" << endl;
+										ss << WS << "            IF " << Called_module_name << "_results_read_int = '0' THEN  -- if it is done then indicate that the results are read" << endl;
+										ss << WS << "             " << Called_module_name << "_results_read_int <= '1';" << endl;
+										ss << WS << "             state <= state_" << State << ";" << endl;
+										ss << WS << "            ELSIF ";
+										ss << WS << Called_module_name << "_results_read_int" << " = '1'";
+										ss << WS << "  THEN -- all calls are synchronized and completed " << endl;
+										ss << WS << "             ";
+										ss << WS << Called_module_name << "_results_read_int" << " <= '0';" << endl;
+										ss << WS << "             state <= state_";
+										ss << write_conditionally_next_state(Module_name, Next_state);
+										ss << WS << "            END IF;" << endl;
+										ss << WS << "           ELSE " << endl;
+										ss << WS << "            state <= state_" << State << ";" << endl;
+										ss << WS << "           END IF; " << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"), 6));
+					if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+					{
+						Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+						Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+						{
+							Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+							if (custom_block(Called_module_name))
+							{
+								ss << WS;
+								ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
+								ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
+								ss << write_block_call(Called_module_name, 2, WS) << endl;
+								ss << write_cus_block_call_output_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS);
+							}
+						}
+					}
+				}
+				else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 6));
+					Res_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 7));
+					if (Res_entry > 0)
+					{
+						if (HT.findfact("data_stmt(" + Module_name + ",_,"+to_string(Res_entry)+",_,_,_)"))
+						{
+							Res_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Res_entry) + ",_,_,_)"), 2);
+							Res_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Res_entry) + ",_,_,_)"), 4));
+							if (!HT.findfact("type_def(" + to_string(Res_type) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"))
+							{
+								if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+								{
+									Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+									Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
+									if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+									{
+										Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+										if (custom_block(Called_module_name))
+										{
+											ss << WS;
+											ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
+											ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
+											ss << write_block_call(Called_module_name, 2, WS) << endl;
+											ss << WS << Res_name << " <= " << Called_module_name << "_" << Called_module_name << "_var; -- default function output" << endl;
+										}
+									}
+								}
+							}
+							else if (HT.findfact("type_def(" + to_string(Res_type) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"))
+							{
+								if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+								{
+									Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+									Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
+									if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+									{
+										Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+										if (custom_block(Called_module_name))
+										{
+											ss << WS;
+											ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
+											ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
+											ss << write_block_call(Called_module_name, 2, WS) << endl;
+											ss << WS << Res_name << " <= " << Called_module_name << "_" << Called_module_name << "_var; -- default function output" << endl;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (HDL == "verilog")
+	{
+		if (int1 == 1)
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("hdl_style(\"verilog\")"))
+				{
+					if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
+					{
+						Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 6));
+						if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+						{
+							Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+							{
+								Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+								if (!custom_block(Called_module_name))
+								{
+									read_current_depth(&CurrentDepth);
+									if (HT.findfact("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"))
+									{
+										Same_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 6));
+										Same_total = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 7));
+										Total_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 9));
+										Gross = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 10));
+										if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"))
+										{
+											Max_order = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"), 4));
+											if (Total_order > 1)
+											{
+												make_order_string(Same_order, Same_total, &Order);
+												ss << WS;
+												ss << WS << " //------ this is a call to module : " << Called_module_name << " -----" << endl;
+												ss << print_call_input_par_assignments_parcs(Module_name, vecOp, Order);
+												ss << WS << "           if ((" << Called_module_name << Order << "_busy == 1'b0) && (" << Called_module_name << Order << "_done == 1'b0))" << endl;
+												ss << WS << "            if (" << Called_module_name << Order << "_results_read_int == 1'b1) " << endl;
+												ss << WS << "             begin" << endl;
+												ss << WS << "              if (" << endl;
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                ", " && ", " == 1'b1", 1, 1);
+												ss << ")";
+												ss << WS << "               begin" << endl;
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "start_int", 1, Gross, "                                ", "", " <= 1'b0;", 1, 0);
+												ss << WS << "                ";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                ", "", " <= 1'b0;", 1, 0);
+												HT.concat(WS, "   ", &WS1);
+												ss << write_next_state_conditionally(WS1, CurrentDepth, Next_state);
+												ss << WS << "               end" << endl;
+												ss << WS << "             end" << endl;
+												ss << WS << "            else" << endl;
+												ss << WS << "             begin" << endl;
+												ss << WS << "              " << Called_module_name << Order << "_start_int <= 1'b1;" << endl;
+												ss << WS << "              state_var[" << CurrentDepth << "] = state_" << State << ";" << endl;
+												ss << WS << "             end" << endl;
+												ss << WS << "           else if ((" << Called_module_name << Order << "_busy == 1'b1) && (" << Called_module_name << Order << "_start_int == 1'b1)) // when it begins" << endl;
+												ss << WS << "            begin" << endl;
+												ss << WS << "             " << Called_module_name << Order << "_start_int <= 1'b0;" << endl;
+												ss << WS << "              state_var[" << CurrentDepth << "] = state_" << State << ";" << endl;
+												ss << WS << "            end" << endl;
+												ss << WS << "           else if (" << Called_module_name << Order << "_done == 1'b1) // when it is completed then read the results" << endl;
+												ss << WS << "            begin" << endl;
+												ss << print_call_output_par_assignments_parcs(Module_name, vecOp, Order);
+												ss << WS << "             " << Called_module_name << Order << "_start_int <= 1'b0;" << endl;
+												ss << WS << "              if (" << Called_module_name << Order << "_results_read_int == 1'b0)  //if it is done then indicate that the results are read" << endl;
+												ss << WS << "               begin" << endl;
+												ss << WS << "                " << Called_module_name << Order << "_results_read_int <= 1'b1;" << endl;
+												ss << WS << "                 state_var[" << CurrentDepth << "] = state_" << State << ";" << endl;
+												ss << WS << "               end" << endl;
+												ss << WS << "              else if (";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                        ", " && ", " == 1'b1", 1, 1);
+												ss << ")";
+												ss << WS << "               begin    // all calls are synchronized and completed " << endl;
+												ss << WS << "              ";
+												ss << write_polymorfic_IO_exression(Module_name, New_schedule, State, Called_module_name, "results_read_int", 1, Gross, "                                        ", "", " <= 1'b0;", 1, 0);
+												ss << write_next_state_conditionally(WS, CurrentDepth, Next_state) << endl;
+												ss << WS << "               end" << endl;
+												ss << WS << "            end" << endl;
+												ss << WS << "           else " << endl;
+												ss << WS << "            state_var[" << CurrentDepth << "] = state_" << State << ";" << endl;
+												ss << write_total_order_assignment_conditional(WS, Total_order, CurrentDepth);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (HT.findfact("hdl_style(\"verilog\")"))
+			{
+				if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 6));
+					if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+					{
+						Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+						{
+							Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+							if (!custom_block(Called_module_name))
+							{
+								read_current_depth(&CurrentDepth);
+								if (HT.findfact("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"))
+								{
+									Total_order = stoi(returnpar(HT.findandreturn("operation_order(" + Module_name + ",\"parcsif\"," + to_string(State) + "," + to_string(Operation) + "," + to_string(Called_module_entry) + ",*)"), 9));
+									if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"))
+									{
+										Max_order = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"), 4));
+										if (Total_order == 1)
+										{
+											if (Max_order == 1)
+											{
+												ss << WS;
+												ss << WS << " //------ this is a call to module : " << Called_module_name << " -----" << endl;
+												ss << print_call_input_par_assignments_parcs(Module_name, vecOp, "");
+												ss << WS << "           if ((" << Called_module_name << "_busy == 1'b0) && (" << Called_module_name << "_done == 1'b0))" << endl;
+												ss << WS << "            if (" << Called_module_name << "_results_read_int == 1'b1) " << endl;
+												ss << WS << "             begin" << endl;
+												ss << WS << "              " << Called_module_name << "_start_int <= 1'b0;" << endl;
+												ss << WS << "              " << Called_module_name << "_results_read_int <= 1'b0;" << endl;
+												ss << WS << "              state <= state_";
+												ss << write_conditionally_next_state(Module_name, Next_state);
+												ss << WS << "             end" << endl;
+												ss << WS << "            else" << endl;
+												ss << WS << "             begin" << endl;
+												ss << WS << "              " << Called_module_name << "_start_int <= 1'b1;" << endl;
+												ss << WS << "              state <= state_" << State << ";" << endl;
+												ss << WS << "             end" << endl;
+												ss << WS << "           else if ((" << Called_module_name << "_busy == 1'b1) && (" << Called_module_name << "_start_int == 1'b1)) " << endl;
+												ss << WS << "            begin" << endl;
+												ss << WS << "             " << Called_module_name << "_start_int <= 1'b0;" << endl;
+												ss << WS << "              state <= state_" << State << ";" << endl;
+												ss << WS << "            end" << endl;
+												ss << WS << "           else if (" << Called_module_name << "_done == 1'b1) // when it is completed then read the results" << endl;
+												ss << WS << "            begin" << endl;
+												ss << print_call_output_par_assignments_parcs(Module_name, vecOp, "");
+												ss << WS << "             " << Called_module_name << "_start_int <= 1'b0;" << endl;
+												ss << WS << "              if (" << Called_module_name << "_results_read_int == 1'b0)  //if it is done then indicate that the results are read" << endl;
+												ss << WS << "               begin" << endl;
+												ss << WS << "                " << Called_module_name << "_results_read_int <= 1'b1;" << endl;
+												ss << WS << "                state <= state_" << State << ";" << endl;
+												ss << WS << "               end" << endl;
+												ss << WS << "              else // if (" << Called_module_name << "_results_read_int == 1'b1) " << endl;
+												ss << WS << "               begin    // all calls are synchronized and completed " << endl;
+												ss << WS << "                " << Called_module_name << "_results_read_int <= 1'b0;" << endl;
+												ss << WS << "                 state <= state_";
+												ss << write_conditionally_next_state(Module_name, Next_state);
+												ss << WS << "               end" << endl;
+												ss << WS << "            end" << endl;
+												ss << WS << "           else " << endl;
+												ss << WS << "            state <= state_" << State << ";" << endl;
+											}
+											if (Max_order > 1)
+											{
+												ss << WS;
+												ss << WS << " //------ this is a call to module : " << Called_module_name << " -----" << endl;
+												ss << print_call_input_par_assignments_parcs(Module_name, vecOp, "_1");
+												ss << WS << "           if ((" << Called_module_name << "_1_busy == 1'b0) && (" << Called_module_name << "_1_done == 1'b0))" << endl;
+												ss << WS << "            if (" << Called_module_name << "_1_results_read_int == 1'b1) " << endl;
+												ss << WS << "             begin" << endl;
+												ss << WS << "              " << Called_module_name << "_1_start_int <= 1'b0;" << endl;
+												ss << WS << "              " << Called_module_name << "_1_results_read_int <= 1'b0;" << endl;
+												ss << WS << "              state <= state_";
+												ss << write_conditionally_next_state(Module_name, Next_state);
+												ss << WS << "             end" << endl;
+												ss << WS << "            else" << endl;
+												ss << WS << "             begin" << endl;
+												ss << WS << "              " << Called_module_name << "_1_start_int <= 1'b1;" << endl;
+												ss << WS << "              state <= state_" << State << ";" << endl;
+												ss << WS << "             end" << endl;
+												ss << WS << "           else if ((" << Called_module_name << "_1_busy == 1'b1) && (" << Called_module_name << "_1_start_int == 1'b1)) " << endl;
+												ss << WS << "            begin" << endl;
+												ss << WS << "             " << Called_module_name << "_1_start_int <= 1'b0;" << endl;
+												ss << WS << "              state <= state_" << State << ";" << endl;
+												ss << WS << "            end" << endl;
+												ss << WS << "           else if (" << Called_module_name << "_1_done == 1'b1) // when it is completed then read the results" << endl;
+												ss << WS << "            begin" << endl;
+												ss << print_call_output_par_assignments_parcs(Module_name, vecOp, "_1");
+												ss << WS << "             " << Called_module_name << "_1_start_int <= 1'b0;" << endl;
+												ss << WS << "              if (" << Called_module_name << "_1_results_read_int == 1'b0)  //if it is done then indicate that the results are read" << endl;
+												ss << WS << "               begin" << endl;
+												ss << WS << "                " << Called_module_name << "_1_results_read_int <= 1'b1;" << endl;
+												ss << WS << "                state <= state_" << State << ";" << endl;
+												ss << WS << "               end" << endl;
+												ss << WS << "              else // if (" << Called_module_name << "_1_results_read_int == 1'b1) " << endl;
+												ss << WS << "               begin    // all calls are synchronized and completed " << endl;
+												ss << WS << "                " << Called_module_name << "_1_results_read_int <= 1'b0;" << endl;
+												ss << WS << "                 state <= state_";
+												ss << write_conditionally_next_state(Module_name, Next_state);
+												ss << WS << "               end" << endl;
+												ss << WS << "            end" << endl;
+												ss << WS << "           else " << endl;
+												ss << WS << "            state <= state_" << State << ";" << endl;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"), 6));
+					if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+					{
+						Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+						{
+							Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+							if (custom_block(Called_module_name))
+							{
+								ss << WS;
+								ss << " //------ this is a call to custom block : " << Called_module_name << " -----" << endl;
+								ss << write_custom_call_actuals(Module_name, Call_entry, "verilog") << endl;
+							}
+						}
+					}
+				}
+				else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 6));
+					Res_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 7));
+					if (Res_entry > 0)
+					{
+						if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Res_entry) + ",_,_,_)"))
+						{
+							if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",_,_)"))
+							{
+								Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",_,_)"), 3));
+								if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+								{
+									Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+									if(custom_block(Called_module_name))
+									{
+										ss << WS;
+										ss << " //------ this is a call to custom block : " << Called_module_name << " -----" << endl;
+										ss << write_custom_call_actuals(Module_name, Call_entry, "verilog") << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (HDL == "c")
+	{
+		if (int1 == 1)
+		{
+			if (HT.findfact("hdl_style(\"c\")"))
+			{
+				if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"), 6));
+					if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+					{
+						Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+						if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+						{
+							ss << write_custom_call_actuals(Module_name, Call_entry, "c") << endl;
+						}
+					}
+				}
+				else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 6));
+					Res_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 7));
+					if (Res_entry > 0)
+					{
+						if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Res_entry) + ",_,_,_)"))
+						{
+							if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",_,_)"))
+							{
+								Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",_,_)"), 3));
+								if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+								{
+									ss << write_custom_call_actuals(Module_name, Call_entry, "c") << endl;
 								}
 							}
 						}
@@ -18577,6 +19139,871 @@ void read_current_depth(int* CurrentDepth)
 string print_call_input_par_assignments_parcs(string Module_name, vector<int> List, string Order)
 {
 	stringstream ss;
-	if(List.empty())
+	if (List.empty())
+	{
+		print_call_input_par_assignment_parcs(Module_name, List.front(), 1, Order);
+		List.erase(List.begin());
+		print_call_input_par_assignments_parcs(Module_name, List, Order);
+	}
+	return ss.str();
+}
+
+string print_call_input_par_assignment_parcs(string Module_name, int Head_op, int Par_entry, string Order)
+{
+	stringstream ss;
+	int Next_entry;
+	if (HT.findfact("top_level_call(" + to_string(Par_entry) + ",_," + Module_name + ",_,_,_,_,_,_,_,_)"))
+	{
+		print_call_input_par_assignment_parcs_core(Module_name, Head_op, Par_entry, Order, &Next_entry);
+		print_call_input_par_assignment_parcs(Module_name, Head_op, Next_entry, Order);
+	}
+	return ss.str();
+}
+
+string print_call_input_par_assignment_parcs_core(string Module_name, int Head_op, int Par_entry, string Order, int* Next_entry)
+{
+	stringstream ss;
+	int Call_entry, Called_entry;
+	string Called_module_name, Actual_param_name, Formal_param_name;
+	if (HT.findfact("top_level_call(" + to_string(Par_entry) + ",_," + Module_name + ",_,_,_,_,_,_,_,\"par_in\")"))
+	{
+		*Next_entry = Par_entry + 1;
+	}
+	else if (HT.findfact("top_level_call(" + to_string(Par_entry) + ",_," + Module_name + ",_,_,_,_,_,_,_,\"par_inout\")"))
+	{
+		*Next_entry = Par_entry + 1;
+	}
+	else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"))
+	{
+		Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 6));
+		if (!HT.findfact("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_,_,_,_,_,_,\"par_out\")"))
+		{
+			*Next_entry = Par_entry + 1;
+		}
+	}
+	else if (Order == "")
+	{
+		if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"))
+		{
+			Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 6));
+			if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+			{
+				Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+				if (HT.findfact("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_,"+to_string(Called_entry)+",_,_,_,_,\"par_out\")"))
+				{
+					Called_module_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_out\")"), 5);
+					Actual_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_out\")"), 7);
+					Formal_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_out\")"), 9);
+					if (!HT.findfact("mem_port(_,_," + Module_name + "," + Actual_param_name + ",_,_,_,_,_,_,_,_,_)"))
+					{
+						ss << "           " << Called_module_name << "_";
+						ss << Formal_param_name << " <= " << Actual_param_name << ";" << endl;
+						*Next_entry = Par_entry + 1;
+					}
+					else if (HT.findfact("mem_port(_,_," + Module_name + "," + Actual_param_name + ",_,_,_,_,_,_,_,_,_)"))
+					{
+						*Next_entry = Par_entry + 1;
+					}
+				}
+			}
+		}
+	}
+	else if (Order != "")
+	{
+		if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"))
+		{
+			Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 6));
+			if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+			{
+				Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+				if (HT.findfact("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_out\")"))
+				{
+					Called_module_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_out\")"), 5);
+					Actual_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_out\")"), 7);
+					Formal_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_out\")"), 9);
+					if (!HT.findfact("mem_port(_,_," + Module_name + "," + Actual_param_name + ",_,_,_,_,_,_,_,_,_)"))
+					{
+						ss << "           " << Called_module_name << Order << "_";
+						ss << Formal_param_name << " <= " << Actual_param_name << ";" << endl;
+						*Next_entry = Par_entry + 1;
+					}
+					else if (HT.findfact("mem_port(_,_," + Module_name + "," + Actual_param_name + ",_,_,_,_,_,_,_,_,_)"))
+					{
+						*Next_entry = Par_entry + 1;
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_conditionally_next_state(string Module, int Next_state)
+{
+	stringstream ss;
+	string Schedule;
+	if (HT.findfact("new_schedule(*)"))
+	{
+		Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+		if (HT.findfact("state(" + Module + "," + Schedule + "," + to_string(Next_state) + ",*)"))
+		{
+			ss << Next_state << ";" << endl;
+		}
+	}
+	else if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (HT.findfact("new_schedule(*)"))
+		{
+			Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+			if (!HT.findfact("state(" + Module + "," + Schedule + "," + to_string(Next_state) + ",*)"))
+			{
+				ss << "0;" << endl;
+				ss << "                           done_int <= '1';   -- processing finished, results are ready !!!" << endl;
+				ss << "                           busy <= '0'; " << endl;
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (HT.findfact("new_schedule(*)"))
+		{
+			Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+			if (!HT.findfact("state(" + Module + "," + Schedule + "," + to_string(Next_state) + ",*)"))
+			{
+				ss << "0;" << endl;
+				ss << "                           done_int <= 1'b1;   //-- processing finished, results are ready !!!" << endl;
+				ss << "                           busy <= 1'b0; " << endl;
+			}
+		}
+	}
+	return ss.str();
+}
+
+string print_call_output_par_assignments_parcs(string Module_name, vector<int> List, string Order)
+{
+	stringstream ss;
+	if (!List.empty())
+	{
+		ss << print_call_output_par_assignment_parcs(Module_name, List.front(), 1, Order);
+		List.erase(List.begin());
+		ss << print_call_output_par_assignments_parcs(Module_name, List, Order);
+	}
+	return ss.str();
+}
+
+string print_call_output_par_assignment_parcs(string Module_name, int Head_op, int Par_entry, string Order)
+{
+	stringstream ss;
+	int Next_entry;
+	if (HT.findfact("top_level_call(" + to_string(Par_entry) + ",_," + Module_name + ",_,_,_,_,_,_,_,_)"))
+	{
+		ss << print_call_output_par_assignment_parcs_core(Module_name, Head_op, Par_entry, Order, &Next_entry);
+		ss << print_call_output_par_assignment_parcs(Module_name, Head_op, Next_entry, Order);
+	}
+	return ss.str();
+}
+
+string print_call_output_par_assignment_parcs_core(string Module_name, int Head_op, int Par_entry, string Order, int* Next_entry)
+{
+	stringstream ss;
+	int Call_entry, Target_entry, Called_entry, Actual_par_entry, Type_entry;
+	string Called_module_name, Actual_param_name, Formal_param_name, Formalname1, Formalname2, Formalname3;
+	if (HT.findfact("top_level_call(" + to_string(Par_entry) + ",_," + Module_name + ",_,_,_,_,_,_,_,\"par_out\")"))
+	{
+		*Next_entry = Par_entry + 1;
+	}
+	else if (HT.findfact("top_level_call(" + to_string(Par_entry) + ",_," + Module_name + ",_,_,_,_,_,_,_,\"par_inout\")"))
+	{
+		*Next_entry = Par_entry + 1;
+	}
+	else if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"))
+		{
+			Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 6));
+			Target_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 7));
+			if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+			{
+				Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+				if (HT.findfact("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"))
+				{
+					Called_module_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 5);
+					Actual_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 7);
+					Actual_par_entry = stoi(returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 8));
+					Formal_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 9);
+					HT.concat(Called_module_name, Order, &Formalname1);
+					HT.concat(Formalname1, "_", &Formalname2);
+					HT.concat(Formalname2, Formal_param_name, &Formalname3);
+					ss << print_function_input_assignment(Module_name, Called_module_name, Actual_param_name, Actual_par_entry, Formalname3, Target_entry);
+					*Next_entry = Par_entry + 1;
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"))
+		{
+			Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 6));
+			Target_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 7));
+			if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+			{
+				Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+				if (HT.findfact("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"))
+				{
+					Called_module_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 5);
+					Actual_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 7);
+					Actual_par_entry = stoi(returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 8));
+					Formal_param_name = returnpar(HT.findandreturn("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_," + to_string(Called_entry) + ",_,_,_,_,\"par_in\")"), 9);
+					HT.concat(Called_module_name, Order, &Formalname1);
+					HT.concat(Formalname1, "_", &Formalname2);
+					HT.concat(Formalname2, Formal_param_name, &Formalname3);
+					if (HT.findfact("data_stmt(" + Called_module_name + "," + Formal_param_name + ",*)"))
+					{
+						Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(" + Called_module_name + "," + Formal_param_name + ",*)"), 4));
+						if (HT.findfact("type_def(" + to_string(Type_entry) + ",_,_,_,0,_,_,_,_)"))
+						{
+							ss << print_function_input_assignment(Module_name, Called_module_name, Actual_param_name, Actual_par_entry, Formalname3, Target_entry);
+							*Next_entry = Par_entry + 1;
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string print_function_input_assignment(string Module_name, string Called_module_name, string Actual_param_name, int Actual_par_entry, string Formal_param_name, int Target_entry)
+{
+	stringstream ss;
+	string tmpstr;
+	if (Actual_param_name == "function_output")
+	{
+		if (Actual_par_entry == 0)
+		{
+			ss << "           ";
+			if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Target_entry) + ",_,_,_)"))
+			{
+				tmpstr = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Target_entry) + ",_,_,_)"), 5);
+				if (!HT.findfact("mem_port(_,_," + Module_name + "," + tmpstr + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					ss << Actual_param_name << " <= " << Formal_param_name << ";" << endl;
+				}
+				else if (HT.findfact("mem_port(_,_," + Module_name + "," + tmpstr + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					return ss.str();
+				}
+			}
+		}
+	}
+	if (Actual_param_name != "function_output")
+	{
+		if (Actual_par_entry != 0)
+		{
+			if (!HT.findfact("mem_port(_,_," + Module_name + "," + Actual_param_name + ",_,_,_,_,_,_,_,_,_)"))
+			{
+				ss << "            ";
+				ss << Actual_param_name << " <= " << Formal_param_name << ";" << endl;
+			}
+			else if (HT.findfact("mem_port(_,_," + Module_name + "," + Actual_param_name + ",_,_,_,_,_,_,_,_,_)"))
+			{
+				return ss.str();
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_total_order_assignment_conditional(string WS, int Total_order, int CurrentDepth)
+{
+	stringstream ss;
+	if (CurrentDepth >= Total_order)
+	{
+		if (HT.findfact("hdl_style(\"vhdl\")"))
+		{
+			if (Total_order == CurrentDepth)
+			{
+				ss << WS << "    state <= state_var(" << Total_order << ");" << endl;
+			}
+		}
+		else if (HT.findfact("hdl_style(\"verilog\")"))
+		{
+			if (Total_order == CurrentDepth)
+			{
+				ss << WS << "    state <= state_var[" << Total_order << "];" << endl;
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_next_state_conditionally(string WS, int CurrentDepth, int Next_state)
+{
+	stringstream ss;
+	int PreviousDepth;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (CurrentDepth == 1)
+		{
+			ss << WS << "              state_var(" << CurrentDepth << ") := state_0;" << endl;
+			ss << WS << "              done_int <= '1';   -- processing finished, results are ready !!!" << endl;
+			ss << WS << "              busy <= '0'; " << endl;
+		}
+		else if (CurrentDepth > 1)
+		{
+			PreviousDepth = CurrentDepth - 1;
+			ss << WS << "              state_var(" << CurrentDepth << ") := state_var(" << PreviousDepth << ");" << endl;
+			ss << WS << "              IF state_var(" << PreviousDepth << ") = state_0 THEN" << endl;
+			ss << WS << "               done_int <= '1';   -- processing finished, results are ready !!!" << endl;
+			ss << WS << "               busy <= '0'; " << endl;
+			ss << WS << "              END IF;" << endl;
+		}
+	}
+	if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (CurrentDepth == 1)
+		{
+			ss << WS << "              state_var[" << CurrentDepth << "] = state_0;" << endl;
+			ss << WS << "              done_int <= 1'b1;   //-- processing finished, results are ready !!!" << endl;
+			ss << WS << "              busy <= 1'b0; " << endl;
+		}
+		else if (CurrentDepth > 1)
+		{
+			PreviousDepth = CurrentDepth - 1;
+			ss << WS << "              state_var[" << CurrentDepth << "] = state_var[" << PreviousDepth << "];" << endl;
+			ss << WS << "              if (state_var[" << PreviousDepth << "] == state_0) begin" << endl;
+			ss << WS << "               done_int <= 1'b1;   //-- processing finished, results are ready !!!" << endl;
+			ss << WS << "               busy <= 1'b0; " << endl;
+			ss << WS << "              end" << endl;
+		}
+	}
+	return ss.str();
+}
+
+string write_cus_block_call_input_var_assignments(string Module_name, string Called_module_name, int Entry, vector<int> List1, string WS, int* One_after, vector<int>* Rest_params, string HDL)
+{
+	stringstream ss;
+	int Next_entry;
+	if (List1.empty())
+	{
+		*One_after = Entry;
+	}
+	else if (HT.findfact("data_stmt("+Called_module_name+",_,"+to_string(Entry)+",_,_,_)"))
+	{
+		ss << write_cus_block_call_input_var_assignments_core(Module_name, Called_module_name, Entry, List1, WS, HDL, &Next_entry);
+		List1.erase(List1.begin());
+		ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, Next_entry, List1, WS, One_after, Rest_params, HDL);
+	}
+	return ss.str();
+}
+
+string  write_cus_block_call_input_var_assignments_core(string Module_name, string Called_module_name, int Entry, vector<int> List, string WS, string HDL, int* Next_entry)
+{
+	stringstream ss;
+	string Kind;
+	if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,_,_)"))
+	{
+		Kind = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,_,_)"), 5);
+		if (!it_is_input_kind(Kind))
+		{
+			*Next_entry = Entry + 1;
+		}
+		else if (it_is_input_kind(Kind))
+		{
+			ss << write_cus_block_call_input_var_assignment(Module_name, Called_module_name, Entry, List.front(), WS, HDL);
+			*Next_entry = Entry + 1;
+		}
+	}
+	return ss.str();
+}
+
+bool it_is_input_kind(string str)
+{
+	return str == "par_in" || str == "par_inout";
+}
+
+string write_cus_block_call_input_var_assignment(string Module_name, string Called_module_name, int Entry, int Actual_param, string WS, string HDL)
+{
+	stringstream ss;
+	string Formal_par_name, Actual_par_name;
+	int Type_entry;
+	if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,\"var\",_)") || HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,\"const\",_)"))
+	{
+		return ss.str();
+	}
+	if (HDL == "vhdl")
+	{
+		if (HT.findfact("data_stmt(" + Called_module_name + ",_,"+to_string(Entry)+",1,_,_)"))
+		{
+			Formal_par_name = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",1,_,_)"), 2);
+			if (it_is_input_kind("par_inout"))
+			{
+				if (HT.findfact("data_stmt(" + Module_name + ",_,"+to_string(Actual_param)+",_,_,_)"))
+				{
+					Actual_par_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"), 2);
+					ss << WS << Called_module_name << "_" << Formal_par_name << "_var := " << Actual_par_name << " ; " << endl;
+				}
+			}
+		}
+		else if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,_,_)"))
+		{
+			Formal_par_name = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,_,_)"), 2);
+			Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,_,_)"), 4));
+			if (it_is_input_kind("par_inout"))
+			{
+				if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"))
+				{
+					Actual_par_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"), 2);
+					if (!HT.findfact("type_def(" + to_string(Type_entry) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"))
+					{
+						ss << WS << Called_module_name << "_" << Formal_par_name << "_var := " << Actual_par_name << " ; " << endl;
+					}
+					else if (HT.findfact("type_def(" + to_string(Type_entry) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"))
+					{
+						ss << WS << Called_module_name << "_" << Formal_par_name << "_var := " << Actual_par_name << " ; " << endl;
+					}
+				}
+			}
+		}
+	}
+	else if (HDL == "verilog")
+	{
+		if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,_,_)"))
+		{
+			Formal_par_name = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Entry) + ",_,_,_)"), 2);
+			if (it_is_input_kind("par_inout"))
+			{
+				if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"))
+				{
+					Actual_par_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"), 2);
+					ss << WS << Called_module_name << "_" << Formal_par_name << "_var := " << Actual_par_name << " ; " << endl;
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_cus_block_call_output_var_assignments(string Module_name, string Called_module_name, int Formal_entry, vector<int> List, string WS)
+{
+	stringstream ss;
+	int Next_entry;
+	if (!List.empty())
+	{
+		if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,\"var\",_)") || HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,\"const\",_)"))
+		{
+			return ss.str();
+		}
+		if (!HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ", _,_,_)"))
+		{
+			return ss.str();
+		}
+		ss << write_cus_block_call_output_var_assignments_core(Module_name, Called_module_name, Formal_entry, List, WS, &Next_entry);
+		List.erase(List.begin());
+		ss << write_cus_block_call_output_var_assignments(Module_name, Called_module_name, Next_entry, List, WS);
+	}
+	return ss.str();
+}
+
+string write_cus_block_call_output_var_assignments_core(string Module_name, string Called_module_name, int Formal_entry, vector<int> List, string WS, int* Next_entry)
+{
+	stringstream ss;
+	string Kind;
+	if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,_,_)"))
+	{
+		Kind = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,_,_)"), 5);
+		if (!it_is_output_kind(Kind))
+		{
+			*Next_entry = Formal_entry + 1;
+		}
+		else if (it_is_output_kind(Kind))
+		{
+			ss << write_cus_block_call_output_var_assignment(Module_name, Called_module_name, Formal_entry, List.front(), WS);
+			*Next_entry = Formal_entry + 1;
+		}
+	}
+	return ss.str();
+}
+
+bool it_is_output_kind(string str)
+{
+	return str == "par_out" || str == "par_inout";
+}
+
+string write_cus_block_call_output_var_assignment(string Module_name, string Called_module_name, int Formal_entry, int Actual_param, string WS)
+{
+	stringstream ss;
+	string Formal_par_name, Kind, Actual_par_name;
+	int Formal_type, Actual_type;
+	if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,\"var\",_)") || HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,\"const\",_)"))
+	{
+		return ss.str();
+	}
+	if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,_,_)"))
+	{
+		Formal_par_name = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,_,_)"), 2);
+		Formal_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,_,_)"), 4));
+		Kind = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Formal_entry) + ",_,_,_)"), 5);
+		if (it_is_output_kind(Kind))
+		{
+			if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"))
+			{
+				Actual_par_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"), 2);
+				Actual_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Actual_param) + ",_,_,_)"), 4));
+				if (Formal_type > 1)
+				{
+					if (!HT.findfact("type_def(" + to_string(Formal_type) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"))
+					{
+						ss << WS << Actual_par_name << " <= " << Called_module_name << "_" << Formal_par_name << "_var ; " << endl;
+					}
+					else if (HT.findfact("type_def(" + to_string(Formal_type) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"))
+					{
+						ss << WS << Actual_par_name << " <= " << Called_module_name << "_" << Formal_par_name << "_var ; " << endl;
+					}
+				}
+				else if (Formal_type == 1)
+				{
+					if (Actual_type == 1)
+					{
+						ss << WS << Actual_par_name << " <= " << Called_module_name << "_" << Formal_par_name << "_var ; " << endl;
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_custom_call_actuals(string Module_name, int Call_entry, string HDL)
+{
+	stringstream ss;
+	int Called_module_entry, Res_entry, Operation;
+	string Called_module_name, WS, Res_name;
+	vector<int> Actual_params;
+	if (HDL == "verilog")
+	{
+		if (HT.findfact("hdl_style(\"verilog\")"))
+		{
+			if (HT.findfact("hierarchy_part(_,_,_,\"libpart\",_,_,_)"))
+			{
+				Called_module_entry = stoi(returnpar(HT.findandreturn("hierarchy_part(_,_,_,\"libpart\",_,_,_)"), 1));
+				Called_module_name = returnpar(HT.findandreturn("hierarchy_part(_,_,_,\"libpart\",_,_,_)"), 2);
+				if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",*)"))
+				{
+					if (HT.findfact("prog_stmt(" + Module_name + ",_,_,109,0,"+to_string(Call_entry)+",0,_)"))
+					{
+						if (custom_block(Called_module_name))
+						{
+							WS = "      ";
+							ss << WS;
+							ss << " //------ this is a call to custom procedure block : " << Called_module_name << " -----" << endl;
+							ss << write_procedure_task_call_actuals(Module_name, Call_entry, "verilog") << endl;
+						}
+					}
+					else if (HT.findfact("prog_stmt(" + Module_name + ",_,_,109,0," + to_string(Call_entry) + ",0,_)"))
+					{
+						Operation = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + ",_,_,109,0," + to_string(Call_entry) + ",0,_)"), 2));
+						Res_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + ",_,_,109,0," + to_string(Call_entry) + ",0,_)"), 7));
+						if (Res_entry > 0)
+						{
+							if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Res_entry) + ",_,_,_)"))
+							{
+								Res_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Res_entry) + ",_,_,_)"), 2);
+								if (custom_block(Called_module_name))
+								{
+									WS = "      ";
+									ss << WS;
+									ss << " //------ this is a call to custom function block : " << Called_module_name << " -----" << endl;
+									ss << write_function_task_call_actuals(Module_name, Operation, Call_entry, "verilog") << endl;
+									ss << "             " << Res_name << " <= " << Called_module_name << "_tmpout;" << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (HDL == "c")
+	{
+		if (HT.findfact("hdl_style(\"c\"),"))
+		{
+			if (HT.findfact("hierarchy_part(_,_,_,\"libpart\",_,_,_)"))
+			{
+				Called_module_entry = stoi(returnpar(HT.findandreturn("hierarchy_part(_,_,_,\"libpart\",_,_,_)"), 1));
+				Called_module_name = returnpar(HT.findandreturn("hierarchy_part(_,_,_,\"libpart\",_,_,_)"), 2);
+				if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ",*)"))
+				{
+					Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
+					if (HT.findfact("prog_stmt(" + Module_name + ",_,_,109,0," + to_string(Call_entry) + ",0,_)"))
+					{
+						WS = "         ";
+						ss << WS;
+						ss << " //------ this is a call to procedure (subroutine) : " << Called_module_name << " -----" << endl;
+						ss << WS << Called_module_name << "(";
+						ss << write_c_actual_parameters(Module_name, Called_module_name, Actual_params, 1);
+						//write(");"), nl,
+						//write(WS),
+						//write("printf(", '"', Called_module_name, "("),
+						//write_c_actual_parameters(Module_name, Called_module_name, Actual_params, 1),
+						//write(")", '\\', "n", '"', ");"), nl.
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_procedure_task_call_actuals(string Module_name, int Call_entry, string HDL)
+{
+	stringstream ss;
+	int Called_module_entry;
+	string Called_module_name;
+	vector<int> Actual_params;
+	if (HDL == "verilog")
+	{
+		if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+		{
+			Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+			Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
+			if (HT.findfact("hierarchy_part("+to_string(Called_module_entry)+",*)"))
+			{
+				Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+				ss << "              " << Called_module_name << "_task(";
+				ss << write_procedure_actual_parameters(Module_name, Called_module_name, Actual_params, 1);
+				ss << ");  //-- from procedure call: " << Called_module_name << endl;
+				ss << write_parameter_assignments(Module_name, Called_module_name, Actual_params, 1);
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_procedure_actual_parameters(string Module_name, string Called_module, vector<int> List, int In_formal_entry)
+{
+	stringstream ss;
+	string  Object_name, Object_kind;
+	int Next_formal_entry;
+	if (!List.empty())
+	{
+		if (List.size() == 1)
+		{
+			if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(In_formal_entry) + ",_,\"par_in\",_)"))
+			{
+				if (HT.findfact("data_stmt(" + Module_name + ",_,"+to_string(List.front())+",_,_,_"))
+				{
+					Object_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(List.front()) + ",_,_,_"), 2);
+					ss << Object_name;
+					ss << write_function_out_param_aux_cond(Called_module);
+				}
+			}
+		}
+		else if (List.size() > 2)
+		{
+			ss << write_actual_or_formal_parameter(Module_name, Called_module, List.front(), In_formal_entry);
+			Next_formal_entry = In_formal_entry + 1;
+			List.erase(List.begin());
+			ss << write_procedure_actual_parameters(Module_name, Called_module, List, Next_formal_entry);
+		}
+		else if (HT.findfact("data_stmt(" + Called_module + ",_,"+to_string(In_formal_entry)+",_,_,_)"))
+		{
+			Object_name = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(In_formal_entry) + ",_,_,_)"), 2);
+			Object_kind = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(In_formal_entry) + ",_,_,_)"), 5);
+			if (it_is_output_kind(Object_kind))
+			{
+				ss << Object_name << "_tmpout";
+				ss << write_function_out_param_aux_cond(Called_module);
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_function_out_param_aux_cond(string Called_module)
+{
+	stringstream ss;
+	if (HT.findfact("data_stmt(" + Called_module + "," + Called_module + ",_,_,\"par_out\",_)"))
+	{
+		ss << ", " << Called_module << "_tmpout";
+	}
+	return ss.str();
+}
+
+string write_parameter_assignments(string Module_name, string Called_module, vector<int> List, int In_formal_entry)
+{
+	stringstream ss;
+	int Next_formal_entry;
+	if (!List.empty())
+	{
+		ss << write_parameter_assignment(Module_name, Called_module, List.front(), In_formal_entry);
+		Next_formal_entry = In_formal_entry + 1;
+		List.erase(List.begin());
+		ss << write_parameter_assignments(Module_name, Called_module, List, Next_formal_entry);
+	}
+	return ss.str();
+}
+
+string write_parameter_assignment(string Module_name, string Called_module, int Actual, int Formal)
+{
+	stringstream ss;
+	string Kind, Formal_name, Actual_name;
+	if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"))
+	{
+		Formal_name = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 2);
+		Kind = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 5);
+		if (Kind != "par_out" || Kind != "par_inout")
+		{
+			return ss.str();
+		}
+		else if (it_is_output_kind(Kind))
+		{
+			if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Actual) + ",_,_,_)"))
+			{
+				Actual_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Actual) + ",_,_,_)"), 2);
+				ss << "             " << Actual_name << " <= " << Formal_name << "_tmpout;" << endl;
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_function_task_call_actuals(string Module_name, int Op_entry, int Call_entry, string HDL)
+{
+	stringstream ss;
+	int Result, Called_module_entry;
+	vector<int> Actual_params;
+	string Called_module_name;
+	if (HDL == "verilog")
+	{
+		if (HT.findfact("prog_stmt("+Module_name+","+to_string(Op_entry)+",_,109,_,"+to_string(Call_entry)+",_,_)"))
+		{
+			Result = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Op_entry) + ",_,109,_," + to_string(Call_entry) + ",_,_)"), 7));
+			if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+			{
+				Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+				Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
+				if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+				{
+					Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+					if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Result) + ",_,_,_)"))
+					{
+						ss << "             " << Called_module_name << "_task(";
+						ss << write_procedure_actual_parameters(Module_name, Called_module_name, Actual_params, 1);
+						ss << ");   //-- from function call: " << Called_module_name << endl;
+						ss << write_parameter_assignments(Module_name, Called_module_name, Actual_params, 1);
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_actual_or_formal_parameter(string Module, string Called_module, int Actual, int Formal)
+{
+	stringstream ss;
+	string Object_name, Object_kind;
+	if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,\"par_in\",_)"))
+	{
+		if (HT.findfact("data_stmt(" + Module + ",_,"+to_string(Actual)+",_,_,_)"))
+		{
+			Object_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Actual) + ",_,_,_)"), 2);
+			ss << Object_name << ", ";
+		}
+	}
+	if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"))
+	{
+		Object_name = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 2);
+		Object_kind = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 5);
+		if (it_is_output_kind(Object_kind))
+		{
+			ss << Object_name << "_tmpout, ";
+		}
+	}
+	return ss.str();
+}
+
+string write_c_actual_parameters(string Module_name, string Called_module, vector<int> List, int In_formal_entry)
+{
+	stringstream ss;
+	string Kind, Object_name, Type_kind;
+	int Type, Next_formal_entry;
+	if (!List.empty())
+	{
+		if (List.size() == 1)
+		{
+			if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(In_formal_entry) + ",_,_,_)"))
+			{
+				Kind = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(In_formal_entry) + ",_,_,_)"), 5);
+				if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(List.front()) + ",_,_,_)"))
+				{
+					Object_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(List.front()) + ",_,_,_)"), 2);
+					Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(List.front()) + ",_,_,_)"), 2));
+					if (HT.findfact("type_def(" + to_string(Type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+					{
+						ss << Object_name;
+					}
+					else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+					{
+						Type_kind = returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 6);
+						if (Type_kind != "vectorarray_t")
+						{
+							ss << write_parkind_c(Kind);
+							ss << Object_name;
+						}
+					}
+				}
+			}
+		}
+		else if (List.size() > 2)
+		{
+			ss << write_c_parameter(Module_name, Called_module, List.front(), In_formal_entry);
+			Next_formal_entry = In_formal_entry + 1;
+			List.erase(List.begin());
+			ss << write_c_actual_parameters(Module_name, Called_module, List, Next_formal_entry);
+		}
+	}
+	return ss.str();
+}
+
+string write_parkind_c(string str)
+{
+	stringstream ss;
+	if (str == "par_out" || str == "par_inout")
+	{
+		ss << "&";
+	}
+	return ss.str();
+}
+
+string write_c_parameter(string Module, string Called_module, int Actual, int Formal)
+{
+	stringstream ss;
+	string Kind, Object_name, Type_kind;
+	int Type;
+	if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"))
+	{
+		Kind = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 5);
+		if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Actual) + ",_,_,_)"))
+		{
+			Object_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Actual) + ",_,_,_)"), 2);
+			Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Actual) + ",_,_,_)"), 2));
+			if (HT.findfact("type_def(" + to_string(Type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+			{
+				ss << Object_name << ", ";
+			}
+			else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+			{
+				Type_kind = returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 6);
+				if (Type_kind != "vectorarray_t")
+				{
+					ss << write_parkind_c(Kind);
+					ss << Object_name << ", ";
+				}
+			}
+		}
+	}
 	return ss.str();
 }
