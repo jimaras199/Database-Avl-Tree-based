@@ -262,6 +262,13 @@ string write_initial_gap_for_instances();
 string write_continuous_assignment();
 string write_division_instance_unopt(string op, int Op_size, string Op_instance, int Input_entry);
 string write_division_signal_op_unopt(string str, int Op_size, string Op_instance, int Input_entry);
+string write_data_routing_unopt(int Entry);
+string write_data_routing_unopt_cond(int Entry);
+string write_data_instances_unopt(int Op_inst_entry, int Input_entry, string Suffix, int In_size);
+string write_data_instances_unopt_core(int Op_inst_entry, int Input_entry, string Suffix, int In_size, int* Next_in_entry, int* Out_size);
+string write_data_instance_unopt(int Operator, int Input_entry, string Signal_inst_name, int Op_size);
+string write_input_name_conditionally(int Operator, string Input_name, int Value, int Size);
+string write_signal_inst_tail(int Signal_type, string In_instance, int Operator_entry, int Which_input);
 /////////////////////
 
 void generate_top(string pathln, string exec, string cmdl);
@@ -344,6 +351,13 @@ bool operator_symbol_is_comparisson(string str);
 bool operator_symbol(string str1, string str2);
 void operator_symbol(string str1, string* str2);
 void operator_symbol(string* str1, string str2);
+void min_(int In1, int In2, int* res);
+void find_minimum_size_of_routed_input(string Signal_instance, int In_entry, int Min_size_in, int* Min_size);
+void hdl_op_inputs_label(string* str1, string str2);
+void hdl_op_inputs_label(string str1, string* str2);
+bool op_is_boolean_operation(int Operator);
+bool comparisson_op(int Operator);
+bool is_incr_op(int op);
 
 //essential functions
 bool Iscmdlinearg(string Line)
@@ -443,7 +457,6 @@ void str_int(string str, int* int1)
 	*int1 = stoi(str);
 }
 /////////////////////
-
 
 //in language add 16 on page search
 //ITF_lib "as76das" "asdafgg125hdsg" "hdf12sbshd"
@@ -20648,6 +20661,9 @@ string write_datapath_unopt()
 			ss << endl << endl;
 			ss << "--  Datapath operators (Functional Units) --" << endl;
 			ss << write_op_instances_unopt(1);
+			ss << endl << endl;
+			ss << "-- now the data routing --" << endl;
+			ss << write_data_routing_unopt(1);
 		}
 	}
 	return ss.str();
@@ -20656,9 +20672,12 @@ string write_datapath_unopt()
 string write_op_instances_unopt(int Entry)
 {
 	stringstream ss;
+	int Next_entry;
 	if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
 	{
 		ss << write_op_instance_unopt(Entry);
+		Next_entry = Entry + 1;
+		ss << write_op_instances_unopt(Next_entry);
 	}
 	return ss.str();
 }
@@ -20666,8 +20685,8 @@ string write_op_instances_unopt(int Entry)
 string write_op_instance_unopt(int Entry)
 {
 	stringstream ss;
-	int  Operator, Op_size, Type, Size, Upper_bound, Rsize, Type_size;
-	string Instance_name, Symbol1, HDL, In1_instance, Output_inst_name, Right_inst_name, Op_name;
+	int  Operator, Op_size, Type, Size, Upper_bound, Rsize, Type_size, A_size, Min_size, Min_size1, Min_size2;
+	string Instance_name, Symbol1, HDL, In1_instance, Output_inst_name, Right_inst_name, Op_name, Out_instance, In2_instance;
 	string count = "<count>";
 	string increm = "<increm>";
 	string decrem = "<decrem>";
@@ -20863,10 +20882,150 @@ string write_op_instance_unopt(int Entry)
 						Instance_name << "_in2), " << Op_size <<
 						");" << endl;
 				}
+				else if (operator_symbol("mod", Op_name))
+				{
+					HT.concat(Instance_name, "_out", &Output_inst_name);
+					if (HT.findfact("output_instance(_,_,_," + Output_inst_name + ",_,_)"))
+					{
+						Type = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_inst_name + ",_,_)"), 5));
+						Size = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_inst_name + ",_,_)"), 6));
+						if (Type == 0)
+						{
+							if (Size > 1)
+							{
+								Upper_bound = Size - 1;
+								ss << write_initial_gap_for_instances();
+								ss << Output_inst_name << " <= -- synopsys translate_off " << endl;
+								ss << "                         (OTHERS => '0') WHEN is_x(" << Instance_name << "_in2) ELSE " << endl;
+								ss << "                          -- synopsys translate_on " << endl;
+								ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
+									Instance_name << "_in1) mod CONV_INTEGER(" << Instance_name << "_in2), " <<
+									Op_size << ") (" << Upper_bound << " downto 0);" << endl;
+							}
+							else if (Size == 1)
+							{
+								ss << write_initial_gap_for_instances();
+								ss << Output_inst_name << " <= -- synopsys translate_off " << endl;
+								ss << "                         '0' WHEN is_x(" << Instance_name << "_in2) ELSE " << endl;
+								ss << "                          -- synopsys translate_on " << endl;
+								ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
+									Instance_name << "_in1) mod CONV_INTEGER(" << Instance_name << "_in2), " <<
+									Op_size << ") (0) ;" << endl;
+							}
+						}
+						else if (Type > 0)
+						{
+							if (HT.findfact("type_def("+to_string(Type)+",*)"))
+							{
+								Type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+								if (Type_size > 1)
+								{
+									Upper_bound = Type_size - 1;
+									ss << write_initial_gap_for_instances();
+									ss << Output_inst_name << " <= -- synopsys translate_off " << endl;
+									ss << "                         (OTHERS => '0') WHEN is_x(" << Instance_name << "_in2) ELSE " << endl;
+									ss << "                          -- synopsys translate_on " << endl;
+									ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
+										Instance_name << "_in1) mod CONV_INTEGER(" << Instance_name << "_in2), " <<
+										Op_size << ") (" << Upper_bound << " downto 0);" << endl;
+								}
+								else if (Type_size == 1)
+								{
+									ss << write_initial_gap_for_instances();
+									ss << Output_inst_name << " <= -- synopsys translate_off " << endl;
+									ss << "                         '0' WHEN is_x(" << Instance_name << "_in2) ELSE " << endl;
+									ss << "                          -- synopsys translate_on " << endl;
+									ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
+										Instance_name << "_in1) mod CONV_INTEGER(" << Instance_name << "_in2), " <<
+										Op_size << ") (0) ;" << endl;
+								}
+							}
+						}
+					}
+				}
+				else if (operator_symbol("rem", Op_name))
+				{
+					HT.concat(Instance_name, "_out", &Output_inst_name);
+					if (HT.findfact("output_instance(_,_,_," + Output_inst_name + ",_,_)"))
+					{
+						Type = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_inst_name + ",_,_)"), 5));
+						Size = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_inst_name + ",_,_)"), 6));
+						if (Type > 0)
+						{
+							if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+							{
+								Type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+								if (Type_size > 1)
+								{
+									Upper_bound = Type_size - 1;
+									ss << write_initial_gap_for_instances();
+									ss << Output_inst_name << " <= -- synopsys translate_off " << endl;
+									ss << "                         (OTHERS => '0') WHEN is_x(" << Instance_name << "_in2) ELSE " << endl;
+									ss << "                          -- synopsys translate_on " << endl;
+									ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
+										Instance_name << "_in1) rem CONV_INTEGER(" << Instance_name << "_in2), " <<
+										Op_size << ") (" << Upper_bound << " downto 0);" << endl;
+								}
+							}
+						}
+						if (Type == 0)
+						{
+							if (Size > 1)
+							{
+								Upper_bound = Size - 1;
+								ss << write_initial_gap_for_instances();
+								ss << Output_inst_name << " <= -- synopsys translate_off " << endl;
+								ss << "                         (OTHERS => '0') WHEN is_x(" << Instance_name << "_in2) ELSE " << endl;
+								ss << "                          -- synopsys translate_on " << endl;
+								ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
+									Instance_name << "_in1) rem CONV_INTEGER(" << Instance_name << "_in2), " <<
+									Op_size << ") (" << Upper_bound << " downto 0);" << endl;
+							}
+							else if (Size == 1)
+							{
+								ss << write_initial_gap_for_instances();
+								ss << Output_inst_name << " <= -- synopsys translate_off " << endl;
+								ss << "                         '0' WHEN is_x(" << Instance_name << "_in2) ELSE " << endl;
+								ss << "                          -- synopsys translate_on " << endl;
+								ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
+									Instance_name << "_in1) rem CONV_INTEGER(" << Instance_name << "_in2), " <<
+									Op_size << ") (0) ;" << endl;
+							}
+						}
+					}
+				}
 			}
 			else if (operator_symbol(Symbol1, Op_name))
 			{
-
+				if (!Operator_symbol_is_modrem(Symbol1))
+				{
+					if (!Operator_symbol_is_incrdecr(Symbol1))
+					{
+						if (!Operator_symbol_is_multdiv(Symbol1))
+						{
+							ss << write_initial_gap_for_instances();
+							ss << Instance_name << "_out ";
+							HT.concat(Instance_name, "_out", &Out_instance);
+							HT.concat(Instance_name, "_in1", &In1_instance);
+							HT.concat(Instance_name, "_in2", &In2_instance);
+							if (HT.findfact("output_instance(1,_,_," + Out_instance + ",_,_)"))
+							{
+								A_size = stoi(returnpar(HT.findandreturn("output_instance(1,_,_," + Out_instance + ",_,_)"), 6));
+								min_(Op_size, A_size, &Min_size);
+								find_minimum_size_of_routed_input(In1_instance, 1, Min_size, &Min_size1);
+								find_minimum_size_of_routed_input(In2_instance, 1, Min_size1, &Min_size2);
+								ss << write_continuous_assignment();
+								ss << " conv_std_logic_vector(CONV_INTEGER(" << Instance_name << "_in1) ";
+								if (HT.findfact("hdl_style(*)"))
+								{
+									HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+									ss << write_hdl_dep_operator_symbol(Symbol1, HDL);
+									ss << " CONV_INTEGER(" << Instance_name << "_in2), " << Op_size << ");" << endl;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -20938,21 +21097,92 @@ string write_op_instance_unopt(int Entry)
 					ss << "       default: " << Instance_name << "_out = 0;" << endl;
 					ss << "      endcase" << endl;
 				}
-				if (Op_name == "mult")
+				else if (Op_name == "mult")
 				{
 					ss << write_initial_gap_for_instances();
 					ss << Instance_name << "_out = " <<
 						Instance_name << "_in1 * " <<
 						Instance_name << "_in2;" << endl;
 				}
+				else if (operator_symbol("mod", Op_name))
+				{
+					ss << write_initial_gap_for_instances();
+					ss << Instance_name << "_out = " <<
+						Instance_name << "_in1 % " << Instance_name << "_in2;" << endl;
+				}
+				else if (operator_symbol("rem", Op_name))
+				{
+					ss << write_initial_gap_for_instances();
+					ss << Instance_name << "_out = " <<
+						Instance_name << "_in1 - (" << Instance_name << "_in1 / " << Instance_name << "_in2);" << endl;
+				}
+				else if (operator_symbol(Symbol1, Op_name))
+				{
+					if (!Operator_symbol_is_modrem(Symbol1))
+					{
+						if (!Operator_symbol_is_incrdecr(Symbol1))
+						{
+							if (!Operator_symbol_is_multdiv(Symbol1))
+							{
+								ss << write_initial_gap_for_instances();
+								ss << Instance_name << "_out ";
+								HT.concat(Instance_name, "_out", &Out_instance);
+								HT.concat(Instance_name, "_in1", &In1_instance);
+								HT.concat(Instance_name, "_in2", &In2_instance);
+								if (HT.findfact("output_instance(1,_,_," + Out_instance + ",_,_)"))
+								{
+									A_size = stoi(returnpar(HT.findandreturn("output_instance(1,_,_," + Out_instance + ",_,_)"), 6));
+									min_(Op_size, A_size, &Min_size);
+									find_minimum_size_of_routed_input(In1_instance, 1, Min_size, &Min_size1);
+									find_minimum_size_of_routed_input(In2_instance, 1, Min_size1, 0);
+									ss << write_continuous_assignment();
+									if (HT.findfact("hdl_style(*)"))
+									{
+										HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+										ss << write_hdl_dep_operator_symbol(Symbol1, HDL);
+										ss << " " << Instance_name << "_in2 ;" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 	else if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
 	{
+		Op_name = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 2);
 		Operator = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 3));
 		Instance_name = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 5);
-		if (Operator > 0)
+		if (Operator == 0)
+		{
+			if (operator_symbol("<count>", Op_name))
+			{
+				ss << write_initial_gap_for_instances();
+				ss << Instance_name << "_out ";
+				ss << write_continuous_assignment;
+				ss << " " << Instance_name << "_in1 " <<
+					"+" << " " << Instance_name << "_in2;" << endl;
+			}
+			else if (operator_symbol("<increm>", Op_name))
+			{
+				ss << write_initial_gap_for_instances();
+				ss << Instance_name << "_out ";
+				ss << write_continuous_assignment();
+				ss << " " << Instance_name << "_in1 " <<
+					"+" << " " << Instance_name << "_in2;" << endl;
+			}
+			else if (operator_symbol("<decrem>", Op_name))
+			{
+				ss << write_initial_gap_for_instances();
+				ss << Instance_name << "_out ";
+				ss << write_continuous_assignment();
+				ss << " " << Instance_name << "_in1 " <<
+					"-" << " " << Instance_name << "_in2;" << endl;
+			}
+		}
+		else if (Operator > 0)
 		{
 			if (HT.findfact("op_def(" + to_string(Operator) + ",_,\"binop\",_,_,_,_)"))
 			{
@@ -21338,4 +21568,882 @@ void operator_symbol(string* str1, string str2)
 		*str1 = "<increm>";
 	else if (str2 == "minusone")
 		*str1 = "<decrem>";
+}
+
+void min_(int In1, int In2, int* res)
+{
+	if (In1 <= In2)
+		*res = In1;
+	else
+		*res = In2;
+}
+
+void find_minimum_size_of_routed_input(string Signal_instance, int In_entry, int Min_size_in, int* Min_size)
+{
+	int Size, Min_size_next, Next_entry;
+	if (!HT.findfact("signal_instance(" + to_string(In_entry) + "," + Signal_instance + ",*)"))
+	{
+		*Min_size = Min_size_in;
+	}
+	else if (HT.findfact("signal_instance(" + to_string(In_entry) + "," + Signal_instance + ",*)"))
+	{
+		Size = stoi(returnpar(HT.findandreturn("signal_instance(" + to_string(In_entry) + "," + Signal_instance + ",*)"), 6));
+		min_(Size, Min_size_in, &Min_size_next);
+		Next_entry = In_entry + 1;
+		find_minimum_size_of_routed_input(Signal_instance, Next_entry, Min_size_next, Min_size);
+	}
+}
+
+string write_data_routing_unopt(int Entry)
+{
+	stringstream ss;
+	if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
+	{
+		ss << write_data_routing_unopt_cond(Entry);
+	}
+	return ss.str();
+}
+
+string write_data_routing_unopt_cond(int Entry)
+{
+	stringstream ss;
+	string OpSymbol, Op_instance, In1_instance, In2_instance, Op_name, Op_announcement;
+	int Operator, Op_size, In1_type, In1_size, In2_type, In2_size;
+	if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
+	{
+		OpSymbol = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 2);
+		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 5);
+		if (OpSymbol != "minus")
+		{
+			HT.concat(Op_instance, "_in1", &In1_instance);
+			if (!HT.findfact("signal_instance(_,"+In1_instance+",_,_,_,_,_)"))
+			{
+				return ss.str();
+			}
+		}
+	}
+	if (HT.findfact("op_instance(" + to_string(Entry) + ",\"minus\",_,_,_)"))
+	{
+		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 5);
+		HT.concat(Op_instance, "_in2", &In2_instance);
+		if (!HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+		{
+			return ss.str();
+		}
+	}
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (HT.findfact("op_instance("+to_string(Entry)+",*)"))
+		{
+			Op_name = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 2);
+			Operator = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 3));
+			Op_size = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 4));
+			Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 5);
+			if (Operator != 10)
+			{
+				HT.concat(Op_instance, "_in1", &In1_instance);
+				if (HT.findfact("signal_instance(_," + In1_instance + ",_,_,_,_,_)"))
+				{
+					In1_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In1_instance + ",_,_,_,_,_)"), 5));
+					In1_size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In1_instance + ",_,_,_,_,_)"), 6));
+					HT.concat(Op_instance, "_in2", &In2_instance);
+					if (HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+					{
+						In2_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 5));
+						In2_size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 6));
+						hdl_op_inputs_label(Op_name, &Op_announcement);
+						ss << endl;
+						ss << "-- now the " << Op_announcement << " --" << endl;
+						ss << write_data_instances_unopt(Entry, 1, "_in1", Op_size);
+						ss << write_signal_inst_tail(In1_type, In1_instance, Operator, 1);
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+void hdl_op_inputs_label(string str1, string* str2)
+{
+	if (str1 == "equal")
+		*str2 = "equality comparisons";
+	else if (str1 == "notequal")
+		*str2 = "non-equality comparisons";
+	else if (str1 == "less")
+		*str2 = "less-than comparisons";
+	else if (str1 == "lessequal")
+		*str2 = "less-equality comparisons";
+	else if (str1 == "greater")
+		*str2 = "greater-than comparisons";
+	else if (str1 == "greaterequal")
+		*str2 = "greater-equality comparisons";
+	else if (str1 == "and")
+		*str2 = "logical AND";
+	else if (str1 == "or")
+		*str2 = "logical OR";
+	else if (str1 == "xor")
+		*str2 = "logical XOR";
+	else if (str1 == "not")
+		*str2 = "logical NOT";
+	else if (str1 == "plus")
+		*str2 = "additions";
+	else if (str1 == "minus")
+		*str2 = "subtractions";
+	else if (str1 == "abs")
+		*str2 = "absolute functions";
+	else if (str1 == "mult")
+		*str2 = "multiplications";
+	else if (str1 == "div")
+		*str2 = "divisions";
+	else if (str1 == "rem")
+		*str2 = "remainder functions";
+	else if (str1 == "mod")
+		*str2 = "modulo functions";
+	else if (str1 == "power")
+		*str2 = "power functions";
+	else if (str1 == "plusone")
+		*str2 = "increments by one";
+	else if (str1 == "minusone")
+		*str2 = "decrements by one";
+}
+
+void hdl_op_inputs_label(string* str1, string str2)
+{
+	if (str2 == "equality comparisons")
+		*str1 = "equal";
+	else if (str2 == "non-equality comparisons")
+		*str1 = "notequal";
+	else if (str2 == "less-than comparisons")
+		*str1 = "less";
+	else if (str2 == "less-equality comparisons")
+		*str1 = "lessequal";
+	else if (str2 == "greater-than comparisons")
+		*str1 = "greater";
+	else if (str2 == "greater-equality comparisons")
+		*str1 = "greaterequal";
+	else if (str2 == "logical AND")
+		*str1 = "and";
+	else if (str2 == "logical OR")
+		*str1 = "or";
+	else if (str2 == "logical XOR")
+		*str1 = "xor";
+	else if (str2 == "logical NOT")
+		*str1 = "not";
+	else if (str2 == "additions")
+		*str1 = "plus";
+	else if (str2 == "subtractions")
+		*str1 = "minus";
+	else if (str2 == "absolute functions")
+		*str1 = "abs";
+	else if (str2 == "multiplications")
+		*str1 = "mult";
+	else if (str2 == "divisions")
+		*str1 = "div";
+	else if (str2 == "remainder functions")
+		*str1 = "rem";
+	else if (str2 == "modulo functions")
+		*str1 = "mod";
+	else if (str2 == "power functions")
+		*str1 = "power";
+	else if (str2 == "increments by one")
+		*str1 = "plusone";
+	else if (str2 == "decrements by one")
+		*str1 = "minusone";
+}
+
+string write_data_instances_unopt(int Op_inst_entry, int Input_entry, string Suffix, int In_size)
+{
+	stringstream ss;
+	string Op_instance, Signal_inst_name;
+	int Next_in_entry, Out_size;
+	if (HT.findfact("op_instance("+to_string(Op_inst_entry)+",*)"))
+	{
+		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Op_inst_entry) + ",*)"), 5);
+		HT.concat(Op_instance, Suffix, &Signal_inst_name);
+		if (!HT.findfact("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"))
+		{
+			return ss.str();
+		}
+	}
+	else
+	{
+		ss << write_data_instances_unopt_core(Op_inst_entry, Input_entry, Suffix, In_size, &Next_in_entry, &Out_size);
+		ss << write_data_instances_unopt(Op_inst_entry, Next_in_entry, Suffix, Out_size);
+	}
+	return ss.str();
+}
+
+string write_data_instances_unopt_core(int Op_inst_entry, int Input_entry, string Suffix, int In_size, int* Next_in_entry, int* Out_size)
+{
+	stringstream ss;
+	int Operator, Op_size, Type1, Type2, Op_size1, Op_size2, SSize;
+	string Op_instance, OpSymbol, Signal_inst_name, Module, Input_name;
+	if (HT.findfact("op_instance(" + to_string(Op_inst_entry) + ",_,0,_,_)"))
+	{
+		Op_size = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Op_inst_entry) + ",_,0,_,_)"), 4));
+		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Op_inst_entry) + ",_,0,_,_)"), 5);
+		HT.concat(Op_instance, Suffix, &Signal_inst_name);
+		if (HT.findfact("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"))
+		{
+			Input_name = returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 3);
+			SSize = stoi(returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 6));
+			if (HT.findfact("current_module(*)"))
+			{
+				Module = returnpar(HT.findandreturn("current_module(*)"), 1);
+				ss << write_data_instance_unopt(0, Input_entry, Signal_inst_name, Op_size);
+				*Next_in_entry = Input_entry + 1;
+				*Out_size = In_size;
+			}
+		}
+	}
+	else if (HT.findfact("op_instance(" + to_string(Op_inst_entry) + ",*)"))
+	{
+		Operator = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Op_inst_entry) + ",*)"), 3));
+		Op_size = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Op_inst_entry) + ",*)"), 4));
+		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Op_inst_entry) + ",*)"), 5);
+		if (HT.findfact("op_def("+to_string(Operator)+",\"=\",\"binop\",_,_,1,_)"))
+		{
+			Type1 = stoi(returnpar(HT.findandreturn("op_def(" + to_string(Operator) + ",\"=\",\"binop\",_,_,1,_)"), 4));
+			Type2 = stoi(returnpar(HT.findandreturn("op_def(" + to_string(Operator) + ",\"=\",\"binop\",_,_,1,_)"), 5));
+			if (HT.findfact("type_def(" + to_string(Type1) + ",*)"))
+			{
+				Op_size1 = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type1) + ",*)"), 3));
+				if (HT.findfact("type_def(" + to_string(Type2) + ",*)"))
+				{
+					Op_size2 = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type2) + ",*)"), 3));
+					HT.concat(Op_instance, Suffix, &Signal_inst_name);
+					if (HT.findfact("current_module(*)"))
+					{
+						Module = returnpar(HT.findandreturn("current_module(*)"), 1);
+						ss << write_data_instance_unopt(Operator, Input_entry, Signal_inst_name, Op_size1);
+						*Next_in_entry = Input_entry + 1;
+						*Out_size = Op_size2;
+					}
+				}
+			}
+		}
+		else if (HT.findfact("op_def("+to_string(Operator)+",*)"))
+		{
+			OpSymbol = returnpar(HT.findandreturn("op_def(" + to_string(Operator) + ",*)"), 2);
+			if (OpSymbol != "=")
+			{
+				HT.concat(Op_instance, Suffix, &Signal_inst_name);
+				if (HT.findfact("current_module(*)"))
+				{
+					Module = returnpar(HT.findandreturn("current_module(*)"), 1);
+					ss << write_data_instance_unopt(Operator, Input_entry, Signal_inst_name, Op_size);
+					*Next_in_entry = Input_entry + 1;
+					*Out_size = Op_size;
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_data_instance_unopt(int Operator, int Input_entry, string Signal_inst_name, int Op_size)
+{
+	stringstream ss;
+	string Input_name, State_name, Module, Kind;
+	int Signal_size, Value, Type, TSize, Size1, Size, Lsize;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (Input_entry == 1)
+		{
+			if (HT.findfact("signal_instance(1," + Signal_inst_name + ",*)"))
+			{
+				Input_name = returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 3);
+				State_name = returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 4);
+				Signal_size = stoi(returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 6));
+				Value = stoi(returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 7));
+				if (HT.findfact("current_module(*)"))
+				{
+					Module = returnpar(HT.findandreturn("current_module(*)"), 1);
+					if (Input_name != "constant")
+					{
+						if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",*)"))
+						{
+							Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 4));
+							Kind = returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 5);
+							if (Kind != "const")
+							{
+								if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+								{
+									TSize = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+									max_(Op_size, Signal_size, &Size1);
+									max_(Size1, TSize, &Size);
+									ss << "  routing_" << Signal_inst_name << ":" << endl;
+									ss << "   WITH state SELECT " << endl;
+									ss << "   " << Signal_inst_name << " <= ";
+									ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+									ss << " WHEN " << State_name << "," << endl;
+									ss << "                      ";
+
+								}
+							}
+						}
+						else if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",_,_,\"const\",_)"))
+						{
+							Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",_,_,\"const\",_)"), 4));
+							if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+							{
+								TSize = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+								max_(Op_size, Signal_size, &Size1);
+								max_(Size1, TSize, &Size);
+								if (comparisson_op(Operator))
+								{
+									ss << "  routing_" << Signal_inst_name << ":" << endl;
+									ss << "   WITH state SELECT " << endl;
+									ss << "   " << Signal_inst_name << " <= ";
+									ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+									ss << " WHEN " << State_name << "," << endl;
+									ss << "                      ";
+								}
+								else if (comparisson_op(Operator))
+								{
+									ss << "  routing_" << Signal_inst_name << ":" << endl;
+									ss << "   WITH state SELECT " << endl;
+									ss << "   " << Signal_inst_name << " <= ";
+									ss << write_input_name_conditionally(Operator, Input_name, Value, Op_size);
+									ss << " WHEN " << State_name << "," << endl;
+									ss << "                      ";
+								}
+							}
+						}
+						else if (!HT.findfact("data_stmt(" + Module + "," + Input_name + ",*)"))
+						{
+							if (HT.findfact("local_object(" + Module + ",_,_," + Input_name + ",_,_,_,_,_)"))
+							{
+								Lsize = stoi(returnpar(HT.findandreturn("local_object(" + Module + ",_,_," + Input_name + ",_,_,_,_,_)"), 8));
+								max_(Op_size, Signal_size, &Size1);
+								max_(Size1, Lsize, &Size);
+								ss << "  routing_" << Signal_inst_name << ":" << endl;
+								ss << "   WITH state SELECT " << endl;
+								ss << "   " << Signal_inst_name << " <= ";
+								ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+								ss << " WHEN " << State_name << "," << endl;
+								ss << "                      ";
+							}
+						}
+					}
+					else if (Input_name == "constant")
+					{
+						max_(Op_size, Signal_size, &Size);
+						ss << "  routing_" << Signal_inst_name << ":" << endl;
+						ss << "   WITH state SELECT " << endl;
+						ss << "   " << Signal_inst_name << " <= ";
+						ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+						ss << " WHEN " << State_name << "," << endl;
+						ss << "                      ";
+					}
+				}
+			}
+		}
+		else if (Input_entry > 1)
+		{
+			if (HT.findfact("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"))
+			{
+				Input_name = returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 3);
+				State_name = returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 4);
+				Signal_size = stoi(returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 6));
+				Value = stoi(returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 7));
+				if (HT.findfact("current_module(*)"))
+				{
+					Module = returnpar(HT.findandreturn("current_module(*)"), 1);
+					if (Input_name != "constant")
+					{
+						if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",_,_,\"const\",_)"))
+						{
+							Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",_,_,\"const\",_)"), 4));
+							if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+							{
+								TSize = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+								max_(Op_size, Signal_size, &Size1);
+								max_(Size1, TSize, &Size);
+								if (comparisson_op(Operator))
+								{
+									ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+									ss << " WHEN " << State_name << "," << endl;
+									ss << "                      ";
+								}
+								else if (!comparisson_op(Operator))
+								{
+									ss << write_input_name_conditionally(Operator, Input_name, Value, Op_size);
+									ss << " WHEN " << State_name << "," << endl;
+									ss << "                      ";
+								}
+							}
+						}
+						else if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",*)"))
+						{
+							Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 4));
+							Kind = returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 5);
+							if (Kind != "const")
+							{
+								if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+								{
+									TSize = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+									max_(Op_size, Signal_size, &Size1);
+									max_(Size1, TSize, &Size);
+									ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+									ss << " WHEN " << State_name << "," << endl;
+									ss << "                      ";
+								}
+							}
+						}
+						else if (!HT.findfact("data_stmt(" + Module + "," + Input_name + ",*)"))
+						{
+							if (HT.findfact("local_object(" + Module + ",_,_," + Input_name + ",_,_,_,_,_)"))
+							{
+								Lsize = stoi(returnpar(HT.findandreturn("local_object(" + Module + ",_,_," + Input_name + ",_,_,_,_,_)"), 8));
+								max_(Op_size, Signal_size, &Size1);
+								max_(Size1, Lsize, &Size);
+								ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+								ss << " WHEN " << State_name << "," << endl;
+								ss << "                      ";
+							}
+						}
+					}
+					if (Input_name == "constant")
+					{
+						max_(Op_size, Signal_size, &Size);
+						ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
+						ss << " WHEN " << State_name << "," << endl;
+						ss << "                      ";
+					}
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (Input_entry == 1)
+		{
+			if (HT.findfact("signal_instance(1," + Signal_inst_name + ",*)"))
+			{
+				Input_name = returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 3);
+				State_name = returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 4);
+				Signal_size = stoi(returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 6));
+				Value = stoi(returnpar(HT.findandreturn("signal_instance(1," + Signal_inst_name + ",*)"), 7));
+				ss << "  always @(*)" << endl;
+				ss << "   case (state) " << endl;
+				ss << "    " << State_name << ":";
+				ss << " " << Signal_inst_name << " = ";
+				ss << write_input_name_conditionally(Operator, Input_name, Value, Signal_size) << endl;
+			}
+		}
+		else if (Input_entry > 1)
+		{
+			if (HT.findfact("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"))
+			{
+				Input_name = returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 3);
+				State_name = returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 4);
+				Signal_size = stoi(returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 6));
+				Value = stoi(returnpar(HT.findandreturn("signal_instance(" + to_string(Input_entry) + "," + Signal_inst_name + ",*)"), 7));
+				ss << "    " << State_name << ":";
+				ss << " " << Signal_inst_name << " = ";
+				ss << write_input_name_conditionally(Operator, Input_name, Value, Signal_size) << endl;
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_input_name_conditionally(int Operator, string Input_name, int Value, int Size)
+{
+	stringstream ss;
+	string Module;
+	int Type;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (Value == 0)
+		{
+			if (Size == 1)
+			{
+				if (op_is_boolean_operation(Operator))
+				{
+					if (Operator != 10)
+					{
+						if (Input_name != "constant")
+						{
+							if (HT.findfact("current_module(*)"))
+							{
+								Module = returnpar(HT.findandreturn("current_module(*)"), 1);
+								if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",*)"))
+								{
+									Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 4));
+									if (Type == 1)
+									{
+										ss << Input_name;
+									}
+									else if (Type > 1)
+									{
+										ss << Input_name;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (Operator == 10)
+				{
+					if (Input_name != "constant")
+						ss << Input_name;
+				}
+				else if (!op_is_boolean_operation(Operator))
+				{
+					if (Input_name != "constant")
+						ss << "conv_std_logic_vector(CONV_INTEGER(" << Input_name << "), " << 1 << ")(0)";
+				}
+			}
+		}
+		else if (Size > 1)
+		{
+			if (Input_name != "constant")
+			{
+				if (out_of_logical_op(Operator))
+				{
+					ss << "conv_std_logic_vector(CONV_INTEGER(" << Input_name << "), " << Size << ")";
+				}
+			}
+			else if (Operator >= 7 && Operator <= 10)
+			{
+				ss << Input_name;
+			}
+		}
+		else if (Input_name == "constant")
+		{
+			if (Size == 1)
+			{
+				if (Operator == 10)
+				{
+					ss << "conv_std_logic_vector(" << Value << ", " << 1 << ") = \"0\"";
+				}
+			}
+			else if (Operator >= 7 && Operator <= 10)
+			{
+				ss << Value << "(1) = '1'";
+			}
+			else if (Operator != 10)
+			{
+				if (out_of_logical_op(Operator))
+				{
+					ss << "conv_std_logic_vector(" << Value << ", " << Size << ")";
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (Input_name == "constant")
+			ss << " " << Value << ";";
+		else if (Input_name != "constant")
+			ss << Input_name << ";";
+	}
+	return ss.str();
+}
+
+bool op_is_boolean_operation(int Operator)
+{
+	return Operator >= 7 && Operator <= 10;
+}
+
+bool comparisson_op(int Operator)
+{
+	return (Operator > 0 && Operator <= 6) || (Operator >= 11 && Operator <= 58);
+}
+
+string write_signal_inst_tail(int Signal_type, string In_instance, int Operator_entry, int Which_input)
+{
+	stringstream ss;
+	int Type, Size, Type_size, Right_type, Res_type, Left_type, Dtype, LSize, LeftType;
+	string Op_symbol, Data1, Module_name, Opsymbol;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (Signal_type == 0 && Operator_entry == 0)
+		{
+			if (HT.findfact("signal_instance(_," + In_instance + ",_,_,_,_,_)"))
+			{
+				Type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 5));
+				Size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 6));
+				if (Type > 0)
+				{
+					if (Type > 1)
+					{
+						if (Size == 0)
+						{
+							if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+							{
+								Type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+								if (Type > 1)
+								{
+									if (Type_size > 1)
+									{
+										ss << "(OTHERS => '0') WHEN OTHERS;" << endl;
+									}
+									else if (Type_size == 1)
+									{
+										ss << "'0' WHEN OTHERS;" << endl;
+									}
+								}
+								else if (Type == 1)
+								{
+									if (Type_size == 1)
+									{
+										ss << "'0' WHEN OTHERS;" << endl;
+									}
+								}
+							}
+						}
+						else if (Size == 1)
+						{
+							ss << " '0' WHEN OTHERS;" << endl;
+						}
+					}
+				}
+				else if (Type == 0)
+				{
+					if (Size > 1)
+					{
+						ss << "(OTHERS => '0') WHEN OTHERS;" << endl;
+					}
+					else if (Size == 1)
+					{
+						ss << " '0' WHEN OTHERS;" << endl;
+					}
+				}
+			}
+		}
+		else if (Signal_type == 0)
+		{
+			if (Operator_entry > 0)
+			{
+				if (HT.findfact("signal_instance(_," + In_instance + ",_,_,_,_,_)"))
+				{
+					Type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 5));
+					Size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 6));
+					if (Type > 0)
+					{
+						if (Size == 0)
+						{
+							if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+							{
+								Type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+								if (Type > 1)
+								{
+									if (Type_size > 1)
+									{
+										ss << "(OTHERS => '0') WHEN OTHERS;" << endl;
+									}
+									else if (Type_size == 1)
+									{
+										ss << " '0' WHEN OTHERS;" << endl;
+									}
+								}
+								else if (Type == 1)
+								{
+									if (Type_size == 1)
+									{
+										ss << " '0' WHEN OTHERS;" << endl;
+									}
+								}
+							}
+						}
+					}
+					else if (Type == 0)
+					{
+						if (Size > 1)
+						{
+							ss << " (OTHERS => '0') WHEN OTHERS;" << endl;
+						}
+						else if (Size > 0)
+						{
+							if (HT.findfact("op_def(" + to_string(Operator_entry) + ",\"=\",\"binop\",_,_,1,_)"))
+							{
+								if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+								{
+									Type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+									if (Size == 1)
+									{
+										if (Type_size > 1)
+										{
+											ss << " (OTHERS => '0') WHEN OTHERS;" << endl;
+										}
+									}
+								}
+							}
+							if (HT.findfact("op_def(" + to_string(Operator_entry) + ",*)"))
+							{
+								Op_symbol = returnpar(HT.findandreturn("op_def(" + to_string(Operator_entry) + ",*)"), 2);
+								if (Op_symbol != "=")
+								{
+									if (Size == 1)
+									{
+										ss << " '0' WHEN OTHERS;" << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (!is_incr_op(Operator_entry))
+				{
+					if (Which_input == 1)
+					{
+						if (HT.findfact("op_def(" + to_string(Operator_entry) + ",_,\"unop\",0,_,_,_)"))
+						{
+							Right_type = stoi(returnpar(HT.findandreturn("op_def(" + to_string(Operator_entry) + ",_,\"unop\",0,_,_,_)"), 5));
+							Res_type = stoi(returnpar(HT.findandreturn("op_def(" + to_string(Operator_entry) + ",_,\"unop\",0,_,_,_)"), 6));
+							if (Right_type > 1)
+							{
+								if (Res_type > 1)
+								{
+									ss << "(OTHERS => '0') WHEN OTHERS;" << endl;
+								}
+							}
+						}
+					}
+				}
+				else if (is_incr_op(Operator_entry))
+				{
+					ss << "(OTHERS => '0') WHEN OTHERS;" << endl;
+				}
+			}
+		}
+		else if (Signal_type == 1)
+		{
+			ss << "'0' WHEN OTHERS;" << endl;
+		}
+		else if (HT.findfact("signal_instance(_," + In_instance + ",_,_,_,_,_)"))
+		{
+			Type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 5));
+			Size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 6));
+			if (Type == 1)
+			{
+				if (Size == 1)
+				{
+					ss << " '0' WHEN OTHERS;" << endl;
+				}
+			}
+			else if (Type > 1)
+			{
+				if (Size > 1)
+				{
+					ss << " (OTHERS => '0') WHEN OTHERS;" << endl;
+				}
+			}
+		}
+		else if (Signal_type != 1)
+		{
+			if (HT.findfact("type_def(" + to_string(Signal_type) + ",*)"))
+			{
+				Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Signal_type) + ",*)"), 3));
+				if (Size > 1)
+				{
+					if (HT.findfact("op_def(" + to_string(Operator_entry) + ",_,\"binop\",1,_,_,_)"))
+					{
+						ss << " '0' WHEN OTHERS;" << endl;
+					}
+					else if (HT.findfact("op_def(" + to_string(Operator_entry) + ",_,\"binop\",_,_,_,_)"))
+					{
+						Left_type = stoi(returnpar(HT.findandreturn("op_def(" + to_string(Operator_entry) + ",_,\"binop\",_,_,_,_)"), 6));
+						if (Left_type > 1)
+						{
+							ss << "(OTHERS => '0') WHEN OTHERS;" << endl;
+						}
+					}
+				}
+			}
+			else if (HT.findfact("signal_instance(_," + In_instance + ",_,_,_,_,_)"))
+			{
+				Data1 = returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 3);
+				if (HT.findfact("current_module(*)"))
+				{
+					Module_name = returnpar(HT.findandreturn("current_module(*)"), 1);
+					if (HT.findfact("data_stmt(" + Module_name + "," + Data1 + ",*)"))
+					{
+						Dtype = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Data1 + ",*)"), 4));
+						if (HT.findfact("type_def(" + to_string(Dtype) + ",*)"))
+						{
+							Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Dtype) + ",*)"), 3));
+							if (HT.findfact("op_def(" + to_string(Operator_entry) + ",\"=\",\"binop\",_,_,1,_)"))
+							{
+								LeftType = stoi(returnpar(HT.findandreturn("op_def(" + to_string(Operator_entry) + ",\"=\",\"binop\",_,_,1,_)"), 4));
+								if (HT.findfact("type_def(" + to_string(LeftType) + ",*)"))
+								{
+									LSize = stoi(returnpar(HT.findandreturn("type_def(" + to_string(LeftType) + ",*)"), 3));
+									if (LSize > 1)
+									{
+										if (Size == 1)
+										{
+											if (Dtype != 1)
+											{
+												ss << "  (others => '0') WHEN OTHERS;" << endl;
+											}
+										}
+									}
+								}
+							}
+							else if (HT.findfact("op_def(" + to_string(Operator_entry) + ",*)"))
+							{
+								Opsymbol = returnpar(HT.findandreturn("op_def(" + to_string(Operator_entry) + ",*)"), 2);
+								if (Opsymbol != "=")
+								{
+									if (Size == 1)
+									{
+										if (Dtype != 1)
+										{
+											ss << "'0' WHEN OTHERS;" << endl;
+										}
+									}
+								}
+							}
+							else if (Size == 1)
+							{
+								if (Dtype == 1)
+								{
+									ss << "'0' WHEN OTHERS;" << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (!HT.findfact("type_def(" + to_string(Signal_type) + ",*)"))
+			{
+				if (HT.findfact("signal_instance(_," + In_instance + ",_,_,_,_,_)"))
+				{
+					Size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In_instance + ",_,_,_,_,_)"), 6));
+					if (Size > 1)
+					{
+						ss << "(OTHERS => '1') WHEN OTHERS;" << endl;
+					}
+					else if (Size == 1)
+					{
+						ss << "'0' WHEN OTHERS;" << endl;
+					}
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (Signal_type == 1)
+		{
+			ss << "    " << "default: " << In_instance << " = 1 ;" << endl;
+			ss << "   endcase" << endl;
+		}
+		else
+		{
+			ss << "    " << "default: " << In_instance << " = 1 ;" << endl;
+			ss << "   endcase" << endl;
+		}
+	}
+	return ss.str();
+}
+
+bool is_incr_op(int op)
+{
+	return op == 103 || op == 104 || op == 105;
 }
