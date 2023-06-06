@@ -14,6 +14,7 @@
 #include <ctime>
 #include <time.h>
 #include <ctype.h>
+#include <chrono>
 
 //feedback and typing predicates
 void itf_not_found_message();
@@ -269,6 +270,28 @@ string write_data_instances_unopt_core(int Op_inst_entry, int Input_entry, strin
 string write_data_instance_unopt(int Operator, int Input_entry, string Signal_inst_name, int Op_size);
 string write_input_name_conditionally(int Operator, string Input_name, int Value, int Size);
 string write_signal_inst_tail(int Signal_type, string In_instance, int Operator_entry, int Which_input);
+string write_content_body_tail(string HDL, string Tool);
+string not_write_the_last_end();
+string write_aux_verilog_calls_declarations(string Module, int In_call_entry);
+string write_aux_verilog_task_output_declarations(string Module, int Called_module_entry, vector<int> Parameters);
+string write_aux_verilog_task_output_params(string Module, string Called_module_name, vector<int> List, int In_formal);
+string write_aux_verilog_task_output_param(string Module, string Called_module_name, int Actual, int Formal);
+string write_aux_output_if_it_is_function(string str, string Called_module_name);
+string write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int Last_parcs_state);
+string write_parcs_title(string Module_name, string HDL, string Tool);
+string write_parcs_interface(string Module_name, int int1, string HDL, string Tool);
+string write_parcs_io_ports(string Module, int In_entry, string HDL, string Tool);
+string write_parcs_io_ports_conditional(string Module, int In_entry, string HDL, string Tool);
+string write_formal_call_ports(string Module_name, int Call_entry, string HDL);
+string write_formal_ports_for_called_module(string Module, int Call_entry, int Called_module_entry, string HDL);
+string scan_and_print_formal_parameter_io(string Module, int Called_module_entry, int Data_entry, int Max_order, string HDL);
+string scan_and_print_formal_parameter_io_core(string Module, int Called_module_entry, int Data_entry, int Order, int Max_order, string HDL);
+string  print_io_port_conditional(string Module, string Called_module_name, int Called_module_entry, int Data_entry, int Order, int Max_order, string Data_kind, string Parameter_name, int Data_entry2, string Data_type, string Local_built, int Local_size, string Data_value, string HDL);
+string write_io_port_conditional_with_pass(int Pass, local_object Local, string HDL, string Tool);
+string reset_call_ports(string Module_name, string HDL, int C_entry);
+string reset_call_ports_core(string Module_name, string HDL, int C_entry, int* Next_entry);
+string finds_par_and_resets_formal_ios(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int Function_index);
+string resets_standard_call_ios(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int Function_index);
 /////////////////////
 
 void generate_top(string pathln, string exec, string cmdl);
@@ -358,6 +381,14 @@ void hdl_op_inputs_label(string str1, string* str2);
 bool op_is_boolean_operation(int Operator);
 bool comparisson_op(int Operator);
 bool is_incr_op(int op);
+bool it_is_output_or_inout(string str);
+void convert_local_for_verilog_task_outputs(local_object In_local, local_object* Out_local);
+void remove_dp_instances();
+void remove_called_module_itf(string Called_module_name);
+void find_last_schedule_state(string Module_name, string New_schedule, int* Last_parcs_state);
+void read_local_list_parcs(vector<local_object>* Local_list);
+bool is_io_type(string str);
+void reverse_io_direction(string str1, string* str2);
 
 //essential functions
 bool Iscmdlinearg(string Line)
@@ -780,8 +811,20 @@ void itf_not_found_message()
 	stringstream line;
 	string str;
 
-	line << " hdlmaker CCC compiler run on: " << __DATE__ << endl;
-	line << "        ...with errors    at: " << __TIME__ << endl << endl;
+	auto currentTime = std::chrono::system_clock::now();
+	std::time_t time = std::chrono::system_clock::to_time_t(currentTime);
+	tm* localTime = std::localtime(&time);
+	int year = localTime->tm_year + 1900;
+	int month = localTime->tm_mon + 1;
+	int day = localTime->tm_mday;
+	int hour = localTime->tm_hour;
+	int min = localTime->tm_min;
+	int sec = localTime->tm_sec;
+	auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
+	int hud = currentTimepoint.time_since_epoch().count() % 100;
+
+	line << " hdlmaker CCC compiler run on: " <<  day << "/" << month << "/" << year << endl;
+	line << "        ...with errors    at: " <<  hour << ":" << min << ":" << sec << " ____ :" << hud << endl << endl;
 	line << " hdlmaker CCC compiler runtime error : " << endl;
 	line << "    there is no TYPESOPSDB.DBA file....; run first the front-end CCC compiler SUBADA.EXE" << endl;
 	str = line.str();
@@ -790,13 +833,25 @@ void itf_not_found_message()
 }
 void itf_found_message()
 {
+	auto currentTime = std::chrono::system_clock::now();
+	std::time_t time = std::chrono::system_clock::to_time_t(currentTime);
+	tm* localTime = std::localtime(&time);
+	int year = localTime->tm_year + 1900;
+	int month = localTime->tm_mon + 1;
+	int day = localTime->tm_mday;
+	int hour = localTime->tm_hour;
+	int min = localTime->tm_min;
+	int sec = localTime->tm_sec;
+	auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
+	int hud = currentTimepoint.time_since_epoch().count() % 100;
+
 	fstream File("hdlmaker.log", ios::app);
 	stringstream line;
 	string str;
 	line << endl;
 	line << "------------------------------------------------------------------" << endl;
-	line << "  ITF file itf_fact.dba was processed on: " << __DATE__ << endl;
-	line << "   hdlmaker compilation started successfully at: " << __TIME__ << endl << endl;
+	line << "  ITF file itf_fact.dba was processed on: " << day << "/" << month << "/" << year << endl;
+	line << "   hdlmaker compilation started successfully at: " << hour << ":" << min << ":" << sec << endl << endl;
 	line << "------------------------------------------------------------------" << endl;
 	str = line.str();
 	File << str;
@@ -1615,13 +1670,26 @@ void generate_hdl_recursive(string Hdlform, string Tool, int Entry)
 			Module = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Entry) + ",_,_,\"libpart\",_,_,_)"), 2);
 			Level = stoi(returnpar(HT.findandreturn("hierarchy_part(" + to_string(Entry) + "," + Module + ",_,\"libpart\",_,_,_)"), 3));
 			store_package_name(Entry, Module);
-			//%write(" HDL code for module : ", Module, " is being created...")
 			increment_module_counter();
 			if (HT.findfact("module_counter(*)"))
 			{
 				ModCount = stoi(returnpar(HT.findandreturn("module_counter(_)"), 1));
 				code_for_module_created_message(Module, ModCount);
-				cout << "started on : " << __DATE__ << ", at: " << __TIME__;
+
+				auto currentTime = std::chrono::system_clock::now();
+				std::time_t time = std::chrono::system_clock::to_time_t(currentTime);
+				tm* localTime = std::localtime(&time);
+				int year1 = localTime->tm_year + 1900;
+				int month1 = localTime->tm_mon + 1;
+				int day1 = localTime->tm_mday;
+				int hour1 = localTime->tm_hour;
+				int min1 = localTime->tm_min;
+				int sec1 = localTime->tm_sec;
+				auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
+				int hud = currentTimepoint.time_since_epoch().count() % 100;
+				
+				cout << "started on : " << day1 << "/" << month1 << "/" << year1;
+				cout << ", at: " << hour1 << ":" << min1 << ":" << sec1;
 				HT.assertz("current_module(" + Module + ")");
 				generate_hdl_2(Hdlform, Tool, Module, Level);
 			}
@@ -1687,9 +1755,9 @@ void code_for_module_created_message(string Module, int ModCount)
 
 void generate_hdl_2(string Hdlform, string tool, string Module_name, int Level)
 {
-	string Memory_file_name, Cus_blocks_file_name, Module_unoptimized_dbase_filename;
-	int Last_local_entry0, Next_local_entry, Last_state;
-	vector<local_object> Local_list0, Local_list1, Local_list;
+	string Memory_file_name, Cus_blocks_file_name, Module_unoptimized_dbase_filename, Module_dbase_filename, New_schedule;
+	int Last_local_entry0, Next_local_entry, Last_state, Last_parcs_state;
+	vector<local_object> Local_list0, Local_list1, Local_list, Local_list_parcs;
 
 	if (Level == 0)
 	{
@@ -1734,6 +1802,24 @@ void generate_hdl_2(string Hdlform, string tool, string Module_name, int Level)
 				HT.assertz("old_schedule(\"specials\")");
 				consult_permanent_conditionally(Module_name);
 				write_unoptimised_hdl(Module_name, 1, 1, Hdlform, "synergy", Last_state);
+				remove_dp_instances();
+				HT.retractall("local_object(*)");
+				HT.retractall("top_level_call(*)");
+				remove_called_module_itf(Module_name);
+				HT.concat(Module_name, ".pdb", &Module_dbase_filename);
+				HT.consult(Module_dbase_filename, "hdlmaker_dbase");
+				HT.retractall("new_schedule(*)");
+				HT.assertz("new_schedule(\"parcsif\")");
+				if (HT.findfact("new_schedule(*)"))
+				{
+					New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+					find_last_schedule_state(Module_name, New_schedule, &Last_parcs_state);
+					read_local_list_parcs(&Local_list_parcs);
+					HT.retractall("old_schedule(*)");
+					consult_permanent_conditionally(Module_name);
+					write_parcs_hdl(Module_name, 1, Hdlform, "synergy", Last_parcs_state);
+
+				}
 			}
 		}
 	}
@@ -1763,15 +1849,15 @@ void add_local_conditionally(string Module_name, vector<local_object> In_local_l
 {
 	string Object_name, Top_package_module, Kind, Ltype, Tkind, Ovalue;
 	int Next_local_entry, OrderNo, Osize;
-	if (HT.findfact("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"))
+	if (HT.findfact("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"))
 	{
-		Object_name = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"), 4);
-		Kind = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"), 3);
-		OrderNo = stoi(returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"), 5));
-		Ltype = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"), 6);
-		Tkind = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"), 7);
-		Osize = stoi(returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"), 8));
-		Ovalue = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",_,_,_,_,_,_,_)"), 9);
+		Object_name = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"), 4);
+		Kind = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"), 3);
+		OrderNo = stoi(returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"), 5));
+		Ltype = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"), 6);
+		Tkind = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"), 7);
+		Osize = stoi(returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"), 8));
+		Ovalue = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + ",*)"), 9);
 
 		Next_local_entry = In_local_entry + 1;
 		if (HT.findfact("hierarchy_part(1,_,0,_,_,_,_)"))
@@ -1892,11 +1978,24 @@ void write_custom_block(string Module_name, string hdlform, vector<local_object>
 string write_title(string Module_name, string Hdlform, string Tool)
 {
 	stringstream ss{};
+
+	auto currentTime = std::chrono::system_clock::now();
+	std::time_t time = std::chrono::system_clock::to_time_t(currentTime);
+	tm* localTime = std::localtime(&time);
+	int year = localTime->tm_year + 1900;
+	int month = localTime->tm_mon + 1;
+	int day = localTime->tm_mday;
+	int hour = localTime->tm_hour;
+	int min = localTime->tm_min;
+	int sec = localTime->tm_sec;
+	auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
+	int hud = currentTimepoint.time_since_epoch().count() % 100;
+
 	if (Hdlform == "vhdl")
 	{
 		ss << endl << endl << "---------------------------------------------------------------" << endl << "--::::::::: C CUBED COMPILATION ->  VHDL RTL MODEL ::::::::::--" <<
 			endl << endl << "--::::::::: performed on design module: '" << Module_name << "'" <<
-			endl << endl << "------------ HDL created on: " << __DATE__ << endl << "------------ HDL created at: " << __TIME__ <<
+			endl << endl << "------------ HDL created on: " << day << "/" << month << "/" << year << endl << "------------ HDL created at: " << hour << ":" << min << ":" << sec << " ____ :" << hud <<
 			endl << endl << "--::: The C-cubed compiler, back-end version: CCC_be_6 ::::--" << endl << "--:::::: Copyright(c) 2007-2020, by Michael F. Dossis  :::::::--" <<
 			endl << "----------------------------------------------------------------" << endl << endl;
 	}
@@ -1904,7 +2003,7 @@ string write_title(string Module_name, string Hdlform, string Tool)
 	{
 		ss << endl << endl << "/*---------------------------------------------------------------*/" << endl << "/*--::::::::: C CUBED COMPILATION ->  Verilog RTL MODEL ::::::::::--*/" <<
 			endl << endl << "/*--::::::::: performed on design module: '" << Module_name << "'*/" <<
-			endl << endl << "//------------ HDL created on: " << __DATE__ << endl << "//------------ HDL created at: " << __TIME__ <<
+			endl << endl << "//------------ HDL created on: " << day << "/" << month << "/" << year << endl << "//------------ HDL created at: " << hour << ":" << min << ":" << sec << " ____ :" << hud <<
 			endl << endl << "/*--::: The C-cubed compiler, back-end version: CCC_be_6 ::::--*/" << endl << "/*--:::::: Copyright(c) 2007-2020, by Michael F. Dossis  :::::::--*/" <<
 			endl << "/*----------------------------------------------------------------*/" << endl << endl;
 	}
@@ -9238,6 +9337,50 @@ void write_unoptimised_hdl(string Module_name, int int1, int int2, string HDL, s
 					File << write_content_body_header(Module_name, Hdlform, Tool, Schedule) << endl;
 					File << write_fsm(Module_name, 1, 1, Hdlform, Tool);
 					File << write_datapath_unopt();
+					File << write_content_body_tail(Hdlform, Tool) << endl;
+					File.close();
+				}
+			}
+		}
+		if (HDL == "verilog")
+		{
+			if (!HT.findfact("cac_mode(*)"))
+			{
+				if (HT.findfact("old_schedule(*)"))
+				{
+					Schedule = returnpar(HT.findandreturn("old_schedule(*)"), 1);
+					Hdlform = "verilog";
+					Tool = "synergy";
+					HT.retractall("current_hdl_style(*)");
+					if (HT.findfact("current_hdl_style(\"verilog\")"))
+					{
+						HT.retractall("hdl_style(*)");
+						HT.assertz("hdl_style(\"verilog\")");
+						HT.retractall("added_aux_call_signals(" + Module_name + ",*)");
+						HT.concat(Module_name, ".sv", &Fname);
+
+						fstream     File(Fname, ios::out | ios::in | ios::trunc);
+						if (File.is_open())
+						{
+							File << write_title(Module_name, Hdlform, Tool) << endl;
+							File << write_interface(Module_name, Schedule, 1, Hdlform, Tool) << endl;
+							File << write_global_package(Module_name, Hdlform, Tool);
+							File << write_locals(Module_name, 1, Hdlform, Tool);
+							File << write_standard_call_signals(Schedule, Module_name, 1);
+							File << write_dp_signal_declarations();
+							File << write_aux_verilog_calls_declarations(Module_name, 1);
+							File << write_all_cus_blocks_io_variables(Module_name, 1, "verilog");
+							Last_state_plus_one = Last_st + 1;
+							File << print_states_type(Last_state_plus_one) << endl;
+							HT.retractall("added_aux_call_ios1(" + Module_name + ",*)");
+							File << write_content_header(Module_name, Hdlform, Tool) << endl;
+							File << write_content_body_header(Module_name, Hdlform, Tool, Schedule) << endl;
+							File << write_fsm(Module_name, 1, 1, Hdlform, Tool);
+							File << write_datapath_unopt();
+							File << write_content_body_tail(Hdlform, Tool) << endl;
+							File.close();
+						}
+					}
 				}
 			}
 		}
@@ -20666,6 +20809,21 @@ string write_datapath_unopt()
 			ss << write_data_routing_unopt(1);
 		}
 	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (!HT.findfact("massively_parallel_style(*)"))
+		{
+			ss << endl << endl;
+			ss << "//--  Datapath operators (Functional Units) --" << endl;
+			ss << "  always @(*)" << endl;
+			ss << "   begin" << endl;
+			ss << write_op_instances_unopt(1);
+			ss << "   end" << endl;
+			ss << endl << endl;
+			ss << "//-- now the data routing --" << endl;
+			ss << write_data_routing_unopt(1) << endl;
+		}
+	}
 	return ss.str();
 }
 
@@ -21597,9 +21755,13 @@ void find_minimum_size_of_routed_input(string Signal_instance, int In_entry, int
 string write_data_routing_unopt(int Entry)
 {
 	stringstream ss;
+	int Next_entry;
 	if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
 	{
 		ss << write_data_routing_unopt_cond(Entry);
+		Next_entry = Entry + 1;
+		ss << endl;
+		ss << write_data_routing_unopt(Next_entry);
 	}
 	return ss.str();
 }
@@ -21608,7 +21770,7 @@ string write_data_routing_unopt_cond(int Entry)
 {
 	stringstream ss;
 	string OpSymbol, Op_instance, In1_instance, In2_instance, Op_name, Op_announcement;
-	int Operator, Op_size, In1_type, In1_size, In2_type, In2_size;
+	int Operator, Op_size, In1_type, In1_size, In2_type, In2_size, Min_size2;
 	if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
 	{
 		OpSymbol = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 2);
@@ -21656,7 +21818,86 @@ string write_data_routing_unopt_cond(int Entry)
 						ss << "-- now the " << Op_announcement << " --" << endl;
 						ss << write_data_instances_unopt(Entry, 1, "_in1", Op_size);
 						ss << write_signal_inst_tail(In1_type, In1_instance, Operator, 1);
+						find_minimum_size_of_routed_input(In2_instance, 1, In2_size, &Min_size2);
+						ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
+						ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
 					}
+					else if (!HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+					{
+						HT.concat(Op_instance, "_in2", &In2_instance);
+						if (HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+						{
+							In2_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 5));
+							In2_size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 6));
+							hdl_op_inputs_label(Op_name, &Op_announcement);
+							ss << endl;
+							ss << "-- now the " << Op_announcement << " --" << endl;
+							find_minimum_size_of_routed_input(In2_instance, 1, In2_size, &Min_size2);
+							ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
+							ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
+						}
+					}
+				}
+			}
+			else if (Operator == 10)
+			{
+				HT.concat(Op_instance, "_in1", &In1_instance);
+				if (HT.findfact("signal_instance(_," + In1_instance + ",_,_,_,_,_)"))
+				{
+					In1_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In1_instance + ",_,_,_,_,_)"), 5));
+					In1_size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In1_instance + ",_,_,_,_,_)"), 6));
+					HT.concat(Op_instance, "_in2", &In2_instance);
+					if (HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+					{
+						In2_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 5));
+						In2_size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 6));
+						hdl_op_inputs_label(Op_name, &Op_announcement);
+						ss << endl;
+						ss << "-- now the " << Op_announcement << " --" << endl;
+						ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
+						ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
+					}
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
+		{
+			Op_name = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 2);
+			Operator = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 3));
+			Op_size = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 4));
+			Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 5);
+			HT.concat(Op_instance, "_in1", &In1_instance);
+			if (HT.findfact("signal_instance(_," + In1_instance + ",_,_,_,_,_)"))
+			{
+				In1_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In1_instance + ",_,_,_,_,_)"), 5));
+				HT.concat(Op_instance, "_in2", &In2_instance);
+				if (HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+				{
+					In2_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 5));
+					hdl_op_inputs_label(Op_name, &Op_announcement);
+					ss << endl;
+					ss << "  //-- now the " << Op_announcement << " --" << endl;
+					ss << write_data_instances_unopt(Entry, 1, "_in1", Op_size);
+					ss << write_signal_inst_tail(In1_type, In1_instance, Operator, 1) << endl;
+					ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
+					ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
+
+				}
+			}
+			else if (!HT.findfact("signal_instance(_," + In1_instance + ",_,_,_,_,_)"))
+			{
+				HT.concat(Op_instance, "_in2", &In2_instance);
+				if (HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+				{
+					In2_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 5));
+					hdl_op_inputs_label(Op_name, &Op_announcement);
+					ss << endl;
+					ss << "  //-- now the " << Op_announcement << " --" << endl;
+					ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
+					ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
 				}
 			}
 		}
@@ -22446,4 +22687,916 @@ string write_signal_inst_tail(int Signal_type, string In_instance, int Operator_
 bool is_incr_op(int op)
 {
 	return op == 103 || op == 104 || op == 105;
+}
+
+string write_content_body_tail(string HDL, string Tool)
+{
+	stringstream ss;
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			ss << endl << "  END  rtl ; " << endl;
+		}
+		else if (HDL == "verilog")
+		{
+			ss << endl;
+			not_write_the_last_end();
+			ss << endl;
+			ss << endl << " endmodule " << endl;
+		}
+	}
+	else if (Tool == "gnu")
+	{
+		if (HDL == "c")
+		{
+			ss << endl << "     } " << endl;
+			ss << "   } " << endl;
+			ss << "  } " << endl;
+			ss << " " << endl;
+		}
+	}
+	return ss.str();
+}
+
+string not_write_the_last_end()
+{
+	stringstream ss;
+	if (HT.findfact("massively_parallel_style(1)"))
+	{
+		ss << "     end   " << endl;
+	}
+	return ss.str();
+}
+
+string write_aux_verilog_calls_declarations(string Module, int In_call_entry)
+{
+	stringstream ss;
+	int Called_module_entry, Next_call_entry;
+	vector<int> Parameters;
+	if (HT.findfact("call_stmt(" + Module + "," + to_string(In_call_entry) + ",*)"))
+	{
+		Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module + "," + to_string(In_call_entry) + ",*)"), 3));
+		Parameters = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module + "," + to_string(In_call_entry) + ",*)")), 1);
+		ss << write_aux_verilog_task_output_declarations(Module, Called_module_entry, Parameters);
+		Next_call_entry = In_call_entry + 1;
+		ss << write_aux_verilog_calls_declarations(Module, Next_call_entry);
+
+	}
+	return ss.str();
+}
+
+string write_aux_verilog_task_output_declarations(string Module, int Called_module_entry, vector<int> Parameters)
+{
+	stringstream ss;
+	string Called_module_name;
+	if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+	{
+		Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+		if (HT.findfact("added_verilog_aux_call_outputs("+Module+","+to_string(Called_module_entry)+","+Called_module_name+")"))
+		{
+			return ss.str();
+		}
+	}
+	if (!HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+	{
+		return ss.str();
+	}
+	if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+	{
+		Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+		if (!custom_block(Called_module_name))
+		{
+			return ss.str();
+		}
+	}
+	if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+	{
+		Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+		if (!HT.findfact("added_verilog_aux_call_outputs(" + Module + "," + to_string(Called_module_entry) + "," + Called_module_name + ")"))
+		{
+			if (custom_block(Called_module_name))
+			{
+				HT.assertz("added_verilog_aux_call_outputs(" + Module + "," + to_string(Called_module_entry) + "," + Called_module_name + ")");
+				ss << write_aux_verilog_task_output_params(Module, Called_module_name, Parameters, 1);
+				ss << write_aux_output_if_it_is_function(Module, Called_module_name);
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_aux_verilog_task_output_params(string Module, string Called_module_name, vector<int> List, int In_formal)
+{
+	stringstream ss;
+	int Next_formal;
+	if (!List.empty())
+	{
+		ss << write_aux_verilog_task_output_param(Module, Called_module_name, List.front(), In_formal);
+		Next_formal = In_formal + 1;
+		List.erase(List.begin());
+		ss << write_aux_verilog_task_output_params(Module, Called_module_name, List, Next_formal);
+	}
+	return ss.str();
+}
+
+string write_aux_verilog_task_output_param(string Module, string Called_module_name, int Actual, int Formal)
+{
+	stringstream ss;
+	string Object_kind;
+	local_object In_local, Out_local;
+	if (HT.findfact("data_stmt("+Called_module_name+",_,"+to_string(Formal)+",_,_,_)"))
+	{
+		Object_kind = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Formal) + ",_,_,_)"), 5);
+		if (it_is_output_or_inout(Object_kind))
+		{
+			if (HT.findfact("local_object(" + Module + ",_,_,_," + to_string(Actual) + ",_,_,_,_)"))
+			{
+				local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Module + ",_,_,_," + to_string(Actual) + ",_,_,_,_)")));
+				In_local = *ptr;
+				convert_local_for_verilog_task_outputs(In_local, &Out_local);
+				ss << write_local(Out_local, "verilog", "synergy", "_tmpout");
+			}
+		}
+	}
+	return ss.str();
+}
+
+bool it_is_output_or_inout(string str)
+{
+	return str == "par_out" || str == "par_inout";
+}
+
+void convert_local_for_verilog_task_outputs(local_object In_local, local_object* Out_local)
+{
+	string Ltype, Ltype1, Module, Name, Type, Kind, Value;
+	int In_entry, Order, Size;
+	GeneralFact* GF;
+	GF = &In_local;
+	Module = returnpar(HT.findandreturn(makeStringOf(GF)), 1);
+	In_entry = stoi(returnpar(HT.findandreturn(makeStringOf(GF)), 2));
+	Ltype = returnpar(HT.findandreturn(makeStringOf(GF)), 3);
+	Name = returnpar(HT.findandreturn(makeStringOf(GF)), 4);
+	Order = stoi(returnpar(HT.findandreturn(makeStringOf(GF)), 5));
+	Type = returnpar(HT.findandreturn(makeStringOf(GF)), 6);
+	Kind = returnpar(HT.findandreturn(makeStringOf(GF)), 7);
+	Size = stoi(returnpar(HT.findandreturn(makeStringOf(GF)), 8));
+	Value = returnpar(HT.findandreturn(makeStringOf(GF)), 9);
+	if (Ltype == "signal")
+	{
+		*Out_local = In_local;
+	}
+	else if (Ltype == "variable")
+	{
+		*Out_local = In_local;
+	}
+	else if (Ltype == "constant")
+	{
+		*Out_local = In_local;
+	}
+	else if (Ltype == "par_in")
+	{
+		*Out_local = In_local;
+	}
+	else if (Ltype == "par_out" || Ltype == "par_inout")
+	{
+		Ltype1 = "signal";
+		*Out_local = local_object(Module, In_entry, Ltype1, Name, Order, Type, Kind, Size, Value);
+	}
+}
+
+string write_aux_output_if_it_is_function(string str, string Called_module_name)
+{
+	stringstream ss;
+	local_object In_local, Out_local;
+	if (!HT.findfact("local_object(" + Called_module_name + ",_,\"par_out\"," + Called_module_name + ",_,_,_,_,_)"))
+	{
+		return ss.str();
+	}
+	if (HT.findfact("local_object(" + Called_module_name + ",_,_," + Called_module_name + ",_,_,_,_,_)"))
+	{
+		local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Called_module_name + ",_,_," + Called_module_name + ",_,_,_,_,_)")));
+		In_local = *ptr;
+		convert_local_for_verilog_task_outputs(In_local, &Out_local);
+		ss << write_local(Out_local, "verilog", "synergy", "_tmpout");
+	}
+	return ss.str();
+}
+
+void remove_dp_instances()
+{
+	HT.retractall("op_instance(*)");
+	HT.retractall("last_op_instance(*)");
+	HT.retractall("op_in_a_state(*)");
+	HT.retractall("last_op_in_a_state(*)");
+	HT.retractall("signal_instance(*)");
+	HT.retractall("last_signal_instance(*)");
+	HT.retractall("output_instance(*)");
+	HT.retractall("last_output_instance(*)");
+	HT.retractall("operator_instance_stats(*)");
+}
+
+void remove_called_module_itf(string Called_module_name)
+{
+	if (HT.findfact("hierarchy_part(_," + Called_module_name + ",_,_,_,_,_)"))
+	{
+		HT.retractall("prog_stmt(" + Called_module_name + ",*)");
+		HT.retractall("data_stmt(" + Called_module_name + ",*)");
+		HT.retractall("special_op(" + Called_module_name + ",*)");
+		HT.retractall("special_dt(" + Called_module_name + ",*)");
+		HT.retractall("local_object(" + Called_module_name + ",*)");
+		HT.retractall("state_node(" + Called_module_name + ",*)");
+		HT.retractall("last_change_op_number(" + Called_module_name + ",*)");
+		HT.retractall("change_op_number(" + Called_module_name + ",*)");
+		HT.retractall("call_stmt(" + Called_module_name + ",*)");
+		HT.retractall("joint_stmt(" + Called_module_name + ",*)");
+		HT.retractall("op_guards(" + Called_module_name + ",*)");
+		HT.retractall("var_guards(" + Called_module_name + ",*)");
+		HT.retractall("guard_pair(" + Called_module_name + ",*)");
+		HT.retractall("guard_cond(" + Called_module_name + ",*)");
+		HT.retractall("cessor(" + Called_module_name + ",*)");
+		HT.retractall("cessor_kind(" + Called_module_name + ",*)");
+		HT.retractall("predecessors(" + Called_module_name + ",*)");
+	}
+}
+
+void find_last_schedule_state(string Module_name, string New_schedule, int* Last_parcs_state)
+{
+	if (!HT.findfact("last_schedule_state(" + Module_name + "," + New_schedule + ",*)"))
+	{
+		*Last_parcs_state = 0;
+	}
+	else if (!HT.findfact("last_schedule_state(" + Module_name + "," + New_schedule + ",*)"))
+	{
+		*Last_parcs_state = stoi(returnpar(HT.findandreturn("last_schedule_state(" + Module_name + "," + New_schedule + ",*)"), 3));
+	}
+}
+
+void read_local_list_parcs(vector<local_object>* Local_list)
+{
+	if (HT.findfact("module_local_list_parcs(*)"))
+	{
+		*Local_list = return_vec_lo(makeInstanceOf(HT.findandreturn("module_local_list_parcs(*)")));
+	}
+	else if (!HT.findfact("module_local_list_parcs(*)"))
+	{
+		Local_list->clear();
+	}
+}
+
+string write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int Last_parcs_state)
+{
+	stringstream ss;
+	string Schedule, Module, Vcomscript1, Vcomscript, Fname;
+	int ModCount;
+	if (Last_parcs_state == 0)
+	{
+		return ss.str();
+	}
+	if (int1 == 1)
+	{
+		if (!HT.findfact("cac_mode(*)"))
+		{
+			if (Last_parcs_state > 0)
+			{
+				if (HT.findfact("new_schedule(*)"))
+				{
+					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+					if (Tool == "synergy")
+					{
+						if (HDL == "vhdl")
+						{
+							HT.retractall("added_aux_call_signals("+Module_name+",*)");
+							HT.retractall("output_filename(*)");
+							if (HT.findfact("package_name(*)"))
+							{
+								Module = returnpar(HT.findandreturn("package_name(*)"), 1);
+								HT.concat("vcom_", Module, &Vcomscript1);
+								HT.concat(Vcomscript1, ".bat", &Vcomscript);
+								HT.concat(Module_name, "_parcs.vhd", &Fname);
+
+								fstream File("Vcomscript.log", ios::app);
+
+								if (File.is_open())
+								{
+									if (HT.findfact("module_counter(*)"))
+									{
+										ModCount = stoi(returnpar(HT.findandreturn("module_counter(*)"), 1));
+										File << " echo " << ModCount << " >> vcom_" << Module << ".log" << endl;
+										File << " vcom " << Fname << " >> vcom_" << Module << ".log" << endl;
+									}
+									File.close();
+								}
+
+								
+
+								fstream     File2(Fname, ios::out | ios::in | ios::trunc);
+								if (File.is_open())
+								{
+									File2.open(Fname, fstream::in);
+									if (File2.is_open())
+									{
+										HT.assertz("output_filename(" + Fname + ")");
+										File2 << write_parcs_title(Module_name, HDL, Tool) << endl;
+										File2 << write_ieee_packages("vhdl", "synergy") << endl;
+										File2 << write_global_package(Module_name, HDL, Tool);
+										HT.retractall("added_aux_call_ios(Module_name,*)");
+										HT.retractall("added_aux_call_signals(Module_name,*)");
+										HT.retractall("variable_has_been_listed(Module_name,*)");
+										HT.retractall("hdl_io_pass(*)");
+										HT.assertz("hdl_io_pass(2)");
+										File2 << write_parcs_interface(Module_name, 1, HDL, Tool) << endl;
+										File2 << write_content_header(Module_name, HDL, Tool) << endl;
+										File2 << print_states_type(Last_parcs_state) << endl;
+										File2 << write_locals(Module_name, 1, HDL, Tool);
+										HT.retractall("added_aux_call_ios1(" + Module_name + ",*)");
+										File2 << write_standard_call_signals(Schedule, Module_name, 1);
+										File2 << write_dp_signal_declarations();
+										File2 << write_content_body_header(Module_name, HDL, Tool, Schedule) << endl;
+										File2 << write_fsm_header(Module_name, 1, HDL, Tool);
+										File2 << reset_locals(Module_name, Schedule, 1, HDL, Tool) << endl;
+										HT.retractall("call_ios_have_been_reset(*)");
+										reset_call_ports(Module_name, HDL, 1);
+										ss << endl;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_parcs_title(string Module_name, string HDL, string Tool)
+{
+	stringstream ss;
+
+	auto currentTime = std::chrono::system_clock::now();
+	std::time_t time = std::chrono::system_clock::to_time_t(currentTime);
+	tm* localTime = std::localtime(&time);
+	int year = localTime->tm_year + 1900;
+	int month = localTime->tm_mon + 1;
+	int day = localTime->tm_mday;
+	int hour = localTime->tm_hour;
+	int min = localTime->tm_min;
+	int sec = localTime->tm_sec;
+	auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
+	int hud = currentTimepoint.time_since_epoch().count() % 100;
+
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			ss << endl;
+			ss << endl;
+			ss << "---------------------------------------------------------------";
+			ss << endl;
+			ss << "--::::::::: C CUBED COMPILATION ->  VHDL RTL MODEL ::::::::::--";
+			ss << endl << endl;
+			ss << "--::::::::::::: Optimiser engine used: 'PARCS' ::::::::::::::--";
+			ss << endl << endl;
+			ss << "--::::::::: performed on design module: '" << Module_name << "'";
+			ss << endl << endl;
+			ss << "------------ HDL created on: " << day << "/" << month << "/" << year;
+			ss << endl;
+			ss << "------------ HDL created at: " << hour << ":" << min << ":" << sec << " ____ :" << hud;
+			ss << endl << endl;
+			ss << "--::: The C-cubed compiler, back-end version: CCC_be_6 ::::--";
+			ss << endl;
+			ss << "--:::::: Copyright(c) 2007-2020, by Michael F. Dossis  :::::::--";
+			ss << endl;
+			ss << "----------------------------------------------------------------";
+			ss << endl << endl;
+		}
+		else if (HDL == "verilog")
+		{
+			ss << endl;
+			ss << endl;
+			ss << "//---------------------------------------------------------------";
+			ss << endl;
+			ss << "//--:::: C CUBED COMPILATION ->  System Verilog RTL MODEL :::::--";
+			ss << endl << endl;
+			ss << "//--::::::::::::: Optimiser engine used: 'PARCS' ::::::::::::::--";
+			ss << endl << endl;
+			ss << "//--::::::::: performed on design module: '" << Module_name << "'";
+			ss << endl << endl;
+			ss << "//------------ HDL created on: " << day << "/" << month << "/" << year;
+			ss << endl;
+			ss << "//------------ HDL created at: " << hour << ":" << min << ":" << sec << " ____ :" << hud;
+			ss << endl << endl;
+			ss << "//--::: The C-cubed compiler, back-end version: CCC_be_6 ::::--";
+			ss << endl;
+			ss << "//--:::::: Copyright(c) 2007-2020, by Michael F. Dossis  :::::::--";
+			ss << endl;
+			ss << "//----------------------------------------------------------------";
+			ss << endl << endl;
+		}
+	}
+	else if (Tool == "gnu")
+	{
+		if (HDL == "c")
+		{
+			ss << endl;
+			ss << endl;
+			ss << "/*---------------------------------------------------------------";
+			ss << endl;
+			ss << "--::: C CUBED COMPILATION -> CYCLE-ACCURATE ANSI-C MODEL :::--";
+			ss << endl << endl;
+			ss << "--::::::::::::: Optimiser engine used: 'PARCS' ::::::::::::::--";
+			ss << endl << endl;
+			ss << "--::::::::: performed on design module: '" << Module_name << "'";
+			ss << endl << endl;
+			ss << "-------C model created on: " << day << "/" << month << "/" << year;
+			ss << endl;
+			ss << "-------C model created at: " << hour << ":" << min << ":" << sec << " ____ :" << hud;
+			ss << endl << endl;
+			ss << "--::: The C-cubed compiler, back-end version: CCC_be_6 ::::--";
+			ss << endl;
+			ss << "--:::::: Copyright(c) 2007-2020, by Michael F. Dossis  :::::::--";
+			ss << endl;
+			ss << "----------------------------------------------------------------*/";
+			ss << endl << endl;
+		}
+	}
+	return ss.str();
+}
+
+string write_parcs_interface(string Module_name, int int1, string HDL, string Tool)
+{
+	stringstream ss;
+	string Schedule, Global_package;
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("hierarchy_part(1,_,0,\"libpart\",_,_,_)"))
+				{
+					Global_package = returnpar(HT.findandreturn("hierarchy_part(1,_,0,\"libpart\",_,_,_)"), 2);
+					ss << endl << endl;
+					ss << write_ieee_packages("vhdl", "synergy");
+					ss << "  LIBRARY WORK; " << endl;
+					ss << "  USE WORK." << Global_package << ".ALL; " << endl << endl;
+					ss << "  ENTITY " << Module_name << " IS" << endl;
+					ss << write_interface_header("vhdl", "synergy");
+					ss << "        clock, reset, start, results_read : IN std_logic;" << endl;
+					HT.retractall("added_aux_call_ios(" + Module_name + ",*)");
+					HT.retractall("printed_formal_ios_of_called_module(" + Module_name + ",*)");
+					ss << write_standard_call_ports(Module_name, Schedule, 1);
+					ss << write_parcs_io_ports(Module_name, 1, "vhdl", "synergy");
+					ss << write_formal_call_ports(Module_name, 1, "vhdl");
+					ss << "        done, busy : OUT std_logic" << endl;
+					ss << write_interface_tail(Module_name, "vhdl", "synergy");
+				}
+			}
+		}
+		else if (HDL == "verilog")
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				ss << "  module " << Module_name << " (" << endl;
+				ss << "             clock, reset, start, results_read," << endl;
+				ss << write_verilog_ports(Module_name, 1, "verilog");
+				HT.retractall("added_aux_call_ios(" + Module_name + ",*)");
+				HT.retractall("printed_formal_ios_of_called_module(" + Module_name + ",*)");
+				ss << write_standard_call_ports(Module_name, Schedule, 1);
+				ss << write_formal_call_ports(Module_name, 1, "verilog");
+				ss << "             done, busy ); " << endl << endl;
+				ss << "   /*---- now list of module I/O types ----*/" << endl;
+				ss << "   input clock, reset, start, results_read;" << endl;
+				ss << "   output done, busy;" << endl;
+				ss << "   reg    done, busy;" << endl;
+				HT.retractall("added_aux_call_ios("+Module_name+",*)");
+				HT.retractall("printed_formal_ios_of_called_module(" + Module_name + ",*)");
+				HT.retractall("hdl_io_pass(*)");
+				HT.assertz("hdl_io_pass(2)");
+				ss << write_standard_verilog_call_decls(Module_name, 1);
+				ss << write_formal_call_ports(Module_name, 1, "verilog");
+				ss << write_verilog_call_ios(Module_name, 1);
+				ss << write_parcs_io_ports(Module_name, 1, "verilog", "synergy") << endl;
+				ss << "   /*---- now list of module internal signals ----*/" << endl;
+			}
+		}
+	}
+	else if (Tool == "gnu")
+	{
+		if (HDL == "c")
+		{
+			ss << "  void main() { " << endl;
+			ss << "   /*---- now list of module local declarations ----*/" << endl;
+		}
+	}
+	return ss.str();
+}
+
+string write_parcs_io_ports(string Module, int In_entry, string HDL, string Tool)
+{
+	stringstream ss;
+	int Next_entry;
+	if (HT.findfact("local_object(" + Module + "," + to_string(In_entry) + ",*)"))
+	{
+		ss << write_parcs_io_ports_conditional(Module, In_entry, HDL, Tool);
+		Next_entry = In_entry + 1;
+		ss << write_parcs_io_ports(Module, Next_entry, HDL, Tool);
+	}
+	return ss.str();
+}
+
+string write_parcs_io_ports_conditional(string Module, int In_entry, string HDL, string Tool)
+{
+	stringstream ss;
+	local_object Local;
+	if (HT.findfact("local_object(" + Module + "," + to_string(In_entry)+",*)"))
+	{
+		local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Module + "," + to_string(In_entry) + ",*)")));
+		Local = *ptr;
+		ss << write_io_port(Local, HDL, Tool);
+	}
+	return ss.str();
+}
+
+string write_formal_call_ports(string Module_name, int Call_entry, string HDL)
+{
+	stringstream ss;
+	int Called_module_entry, Next_call_entry;
+	if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+	{
+		Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+		ss << write_formal_ports_for_called_module(Module_name, Call_entry, Called_module_entry, HDL);
+		Next_call_entry = Call_entry + 1;
+		ss << write_formal_call_ports(Module_name, Next_call_entry, HDL);
+	}
+	return ss.str();
+}
+
+string write_formal_ports_for_called_module(string Module, int Call_entry, int Called_module_entry, string HDL)
+{
+	stringstream ss;
+	string Called_module_name;
+	int Module_entry, Max_same;
+	if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+	{
+		Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+		if (custom_block(Called_module_name))
+		{
+			return ss.str();
+		}
+	}
+	if (HT.findfact("hierarchy_part(_," + Module + ",_,_,_,_,_)"))
+	{
+		Module_entry = stoi(returnpar(HT.findandreturn("hierarchy_part(_," + Module + ",_,_,_,_,_)"), 1));
+		if (HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + ",*)"))
+		{
+			return ss.str();
+		}
+		else if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+		{
+			Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+			if (HT.findfact("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"))
+			{
+				Max_same = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"), 4));
+				if (!HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + ",*)"))
+				{
+					if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+					{
+						if (!custom_block(Called_module_name))
+						{
+							ss << scan_and_print_formal_parameter_io(Module, Called_module_entry, 1, Max_same, HDL);
+						}
+					}
+				}
+			}
+			else if (!HT.findfact("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"))
+			{
+				if (!HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + ",*)"))
+				{
+					if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + "," + Called_module_name + ",*)"))
+					{
+						if (!custom_block(Called_module_name))
+						{
+							ss << scan_and_print_formal_parameter_io(Module, Called_module_entry, 1, 1, HDL);
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string scan_and_print_formal_parameter_io(string Module, int Called_module_entry, int Data_entry, int Max_order, string HDL)
+{
+	stringstream ss;
+	string Called_module_name;
+	int Next_entry;
+	if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+	{
+		Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+		if (HT.findfact("data_stmt(" + Called_module_name + ",_," + to_string(Data_entry) + ",_,_,_)"))
+		{
+			ss << scan_and_print_formal_parameter_io_core(Module, Called_module_entry, Data_entry, 1, Max_order, HDL);
+			Next_entry = Data_entry + 1;
+			ss << scan_and_print_formal_parameter_io(Module, Called_module_entry, Next_entry, Max_order, HDL);
+		}
+	}
+	return ss.str();
+}
+
+string scan_and_print_formal_parameter_io_core(string Module, int Called_module_entry, int Data_entry, int Order, int Max_order, string HDL)
+{
+	stringstream ss;
+	string Called_module_name, Data_kind, Parameter_name, Type_name, Local_built, Data_value;
+	int Data_type, Local_size;
+	if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+	{
+		Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
+		if (HT.findfact("data_stmt("+Called_module_name+",_,"+to_string(Data_entry)+",_,_,_)"))
+		{
+			Parameter_name = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Data_entry) + ",_,_,_)"), 2);
+			Data_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Data_entry) + ",_,_,_)"), 4));
+			Data_kind = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Data_entry) + ",_,_,_)"), 5);
+			Data_value = returnpar(HT.findandreturn("data_stmt(" + Called_module_name + ",_," + to_string(Data_entry) + ",_,_,_)"), 6);
+
+			if (Data_kind != "par_in" && Data_kind != "par_out" && Data_kind != "par_inout")
+			{
+				if (HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					return ss.str();
+				}
+				else if (!HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					if (is_io_type(Data_kind))
+					{
+						if (HT.findfact("type_def(" + to_string(Data_type) + ",*)"))
+						{
+							Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Data_type) + ",*)"), 2);
+							Local_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Data_type) + ",*)"), 3));
+							Local_built = returnpar(HT.findandreturn("type_def(" + to_string(Data_type) + ",*)"), 4);
+							ss << print_io_port_conditional(Module, Called_module_name, Called_module_entry, Data_entry, Order, Max_order, Data_kind, Parameter_name, Data_entry, Type_name, Local_built, Local_size, Data_value, HDL);
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+bool is_io_type(string str)
+{
+	return str == "par_in" || str == "par_inout" || str == "par_out";
+}
+
+string  print_io_port_conditional(string Module, string Called_module_name, int Called_module_entry, int Data_entry, int Order, int Max_order, string Data_kind, string Parameter_name, int Data_entry2, string Data_type, string Local_built, int Local_size, string Data_value, string HDL)
+{
+	stringstream ss;
+	string IO_name1, IO_name, New_kind, Orderstr, IO_name2, IO_name3;
+	int Module_entry, Pass, Next_order;
+	local_object Local;
+	if (Data_entry == Data_entry2)
+	{
+		if (HT.findfact("hierarchy_part(_," + Module + ",_,_,_,_,_)"))
+		{
+			Module_entry = stoi(returnpar(HT.findandreturn("hierarchy_part(_," + Module + ",_,_,_,_,_)"), 1));
+			if (HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")"))
+			{
+				return ss.str();
+			}
+			if (!HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")"))
+			{
+				if (Max_order > 1 && Order > Max_order)
+				{
+					HT.assertz("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")");
+					return ss.str();
+				}
+			}
+			if (HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
+			{
+				return ss.str();
+			}
+			if (!HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
+			{
+				if (Max_order > 1 && Order <= Max_order)
+				{
+					str_int(&Orderstr, Order);
+					HT.concat(Called_module_name, "_", &IO_name1);
+					HT.concat(IO_name1, Orderstr, &IO_name2);
+					HT.concat(IO_name2, "_", &IO_name3);
+					HT.concat(IO_name3, Parameter_name, &IO_name);
+					reverse_io_direction(Data_kind, &New_kind);
+					if (HT.findfact("hdl_io_pass(*)"))
+					{
+						Pass = stoi(returnpar(HT.findandreturn("hdl_io_pass(*)"), 1));
+						ss << write_io_port_conditional_with_pass(Pass, Local, HDL, "synergy");
+						Next_order = Order + 1;
+						ss << print_io_port_conditional(Module, Called_module_name, Called_module_entry, Data_entry, Next_order, Max_order, Data_kind,
+							   Parameter_name, Data_entry, Data_type, Local_built, Local_size, Data_value, HDL);
+					}
+				}
+			}
+			else
+			{
+				HT.concat(Called_module_name, "_", &IO_name1);
+				HT.concat(IO_name1, Parameter_name, &IO_name);
+				if (HT.findfact("local_object(" + Module + ",_,_," + IO_name + ",_,_,_,_,_)"))
+				{
+					return ss.str();
+				}
+				else
+				{
+					reverse_io_direction(Data_kind, &New_kind);
+					if (HT.findfact("hdl_io_pass(*)"))
+					{
+						Pass = stoi(returnpar(HT.findandreturn("hdl_io_pass(*)"), 1));
+						if (HT.findfact("local_object(" + Called_module_name + "," + to_string(Data_entry) + "," + New_kind + "," + IO_name + "," + to_string(Data_entry) + "," + Data_type + "," + Local_built + "," + to_string(Local_size) + "," + Data_value + ")"))
+						{
+							local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Called_module_name + "," + to_string(Data_entry) + "," + New_kind + "," + IO_name + "," + to_string(Data_entry) + "," + Data_type + "," + Local_built + "," + to_string(Local_size) + "," + Data_value + ")")));
+							Local = *ptr;
+							ss << write_io_port_conditional_with_pass(Pass, Local, HDL, "synergy");
+							HT.assertz("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")");
+
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+void reverse_io_direction(string str1, string* str2)
+{
+	if (str1 == "par_in")
+		*str2 = "par_out";
+	if (str1 == "par_out")
+		*str2 = "par_in";
+	if (str1 == "par_inout")
+		*str2 = "par_inout";
+}
+
+string write_io_port_conditional_with_pass(int Pass, local_object Local, string HDL, string Tool)
+{
+	stringstream ss;
+	GeneralFact* ptr;
+	ptr = &Local;
+	string Called_module_name = returnpar(HT.findandreturn(makeStringOf(ptr)), 1);
+	if (Pass == 1)
+	{
+		if (Tool == "synergy")
+		{
+			if (HDL == "verilog")
+			{
+				ss << write_verilog_port(Called_module_name, Local, "verilog");
+			}
+		}
+	}
+	else if (Pass == 2)
+	{
+		if (Tool == "synergy")
+		{
+			ss << write_io_port(Local, HDL, "synergy");
+		}
+	}
+	return ss.str();
+}
+
+string reset_call_ports(string Module_name, string HDL, int C_entry)
+{
+	stringstream ss;
+	int Next_entry;
+	if (HDL == "vhdl")
+	{
+		if (!HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"))
+		{
+			return;
+		}
+		if (HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",0)"))
+		{
+			return;
+		}
+		if (!HT.findfact("call_stmt(" + Module_name + "," + to_string(C_entry) + ",*)"))
+		{
+			ss << reset_call_ports_core(Module_name, "vhdl", C_entry, &Next_entry);
+		}
+	}
+	return ss.str();
+}
+
+string reset_call_ports_core(string Module_name, string HDL, int C_entry, int* Next_entry)
+{
+	stringstream ss;
+	int Called_mod_entry, Function_max_calls, Function_max_calls_final;
+	string Cmodule_name;
+	if (HDL == "vhdl")
+	{
+		if (HT.findfact("call_stmt(" + Module_name + "," + to_string(C_entry) + ",*)"))
+		{
+			Called_mod_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(C_entry) + ",*)"), 3));
+			if (HT.findfact("hierarchy_part(" + to_string(Called_mod_entry) + ",*)"))
+			{
+				Cmodule_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_mod_entry) + ",*)"), 2);
+				if (custom_block(Cmodule_name))
+				{
+					*Next_entry = C_entry + 1;
+				}
+				else if (HT.findfact("call_ios_have_been_reset(" + Cmodule_name + ")"))
+				{
+					*Next_entry = C_entry + 1;
+				}
+				else if (HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"))
+				{
+					Function_max_calls = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"), 3));
+					if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + "," + to_string(Function_max_calls) + ")"))
+					{
+						if (Function_max_calls > 0)
+						{
+							find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
+							ss << finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string finds_par_and_resets_formal_ios(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int Function_index)
+{
+	stringstream ss;
+	if (HDL == "vhdl")
+	{
+		if (Function_index <= Function_max_calls)
+		{
+			ss << resets_standard_call_ios(Module_name, "vhdl", C_entry, Function_entry, Function_max_calls, Function_index);
+			iterates_and_resets_formal_ios(Module_name, "vhdl", C_entry, Function_entry, Function_max_calls, Function_index, 1);
+		}
+	}
+	return ss.str();
+}
+
+string resets_standard_call_ios(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int Function_index)
+{
+	stringstream ss;
+	string Called_module_name, Index;
+	if (HDL == "vhdl")
+	{
+		if (Function_max_calls == 1)
+		{
+			if (HT.findfact("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"))
+			{
+				Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+				if (custom_block(Called_module_name))
+				{
+					return;
+				}
+				else if (!custom_block(Called_module_name))
+				{
+					if (HT.findfact("hdl_style(\"vhdl\")"))
+					{
+						ss << "       " << Called_module_name << "_results_read_int <= '0';" << endl;
+						ss << "       " << Called_module_name << "_start_int <= '0';" << endl;
+					}
+					else if (HT.findfact("hdl_style(\"verilog\")"))
+					{
+						ss << "       " << Called_module_name << "_results_read_int <= 1'b0;" << endl;
+						ss << "       " << Called_module_name << "_start_int <= 1'b0;" << endl;
+					}
+				}
+			}
+		}
+		else if (Function_max_calls > 1)
+		{
+			if (HT.findfact("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"))
+			{
+				Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+				if (!custom_block(Called_module_name))
+				{
+					str_int(&Index, Function_index);
+					if (HT.findfact("hdl_style(\"vhdl\")"))
+					{
+						ss << "       " << Called_module_name << "_" << Index << "_results_read_int <= '0';" << endl;
+						ss << "       " << Called_module_name << "_" << Index << "_start_int <= '0';" << endl;
+					}
+					if (HT.findfact("hdl_style(\"verilog\")"))
+					{
+						ss << "       " << Called_module_name << "_" << Index << "_results_read_int <= 1'b0;" << endl;
+						ss << "       " << Called_module_name << "_" << Index << "_start_int <= 1'b0;" << endl;
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+void iterates_and_resets_formal_ios(string Module_name, string HDL, int C_entry, int Function_entry, int Function_max_calls, int Function_index, int Par_entry)
+{
+
 }
