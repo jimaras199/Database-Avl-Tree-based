@@ -298,7 +298,28 @@ string write_frontend_first_non_ifthen_parcs_operations(string WS, string Module
 string write_frontend_first_non_ifthen_parcs_operations_core(string WS, string Module, int Aop, string HDL, string TOOL, int State_entry);
 string write_parcs_operation_all_kinds(string WS, string Module_name, int Operation, string HDL, string Tool);
 string conditionally_writes_the_operation(string WS, string Module_name, int Operation, string HDL, string Tool, int TargetVar);
+string write_parcs_conditional_variable_assignment(string WS, string Module, int Cond_transition, string HDL);
 string print_targeted_conditional_variable_assignment(string WS, string Module, int Op, int Left, int Right, int Targeted_conditional_variable);
+string write_unc_next_state_transition(string Module, int int1, int Uncond_next_state, int Call_op);
+string write_unconditional_next_state(string Module, int Uncond_next_state, int New_next_state);
+string write_conditional_next_states(string WS, string Module, int int1, int Cond_transition, vector<int> Cond_executions, vector<int> Op_list, int Contains_call);
+string write_next_of_ifthen_true_operations(string WS, string Module, string New_schedule, int True_next_state, vector<int> Cond_executions, vector<int> A);
+string write_recursively_conditional_ops(string WSPACE, string Module, string New_schedule, int True_next_state, vector<int> List);
+string write_parcs_operations(string WS, string Module_name, vector<int> Op_list, string HDL, string Tool, int State);
+string write_parcs_operations_recursive(string WS, string Module_name, vector<int> List, string HDL, string Tool);
+string continue_conditional_transition(string WS, string Module, int Cond_transition, vector<int> Con_exs, vector<int> List, int Contains_calls);
+string write_conditional_operations(string WS, string Module, vector<int> List, string HDL, string Tool, int State);
+string write_conditional_operation(string WS, string Module, int Op, string HDL, string Tool, int State);
+string conditionally_write_parcs_operations(string NWS, string Module, vector<int> True_ops, string HDL, string Tool, int State, int int1);
+string write_calls(string WS, string Module, int State_entry, int Uncond_next_state, int int1, vector<int> All_state_ops, vector<int> List, string HDL, int Entry);
+string write_calls_core(string WS, string Module, int State_entry, int Uncond_next_state, int int1, vector<int> All_state_ops, vector<int> List, string HDL, int Entry, int* Next_entry);
+string debug_message1(int State_entry);
+void write_parcs_c(string Module_name, int Local_list, int Last_parcs_state);
+string set_inputs(string Module_name, int In_entry, string HDL, string Tool);
+string set_input(local_object Local, string HDL, string Tool);
+string set_record_fields(string Type_name, string Top_name, int Field_number, int Number_of_fields, int Current_comp_type);
+string set_record_field(string Type_name, string Top_name, string Field_name, string Field_kind, int int1);
+string write_array_comp_set_value(string Local_name, int Last_comp_type, int Dimension_depth);
 /////////////////////
 
 void generate_top(string pathln, string exec, string cmdl);
@@ -408,7 +429,13 @@ void does_it_contain_a_call(string Module, vector<int> List, int* Contains_call,
 void does_it_contain_a_call_tail(string Module, vector<int> List, int* Contains_call, int* Call_op);
 void examine_if_targets_ifthen(string Module_name, int Operation, int* int1);
 void increase_current_depth();
-
+void next_is_loop_head(string Module, int State_entry, int* It_is_loop, int* New_next_state);
+void more_than_one_and_all_conditional(string Module, vector<int> List, int In_count, int* OK_count);
+void read_ifthen_chain_end_operations_written_fact(int* Value);
+void find_call_order(string Module, int State_entry, vector<int> List, int Hop, int Entry, int Curr_op_entry, int In_order, int* NumOrder, string* Order);
+void find_call_order_core(string Module, int State_entry, vector<int> List, int Hop, int Entry, int Curr_op_entry, int In_order, int* Next_curr_op_entry, int* Next_order);
+void set_ifthen_chain_end_operations_written_fact(int Value);
+void closefile_when_debug(int* output);
 //essential functions
 bool Iscmdlinearg(string Line)
 {
@@ -1840,6 +1867,9 @@ void generate_hdl_2(string Hdlform, string tool, string Module_name, int Level)
 					HT.retractall("old_schedule(*)");
 					consult_permanent_conditionally(Module_name);
 					write_parcs_hdl(Module_name, 1, Hdlform, "synergy", Last_parcs_state);
+					HT.retractall("hdl_style(*)");
+					HT.assertz("hdl_style(\"c\")");
+					write_parcs_c(Module_name, 1, Last_parcs_state);
 
 				}
 			}
@@ -23039,8 +23069,51 @@ void write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int 
 										File2 << reset_call_ports(Module_name, HDL, 1) << endl;
 										File2 << write_fsm_clock_header(HDL, Tool);
 										File2 << write_opted_states(Module_name, Schedule, 1, HDL, Tool);
+										File2 << write_fsm_tail(HDL, Tool);
+										File2 << write_datapath_unopt();
+										File2 << write_content_body_tail(HDL, Tool) << endl;
+										File2.close();
 									}
 								}
+							}
+						}
+						else if (HDL == "verilog")
+						{
+							HT.retractall("added_aux_call_signals("+Module_name+",*)");
+							HT.retractall("added_verilog_aux_call_outputs(" + Module_name + ",*)");
+							HT.retractall("output_filename(*)");
+							HT.concat(Module_name, "_parcs.sv", &Fname);
+							fstream     File3(Fname, ios::out | ios::in | ios::trunc);
+							if (File3.is_open())
+							{
+								HT.assertz("output_filename("+Fname+")"); 
+								File3 << write_parcs_title(Module_name, HDL, Tool) << endl;
+								HT.retractall("added_aux_call_ios("+Module_name+",*)");
+								HT.retractall("hdl_io_pass(*)");
+								HT.assertz("hdl_io_pass(1)");
+								File3 << write_parcs_interface(Module_name, 1, HDL, Tool) << endl;
+								File3 << write_content_header(Module_name, HDL, Tool) << endl;
+								File3 << write_global_package(Module_name, HDL, Tool) << endl;
+								File3 << write_locals(Module_name, 1, HDL, Tool) << endl;
+								File3 << write_standard_call_signals(Schedule, Module_name, 1);
+								HT.retractall("hdl_io_pass(*)");
+								HT.assertz("hdl_io_pass(2)");
+								File3 << write_dp_signal_declarations;
+								File3 << write_aux_verilog_calls_declarations(Module_name, 1);
+								File3 << write_all_cus_blocks_io_variables(Module_name, 1, "verilog");
+								File3 << print_states_type(Last_parcs_state) << endl;
+								HT.retractall("added_aux_call_ios1(" + Module_name + ",*)");
+								File3 << write_content_body_header(Module_name, HDL, Tool, Schedule) << endl;
+								File3 << write_fsm_header(Module_name, 1, HDL, Tool);
+								File3 << reset_locals(Module_name, Schedule, 1, HDL, Tool) << endl;
+								HT.retractall("call_ios_have_been_reset(*)");
+								File3 << reset_call_ports(Module_name, "vhdl", 1) << endl;
+								File3 << write_fsm_clock_header(HDL, Tool);
+								File3 << write_opted_states(Module_name, Schedule, 1, HDL, Tool);
+								File3 << write_fsm_tail(HDL, Tool);
+								File3 << write_datapath_unopt();
+								File3 << write_content_body_tail(HDL, Tool) << endl;
+								File3.close();
 							}
 						}
 					}
@@ -23868,12 +23941,33 @@ void translate_type_in_local_object(string str1, string* str2)
 string write_opted_states(string Module, string New_schedule, int State_entry, string HDL, string Tool)
 {
 	stringstream ss;
+	string Fname;
+	int Next_entry;
 	if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"))
 	{
 		HT.retractall("it_includes_ifthen("+Module+",*)");
 		HT.retractall("it_includes_conditional_targeting(" + Module + ",*)");
 		HT.retractall("targets_conditional_variable(" + Module + ",*)");
 		ss << write_opted_state(Module, New_schedule, State_entry, HDL, Tool);
+		// write_opted_states_writedevice(HDL) 
+		if (HT.findfact("debug_mode(2)"))
+		{
+			if (HDL == "vhdl" || HDL == "verilog")
+			{
+				if (HT.findfact("output_filename(*)"))
+				{
+					Fname = returnpar(HT.findandreturn("output_filename(*)"), 1);
+					ofstream File(Fname, std::ios::app);
+
+					if (File.is_open())
+					{
+						Next_entry = State_entry + 1;
+						File << write_opted_states(Module, New_schedule, Next_entry, HDL, Tool);
+						File.close();
+					}
+				}
+			}
+		}
 	}
 	return ss.str();
 }
@@ -23882,7 +23976,7 @@ string write_opted_state(string Module, string New_schedule, int State_entry, st
 {
 	stringstream ss;
 	string State_name, WS;
-	int Uncond_next_state, Cond_transition, Contains_call, Call_operation;
+	int Uncond_next_state, Cond_transition, Contains_call, Call_operation, output;
 	vector<int> Op_list, Cond_operations;
 	if (Tool == "synergy")
 	{
@@ -23905,6 +23999,86 @@ string write_opted_state(string Module, string New_schedule, int State_entry, st
 				ss << write_frontend_first_non_ifthen_parcs_operations(WS, Module, Op_list, "vhdl", "synergy", State_entry);
 				ss << write_parcs_conditional_variable_assignment(WS, Module, Cond_transition, "vhdl");
 				ss << write_unc_next_state_transition(Module, Contains_call, Uncond_next_state, Call_operation);
+				ss << write_conditional_next_states(WS, Module, Uncond_next_state, Cond_transition, Cond_operations, Op_list, Contains_call);
+				set_current_depth(0);
+				ss << write_conditional_operations(WS, Module, Cond_operations, "vhdl", "synergy", State_entry);
+				HT.retractall("local_ifthen_chain_end_operations_were_written(*)");
+				set_current_depth(0);
+				closefile_when_debug(&output);
+				if (output)
+				{
+					cout << debug_message1(State_entry);
+				}
+				else
+				{
+					ss << debug_message1(State_entry);
+				}
+			}
+		}
+		else if (HDL == "verilog")
+		{
+			HT.retractall("local_ifthen_chain_end_operations_were_written(*)");
+			set_current_depth(0);
+			if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"))
+			{
+				State_name = returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"), 4);
+				Uncond_next_state = stoi(returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"), 5));
+				Cond_transition = stoi(returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"), 6));
+				Op_list = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)")), 1);
+				Cond_operations = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)")), 2);
+				WS = "             ";
+				output_filename_when_debug();
+				does_it_target_ifthens(Module, Op_list);
+				does_it_contain_a_call(Module, Op_list, &Contains_call, &Call_operation);
+				ss << "          " << State_name << " :" << endl;
+				ss << "           begin" << endl;
+				ss << write_frontend_first_non_ifthen_parcs_operations(WS, Module, Op_list, "verilog", "synergy", State_entry);
+				ss << write_parcs_conditional_variable_assignment(WS, Module, Cond_transition, "verilog");
+				ss << write_unc_next_state_transition(Module, Contains_call, Uncond_next_state, Call_operation);
+				ss << write_conditional_next_states(WS, Module, Uncond_next_state, Cond_transition, Cond_operations, Op_list, Contains_call);
+				set_current_depth(0);
+				ss << write_conditional_operations(WS, Module, Cond_operations, "verilog", "synergy", State_entry);
+				ss << "           end" << endl;
+				HT.retractall("local_ifthen_chain_end_operations_were_written(*)");
+				set_current_depth(0);
+				closefile_when_debug(&output);
+				if (output)
+				{
+					cout << debug_message1(State_entry);
+				}
+				else
+				{
+					ss << debug_message1(State_entry);
+				}
+			}
+		}
+	}
+	if (Tool == "gnu")
+	{
+		if (HDL == "c")
+		{
+			HT.retractall("local_ifthen_chain_end_operations_were_written(*)");
+			set_current_depth(0);
+			WS = "            ";
+			if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"))
+			{
+				State_name = returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"), 4);
+				Uncond_next_state = stoi(returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"), 5));
+				Cond_transition = stoi(returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)"), 6));
+				Op_list = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)")), 1);
+				Cond_operations = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(State_entry) + ",*)")), 2);
+				does_it_contain_a_call(Module, Op_list, &Contains_call, &Call_operation);
+				ss << "        case " << State_entry << ":" << endl;
+				ss << write_frontend_first_non_ifthen_parcs_operations(WS, Module, Op_list, "c", "gnu", State_entry);
+				ss << write_parcs_conditional_variable_assignment(WS, Module, Cond_transition, "c");
+				ss << write_unc_next_state_transition(Module, Contains_call, Uncond_next_state, Call_operation);
+				ss << write_conditional_next_states(WS, Module, Uncond_next_state, Cond_transition, Cond_operations, Op_list, Contains_call);
+				ss << write_conditional_operations(WS, Module, Cond_operations, "c", "gnu", State_entry);
+				ss << "         run_clock_cycles = run_clock_cycles + 1;" << endl;
+				ss << "         break;" << endl;
+				set_current_depth(0);
+				HT.retractall("local_ifthen_chain_end_operations_were_written(*)");
+				ss << endl;
 			}
 		}
 	}
@@ -24364,10 +24538,1501 @@ string print_targeted_conditional_variable_assignment(string WS, string Module, 
 string write_unc_next_state_transition(string Module, int int1, int Uncond_next_state, int Call_op)
 {
 	stringstream ss;
+	int Call_entry, Called_entry, New_next_state;
+	string Called_module, HDL, New_schedule;
 	if (int1 == 1 && Uncond_next_state == 0)
 	{
 		return ss.str();
 	}
+	if (int1 == 1)
+	{
+		if (HT.findfact("prog_stmt(" + Module + "," + to_string(Call_op) + ",_,109,_,_,_,_)"))
+		{
+			Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Call_op) + ",_,109,_,_,_,_)"), 6));
+			if (HT.findfact("call_stmt(" + Module + ","+to_string(Call_entry)+",*)"))
+			{
+				Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module + "," + to_string(Call_entry) + ",*)"), 3));
+				if (HT.findfact("hierarchy_part("+to_string(Called_entry)+",_,_,\"libpart\",_,_,_)"))
+				{
+					Called_module = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+					if (custom_block(Called_module))
+					{
+						next_is_loop_head(Module, Uncond_next_state, 0, &New_next_state);
+						ss << write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
+					}
+				}
+			}
+		}
+		else if (HT.findfact("new_schedule(*)"))
+		{
+			New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+			if (HT.findfact("hdl_style(\"c\")"))
+			{
+				if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(Uncond_next_state) + ",*)"))
+				{
+					return ss.str();
+				}
+			}
+		}
+		else if (HT.findfact("hdl_style(\"c\")"))
+		{
+			next_is_loop_head(Module, Uncond_next_state, 0, &New_next_state);
+			ss << write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
+		}
+		else if (HT.findfact("hdl_style(*)"))
+		{
+			HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+			if (HDL != "c")
+			{
+				if (HT.findfact("prog_stmt(" + Module + "," + to_string(Call_op) + ",_,109,_,_,_,_)"))
+				{
+					Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Call_op) + ",_,109,_,_,_,_)"), 6));
+					if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry) + ",*)"))
+					{
+						Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module + "," + to_string(Call_entry) + ",*)"), 3));
+						if (HT.findfact("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"))
+						{
+							Called_module = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
+							if (!custom_block(Called_module))
+							{
+								return ss.str();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (int1 == 0)
+	{
+		if (Uncond_next_state == 0)
+		{
+			return ss.str();
+		}
+		if (HT.findfact("new_schedule(*)"))
+		{
+			New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+			if (!HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(Uncond_next_state) + ",*)"))
+			{
+				ss << write_unconditional_next_state(Module, Uncond_next_state, Uncond_next_state);
+			}
+		}
+		else
+		{
+			next_is_loop_head(Module, Uncond_next_state, 0, &New_next_state);
+			write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
+		}
+	}
+	return ss.str();
+}
 
+void next_is_loop_head(string Module, int State_entry, int* It_is_loop, int* New_next_state)
+{
+	int Conditional_trans_entry_number, Ifop, Condition, True_next_state, Unconditional_next_state, Operator;
+	string Kind;
+	vector<int> vIfop;
+	if (HT.findfact("state(" + Module + ",\"specials\"," + to_string(State_entry) + ",_,0,_,_,_)"))
+	{
+		Conditional_trans_entry_number = stoi(returnpar(HT.findandreturn("state(" + Module + ",\"specials\"," + to_string(State_entry) + ",_,0,_,_,_)"), 6));
+		vIfop = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + ",\"specials\"," + to_string(State_entry) + ",_,0,_,_,_)")), 1);
+		Ifop = vIfop.front();
+		if (HT.findfact("prog_stmt(" + Module + "," + to_string(Ifop) + ",_,106,_,_,_,_)"))
+		{
+			Condition = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Ifop) + ",_,106,_,_,_,_)"), 6));
+			if (Ifop <= State_entry)
+			{
+				if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Condition) + ",_,\"const\",bol(1))"))
+				{
+					*It_is_loop = 1;
+					if (HT.findfact("conditional_transitions(" + Module + ",\"specials\"," + to_string(Conditional_trans_entry_number) + "," + to_string(Condition) + ",*)"))
+					{
+						True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + ",\"specials\"," + to_string(Conditional_trans_entry_number) + "," + to_string(Condition) + ",*)"), 7));
+						*New_next_state = True_next_state;
+					}
+				}
+				else if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Condition) + ",_,\"const\",i(1))"))
+				{
+					if (HT.findfact("conditional_transitions(" + Module + ",\"specials\"," + to_string(Conditional_trans_entry_number) + "," + to_string(Condition) + ",*)"))
+					{
+						True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + ",\"specials\"," + to_string(Conditional_trans_entry_number) + "," + to_string(Condition) + ",*)"), 7));
+						*New_next_state = True_next_state;
+					}
+				}
+				else if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Condition) + ",_,_,_)"))
+				{
+					Kind = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Condition) + ",_,_,_)"), 5);
+					if (Kind != "const")
+					{
+						*It_is_loop = 0;
+						*New_next_state = State_entry;
+					}
+				}
+			}
+			else if (Ifop > State_entry)
+			{
+				*It_is_loop = 0;
+				*New_next_state = State_entry;
+			}
+		}
+	}
+	else if (HT.findfact("state(" + Module + ",\"specials\"," + to_string(State_entry) + ",_,_,0,_,_)"))
+	{
+		Unconditional_next_state = stoi(returnpar(HT.findandreturn("state(" + Module + ",\"specials\"," + to_string(State_entry) + ",_,_,0,_,_)"), 5));
+		vIfop = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + ",\"specials\"," + to_string(State_entry) + ",_,_,0,_,_)")), 1);
+		Ifop = vIfop.front();
+		if (Unconditional_next_state != 0)
+		{
+			if (HT.findfact("prog_stmt(" + Module + "," + to_string(Ifop) + ",*)"))
+			{
+				Operator = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Ifop) + ",*)"), 4));
+				if (Operator != 106)
+				{
+					*It_is_loop = 0;
+					*New_next_state = State_entry;
+				}
+			}
+			else if (Ifop < 0)
+			{
+				*It_is_loop = 0;
+				*New_next_state = State_entry;
+			}
+		}
+	}
+}
+
+string write_unconditional_next_state(string Module, int Uncond_next_state, int New_next_state)
+{
+	stringstream ss;
+	string HDL, Schedule;
+	if (HT.findfact("hdl_style(\"vhdl\")"))
+	{
+		if (Uncond_next_state != 0)
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (!HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
+				{
+					ss << "            state <= state_0;" << endl;
+					ss << "            done_int <= '1';   -- processing finished, results are ready !!!" << endl;
+					ss << "            busy <= '0';  " << endl << endl;
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"verilog\")"))
+	{
+		if (Uncond_next_state != 0)
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (!HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
+				{
+					ss << "            state <= state_0;" << endl;
+					ss << "            done_int <= 1'b1;   //-- processing finished, results are ready !!!" << endl;
+					ss << "            busy <= 1'b0;  " << endl << endl;
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(\"c\")"))
+	{
+		if (HDL != "c")
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
+				{
+					ss << "         state = " << New_next_state << ";" << endl;
+				}
+				else if (!HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
+				{
+					ss << "         printf(" << '"' << " last state %d" << '\\' << 'n' << " does not really exist " << '"' << ',' << New_next_state << ");" << endl;
+					ss << "         printf(" << '"' << " writing the design's outputs and synchronizing with the outside world..." << '\\' << 'n' << '"' << ");" << endl;
+					ss << "         printf(" << '"' << " you will move to state 0" << '\\' << 'n' << '"' << ");" << endl;
+					ss << "         run_clock_cycles = run_clock_cycles + 1;" << endl;
+					ss << "          Stop = 1;" << endl;
+					ss << "         state = 0; " << endl;
+					ss << "         break;" << endl;
+				}
+			}
+		}
+	}
+	else if (HT.findfact("hdl_style(*)"))
+	{
+		HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+		if (HDL != "c")
+		{
+			if (Uncond_next_state != 0)
+			{
+				if (HT.findfact("new_schedule(*)"))
+				{
+					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+					if (HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
+					{
+						ss << "            state <= state_" << New_next_state << ";" << endl;
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_conditional_next_states(string WS, string Module, int int1, int Cond_transition, vector<int> Cond_executions, vector<int> Op_list, int Contains_call)
+{
+	stringstream ss;
+	string New_schedule, NWS, Var_name, VariableName, NWS1;
+	int Condition_variable, True_cond_transition, False_cond_transition, True_next_state, False_next_state;
+	if (Cond_transition == 0)
+	{
+		return ss.str();
+	}
+	if (int1 == 0)
+	{
+		if (HT.findfact("hdl_style(\"c\")"))
+		{
+			if (HT.findfact("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"))
+			{
+				Condition_variable = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 4));
+				True_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 5));
+				False_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 6));
+				True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 7));
+				False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 8));
+				if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Condition_variable) + ",_,_,_)"))
+				{
+					Var_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Condition_variable) + ",_,_,_)"), 2);
+					ss << WS << "if (" << Var_name << ") " << endl;
+					HT.concat(WS, " ", NWS);
+					ss << NWS << "{" << endl;
+					HT.concat(NWS, " ", NWS1);
+					ss << "           printf(" << '"' << Var_name << " is true " << '\\' << 'n' << '"' << ");" << endl;
+					ss << write_unconditional_next_state(Module, 1, True_next_state);
+					ss << continue_conditional_transition(NWS1, Module, True_cond_transition, Cond_executions, Op_list, 0);
+					ss << write_next_of_ifthen_true_operations(NWS1, Module, New_schedule, True_next_state, Cond_executions, Op_list);
+					ss << NWS << "}" << endl;
+					ss << WS << "else " << endl;
+					ss << NWS << "{" << endl;
+					ss << "           printf(" << '"' << Var_name << " is false " << '\\' << 'n' << '"' << ");" << endl;
+					ss << write_unconditional_next_state(Module, 1, False_next_state);
+					ss << continue_conditional_transition(NWS1, Module, False_cond_transition, Cond_executions, Op_list, 0);
+					ss << NWS << "}" << endl;
+				}
+			}
+		}
+		else if (Contains_call == 1)
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("hdl_style(\"vhdl\")"))
+				{
+					if (HT.findfact("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"))
+					{
+						Condition_variable = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 4));
+						True_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 5));
+						False_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 6));
+						True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 7));
+						False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 8));
+						HT.concat(WS, " ", &NWS);
+						ss << write_the_ifthen_condition(WS, Module, New_schedule, Condition_variable, "vhdl");
+						ss << write_unconditional_next_state(Module, 1, True_next_state);
+						ss << write_next_of_ifthen_true_operations(NWS, Module, New_schedule, True_next_state, Cond_executions, Op_list);
+						ss << continue_conditional_transition(NWS, Module, True_cond_transition, Cond_executions, Op_list, Contains_call);
+						ss << WS << "ELSE " << endl;
+						ss << write_unconditional_next_state(Module, 1, False_next_state);
+						ss << continue_conditional_transition(NWS, Module, False_cond_transition, Cond_executions, Op_list, 0);
+						ss << WS << "END IF;" << endl;
+					}
+				}
+				if (HT.findfact("hdl_style(\"verilog\")"))
+				{
+					if (HT.findfact("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"))
+					{
+						Condition_variable = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 4));
+						True_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 5));
+						False_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 6));
+						True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 7));
+						False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 8));
+						if (HT.findfact("data_stmt(" + Module + ",_,"+to_string(Condition_variable)+",_,_,_)"))
+						{
+							Var_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Condition_variable) + ",_,_,_)"), 2);
+							interpret_condition_variable(Module, Var_name, &VariableName);
+							ss << WS << "if (" << VariableName << ") " << endl;
+							HT.concat(WS, " ", &NWS);
+							ss << NWS << "begin" << endl;
+							HT.concat(NWS, " ", &NWS1);
+							ss << write_unconditional_next_state(Module, 1, True_next_state);
+							ss << write_next_of_ifthen_true_operations(NWS1, Module, New_schedule, True_next_state, Cond_executions, Op_list);
+							ss << continue_conditional_transition(NWS1, Module, True_cond_transition, Cond_executions, Op_list, Contains_call);
+							ss << NWS << "end" << endl;
+							ss << WS << "else " << endl;
+							ss << NWS << "begin" << endl;
+							ss << write_unconditional_next_state(Module, 1, False_next_state);
+							ss << continue_conditional_transition(NWS1, Module, False_cond_transition, Cond_executions, Op_list, 0);
+							ss << NWS << "end" << endl;
+						}
+					}
+				}
+			}
+		}
+		if (Contains_call == 0)
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("hdl_style(\"vhdl\")"))
+				{
+					if (HT.findfact("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"))
+					{
+						Condition_variable = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 4));
+						True_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 5));
+						False_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 6));
+						True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 7));
+						False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 8));
+						HT.concat(WS, " ", &NWS);
+						ss << write_the_ifthen_condition(WS, Module, New_schedule, Condition_variable, "vhdl");
+						ss << write_next_of_ifthen_true_operations(NWS, Module, New_schedule, True_next_state, Cond_executions, Op_list);
+						ss << continue_conditional_transition(NWS, Module, True_cond_transition, Cond_executions, Op_list, Contains_call);
+						ss << WS << "ELSE " << endl;
+						ss << write_unconditional_next_state(Module, 1, False_next_state);
+						ss << continue_conditional_transition(NWS, Module, False_cond_transition, Cond_executions, Op_list, 0);
+						ss << WS << "END IF;" << endl;
+					}
+				}
+				else if (HT.findfact("hdl_style(\"verilog\")"))
+				{
+					if (HT.findfact("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"))
+					{
+						Condition_variable = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 4));
+						True_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 5));
+						False_cond_transition = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 6));
+						True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 7));
+						False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + New_schedule + "," + to_string(Cond_transition) + ",*)"), 8));
+						if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Condition_variable) + ",_,_,_)"))
+						{
+							Var_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Condition_variable) + ",_,_,_)"), 2);
+							interpret_condition_variable(Module, Var_name, &VariableName);
+							ss << WS << "if (" << VariableName << ") " << endl;
+							HT.concat(WS, " ", &NWS);
+							ss << NWS << "begin" << endl;
+							HT.concat(NWS, " ", &NWS1);
+							ss << write_next_of_ifthen_true_operations(NWS1, Module, New_schedule, True_next_state, Cond_executions, Op_list);
+							ss << continue_conditional_transition(NWS1, Module, True_cond_transition, Cond_executions, Op_list, Contains_call);
+							ss << NWS << "end" << endl;
+							ss << WS << "else " << endl;
+							ss << NWS << "begin" << endl;
+							ss << write_unconditional_next_state(Module, 1, False_next_state);
+							ss << continue_conditional_transition(NWS1, Module, False_cond_transition, Cond_executions, Op_list, 0);
+							ss << NWS << "end" << endl;
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_next_of_ifthen_true_operations(string WS, string Module, string New_schedule, int True_next_state, vector<int> Cond_executions, vector<int> A)
+{
+	stringstream ss;
+	int Unconditional_next_state, OK;
+	vector<int> True_ops;
+	if (HT.findfact("new_schedule(*)"))
+	{
+		New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+		if (!HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)"))
+		{
+			return ss.str();
+		}
+		if (A.size() == 1)
+		{
+			if (HT.findfact("hdl_style(\"vhdl\")"))
+			{
+				if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)"))
+				{
+					Unconditional_next_state = stoi(returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)"), 5));
+					True_ops = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)")), 1);
+					if (Unconditional_next_state == 0)
+					{
+						more_than_one_and_all_conditional(Module, True_ops, 0, &OK);
+						if (OK <= 1)
+						{
+							ss << "            state <= state_" << True_next_state << ";" << endl;
+						}
+						else if (OK > 1)
+						{
+							HT.assertz("local_ifthen_chain_end_operations_were_written(1)");
+							ss << write_recursively_conditional_ops(WS, Module, New_schedule, True_next_state, Cond_executions);
+						}
+					}
+					else if (Unconditional_next_state != 0)
+					{
+						more_than_one_and_all_conditional(Module, True_ops, 0, &OK);
+						if (OK <= 1)
+						{
+							ss << "            state <= state_" << True_next_state << ";" << endl;
+						}
+					}
+				}
+			}
+			else if (HT.findfact("hdl_style(\"verilog\")"))
+			{
+				if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)"))
+				{
+					Unconditional_next_state = stoi(returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)"), 5));
+					True_ops = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)")), 1);
+					if (Unconditional_next_state == 0)
+					{
+						more_than_one_and_all_conditional(Module, True_ops, 0, &OK);
+						if (OK > 1)
+						{
+							HT.assertz("local_ifthen_chain_end_operations_were_written(1)");
+							ss << write_recursively_conditional_ops(WS, Module, New_schedule, True_next_state, Cond_executions);
+						}
+						else if (OK <= 1)
+						{
+							ss << "            state <= state_" << True_next_state << ";" << endl;
+						}
+					}
+				}
+			}
+			else if (HT.findfact("hdl_style(\"c\")"))
+			{
+				if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)"))
+				{
+					Unconditional_next_state = stoi(returnpar(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)"), 5));
+					True_ops = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + New_schedule + "," + to_string(True_next_state) + ",*)")), 1);
+					if (Unconditional_next_state == 0)
+					{
+						more_than_one_and_all_conditional(Module, True_ops, 0, &OK);
+						if (OK > 1)
+						{
+							HT.assertz("local_ifthen_chain_end_operations_were_written(1)");
+							ss << write_recursively_conditional_ops(WS, Module, New_schedule, True_next_state, Cond_executions);
+						}
+						else if (OK <= 1)
+						{
+							ss << "            state <= state_" << True_next_state << ";" << endl;
+						}
+					}
+					else if (Unconditional_next_state != 0)
+					{
+						more_than_one_and_all_conditional(Module, True_ops, 0, &OK);
+						if (OK <= 1)
+						{
+							ss << "            state <= state_" << True_next_state << ";" << endl;
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+void more_than_one_and_all_conditional(string Module, vector<int> List, int In_count, int* OK_count)
+{
+	int Next_count;
+	if (List.empty())
+	{
+		*OK_count = In_count;
+	}
+	else
+	{
+		if (List.front() != 0)
+		{
+			if (!HT.findfact("prog_stmt(" + Module + "," + to_string(List.front()) + ",_,106,_,_,_,_)"))
+			{
+				*OK_count = 0;
+			}
+			else if (HT.findfact("prog_stmt(" + Module + "," + to_string(List.front()) + ",_,106,_,_,_,_)"))
+			{
+				Next_count = In_count + 1;
+				List.erase(List.begin());
+				more_than_one_and_all_conditional(Module, List, Next_count, OK_count);
+			}
+		}
+	}
+}
+
+string write_recursively_conditional_ops(string WSPACE, string Module, string New_schedule, int True_next_state, vector<int> List)
+{
+	stringstream ss;
+	vector<int> True_ops;
+	string HDL;
+	if (!List.empty())
+	{
+		if (HT.findfact("conditional_operations(" + Module + ",_," + to_string(List.front()) + ",_,_,_,_,_)"))
+		{
+			True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + ",_," + to_string(List.front()) + ",_,_,_,_,_)")), 2);
+			if (HT.findfact("hdl_style(*)"))
+			{
+				HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+				ss << write_parcs_operations(WSPACE, Module, True_ops, HDL, "synergy", True_next_state);
+				List.erase(List.begin());
+				ss << write_recursively_conditional_ops(WSPACE, Module, New_schedule, True_next_state, List);
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_parcs_operations(string WS, string Module_name, vector<int> Op_list, string HDL, string Tool, int State)
+{
+	stringstream ss;
+	if (!Op_list.empty())
+	{
+		if (HDL == "c")
+		{
+			ss << write_parcs_operations_recursive(WS, Module_name, Op_list, "c", "gnu");
+		}
+		else if (Tool == "synergy")
+		{
+			if (HDL != "c")
+			{
+				if (!HT.findfact("massively_parallel_style(*)"))
+				{
+					ss << write_output_state_assignments(Module_name, State, Op_list);
+				}
+			}
+		}
+		else if (HDL != "c")
+		{
+			if (HT.findfact("massively_parallel_style(1)"))
+			{
+				ss << write_parcs_operations_recursive(WS, Module_name, Op_list, HDL, Tool);
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_parcs_operations_recursive(string WS, string Module_name, vector<int> List, string HDL, string Tool)
+{
+	stringstream ss;
+	if (!List.empty())
+	{
+		ss << write_parcs_operation_all_kinds(WS, Module_name, List.front(), HDL, Tool);
+		List.erase(List.begin());
+		ss << write_parcs_operations_recursive(WS, Module_name, List, HDL, Tool);
+	}
+	return ss.str();
+}
+
+string continue_conditional_transition(string WS, string Module, int Cond_transition, vector<int> Con_exs, vector<int> List, int Contains_calls)
+{
+	stringstream ss;
+	if (Cond_transition != 0)
+	{
+		List.erase(List.begin());
+		ss << write_conditional_next_states(WS, Module, 0, Cond_transition, Con_exs, List, Contains_calls);
+	}
+	return ss.str();
+}
+
+string write_conditional_operations(string WS, string Module, vector<int> List, string HDL, string Tool, int State)
+{
+	stringstream ss;
+	if (!List.empty())
+	{
+		ss << write_conditional_operation(WS, Module, List.front(), HDL, Tool, State);
+		List.erase(List.begin());
+		ss << write_conditional_operations(WS, Module, List, HDL, Tool, State);
+	}
+	return ss.str();
+}
+
+string write_conditional_operation(string WS, string Module, int Op, string HDL, string Tool, int State)
+{
+	stringstream ss;
+	string Schedule, NWS, Var_name, Kind, NWS1;
+	int Conditional_variable, Conditional_transition_entry_number, True_next_state, False_next_state, Cond1, Contains_callT, Call_operationT,
+		Contains_callF, Call_operationF, Var_type, Var_size;
+	vector<int> True_ops, False_ops, True_cond_execs, False_cond_execs, Operations_list;
+	if (Op != 0)
+	{
+		if (Tool == "synergy")
+		{
+			if (HDL == "vhdl")
+			{
+				if (HT.findfact("new_schedule(*)"))
+				{
+					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+					if (HT.findfact("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)"))
+					{
+						Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)"), 4));
+						True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 1);
+						False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 2);
+						True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 3);
+						False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 4);
+						HT.concat(WS, " ", &NWS);
+						if (HT.findfact("state(" + Module + "," + Schedule + ",*)"))
+						{
+							Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(" + Module + "," + Schedule + ",*)"), 6));
+							Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + Schedule + ",*)")), 1);
+							if (HT.findfact("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"))
+							{
+								True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
+								False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
+								if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",1,\"const\",_)"))
+								{
+									Var_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",1,\"const\",_)"), 2);
+									ss << WS << "IF " << Var_name << " THEN " << endl;
+									read_ifthen_chain_end_operations_written_fact(&Cond1);
+									HT.retractall("found_call_operator(" + Module + ",*)");
+									ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
+									does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+									set_current_depth(0);
+									ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
+									ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
+									ss << WS << "ELSE " << endl;
+									HT.retractall("found_call_operator(" + Module + ",*)");
+									ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
+									does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+									set_current_depth(0);
+									ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
+									ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
+									set_ifthen_chain_end_operations_written_fact(1);
+									ss << WS << "END IF;" << endl;
+								}
+								else if (HT.findfact("data_stmt(" + Module + ",_,"+to_string(Conditional_variable)+",_,_,_)"))
+								{
+									Var_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
+									Var_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",_,_,_)"), 4));
+									Kind = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",_,_,_)"), 5);
+									if (HT.findfact("type_def(" + to_string(Var_type) + ",_,1,_,_,_,_,_,_)"))
+									{
+										if (Kind != "const")
+										{
+											ss << WS << "IF " << Var_name << " = '1' THEN " << endl;
+											read_ifthen_chain_end_operations_written_fact(&Cond1);
+											HT.retractall("found_call_operator(" + Module + ",*)");
+											ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
+											does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+											set_current_depth(0);
+											ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
+											ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
+											ss << WS << "ELSE " << endl;
+											HT.retractall("found_call_operator(" + Module + ",*)");
+											ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
+											does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+											set_current_depth(0);
+											ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
+											ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
+											set_ifthen_chain_end_operations_written_fact(1);
+											ss << WS << "END IF;" << endl;
+										}
+									}
+									if (HT.findfact("type_def(" + to_string(Var_type) + ",*)"))
+									{
+										Var_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Var_type) + ",*)"), 3));
+										if (Var_size > 1)
+										{
+											ss << WS << "IF " << Var_name << " /= 0 THEN " << endl;
+											read_ifthen_chain_end_operations_written_fact(&Cond1);
+											HT.retractall("found_call_operator(" + Module + ",*)");
+											ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
+											does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+											set_current_depth(0);
+											ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
+											ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
+											ss << WS << "ELSE " << endl;
+											HT.retractall("found_call_operator(" + Module + ",*)");
+											ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
+											does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+											set_current_depth(0);
+											ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
+											ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
+											set_ifthen_chain_end_operations_written_fact(1);
+											ss << WS << "END IF;" << endl;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (HDL == "verilog")
+			{
+				if (HT.findfact("new_schedule(*)"))
+				{
+					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+					if (HT.findfact("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)"))
+					{
+						Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)"), 4));
+						True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 1);
+						False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 2);
+						True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 3);
+						False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 4);
+						HT.concat(WS, " ", &NWS);
+						if (HT.findfact("state(" + Module + "," + Schedule + ",*)"))
+						{
+							Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(" + Module + "," + Schedule + ",*)"), 6));
+							Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + Schedule + ",*)")), 1);
+							if (HT.findfact("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"))
+							{
+								True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
+								False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
+								if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",_,_,_)"))
+								{
+									Var_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
+									ss << WS;
+									ss << "if (" << Var_name << ") " << endl;
+									HT.concat(NWS, " ", &NWS1);
+									ss << NWS;
+									ss << "begin" << endl;
+									read_ifthen_chain_end_operations_written_fact(&Cond1);
+									HT.retractall("found_call_operator(" + Module + ",*)");
+									ss << conditionally_write_parcs_operations(NWS1, Module, True_ops, "verilog", "synergy", State, Cond1);
+									does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+									set_current_depth(0);
+									ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "verilog", 1);
+									ss << write_conditional_operations(NWS1, Module, True_cond_execs, "verilog", "synergy", State);
+									ss << NWS;
+									ss << "end" << endl;
+									ss << WS << "else " << endl;
+									ss << NWS;
+									ss << "begin" << endl;
+									HT.retractall("found_call_operator(" + Module + ",*)");
+									ss << write_parcs_operations(NWS, Module, False_ops, "verilog", "synergy", State);
+									does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+									set_current_depth(0);
+									ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "verilog", 1);
+									ss << write_conditional_operations(NWS, Module, False_cond_execs, "verilog", "synergy", State);
+									set_ifthen_chain_end_operations_written_fact(1);
+									ss << NWS;
+									ss << "end" << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (Tool == "gnu")
+		{
+			if (HDL == "c")
+			{
+				if (HT.findfact("new_schedule(*)"))
+				{
+					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+					if (HT.findfact("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)"))
+					{
+						Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)"), 4));
+						True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 1);
+						False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 2);
+						True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 3);
+						False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(" + Module + "," + Schedule + "," + to_string(Op) + ",*)")), 4);
+						HT.concat(WS, " ", &NWS);
+						if (HT.findfact("state(" + Module + "," + Schedule + ",*)"))
+						{
+							Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(" + Module + "," + Schedule + ",*)"), 6));
+							Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(" + Module + "," + Schedule + ",*)")), 1);
+							if (HT.findfact("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"))
+							{
+								True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
+								False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(" + Module + "," + Schedule + "," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
+								HT.concat(WS, " ", NWS);
+								if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",_,_,_)"))
+								{
+									Var_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
+									ss << WS;
+									ss << "if (" << Var_name << ") " << endl;
+									HT.concat(NWS, " ", NWS1);
+									ss << NWS;
+									ss << "{" << endl;
+									read_ifthen_chain_end_operations_written_fact(&Cond1);
+									ss << conditionally_write_parcs_operations(NWS1, Module, True_ops, "c", "gnu", State, Cond1);
+									does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+									ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "c", 1);
+									ss << write_conditional_operations(NWS1, Module, True_cond_execs, "c", "gnu", State);
+									ss << NWS;
+									ss << "}" << endl;
+									ss << WS << "else " << endl;
+									ss << NWS;
+									ss << "{" << endl;
+									ss << write_parcs_operations(NWS, Module, False_ops, "c", "gnu", State);
+									does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+									ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "c", 1);
+									ss << write_conditional_operations(NWS, Module, False_cond_execs, "c", "gnu", State);
+									set_ifthen_chain_end_operations_written_fact(1);
+									ss << NWS;
+									ss << "}" << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+void read_ifthen_chain_end_operations_written_fact(int* Value)
+{
+	if (!HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
+	{
+		*Value = 0;
+	}
+	else if (HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
+	{
+		*Value = stoi(returnpar(HT.findandreturn("local_ifthen_chain_end_operations_were_written(*)"), 1));
+	}
+}
+
+string conditionally_write_parcs_operations(string NWS, string Module, vector<int> True_ops, string HDL, string Tool, int State, int int1)
+{
+	stringstream ss;
+	if (int1 == 1 || True_ops.empty())
+	{
+		return ss.str();
+	}
+	if (int1 == 0)
+	{
+		ss << write_parcs_operations(NWS, Module, True_ops, HDL, Tool, State);
+	}
+	return ss.str();
+}
+
+string write_calls(string WS, string Module, int State_entry, int Uncond_next_state, int int1, vector<int> All_state_ops, vector<int> List, string HDL, int Entry)
+{
+	stringstream ss;
+	int Next_entry;
+	if (!List.empty() || int1 != 0)
+	{
+		ss << write_calls_core(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List, HDL, Entry, &Next_entry);
+		List.erase(List.begin());
+		write_calls(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List, HDL, Next_entry);
+	}
+	return ss.str();
+}
+
+string write_calls_core(string WS, string Module, int State_entry, int Uncond_next_state, int int1, vector<int> All_state_ops, vector<int> List, string HDL, int Entry, int* Next_entry)
+{
+	stringstream ss;
+	int Operator;
+	string Str_order;
+	if (int1 == 1)
+	{
+		if (List.front() < 0)
+		{
+			*Next_entry = Entry + 1;
+		}
+		else if (HT.findfact("prog_stmt(" + Module + "," + to_string(List.front()) + ",*)"))
+		{
+			Operator = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(List.front()) + ",*)"), 4));
+			if (Operator != 109)
+			{
+				*Next_entry = Entry + 1;
+			}
+			else if (Operator == 109)
+			{
+				increase_current_depth();
+				find_call_order(Module, State_entry, All_state_ops, List.front(), Entry, 1, 0, 0, &Str_order);
+				ss << write_call(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List.front(), HDL, Str_order);
+				*Next_entry = Entry + 1;
+			}
+		}
+	}
+	return ss.str();
+}
+
+void find_call_order(string Module, int State_entry, vector<int> List, int Hop, int Entry, int Curr_op_entry, int In_order, int* NumOrder, string* Order)
+{
+	string Order_in_text;
+	int Next_curr_op_entry, Next_order;
+	if (List.empty())
+	{
+		if (In_order == 0)
+		{
+			*Order = "";
+			*NumOrder = 0;
+		}
+		else if (In_order > 0)
+		{
+			str_int(&Order_in_text, In_order);
+			HT.concat("_", Order_in_text, Order);
+			*NumOrder = In_order;
+		}
+	}
+	else if (Curr_op_entry > Entry)
+	{
+		if (In_order == 0)
+		{
+			*Order = "";
+			*NumOrder = 0;
+		}
+		else if (In_order > 0)
+		{
+			str_int(&Order_in_text, In_order);
+			HT.concat("_", Order_in_text, Order);
+			*NumOrder = In_order;
+		}
+	}
+	else
+	{
+		find_call_order_core(Module, State_entry, List, Hop, Entry, Curr_op_entry, In_order, &Next_curr_op_entry, &Next_order);
+		List.erase(List.begin());
+		find_call_order(Module, State_entry, List, Hop, Entry, Next_curr_op_entry, Next_order, NumOrder, Order);
+	}
+}
+
+void find_call_order_core(string Module, int State_entry, vector<int> List, int Hop, int Entry, int Curr_op_entry, int In_order, int* Next_curr_op_entry, int* Next_order)
+{
+	int Operator, Operator1, Call_entry, Call_entry1;
+	string Called_Module, Called_Module1;
+	if (List.front() <= 0)
+	{
+		*Next_curr_op_entry = Curr_op_entry + 1;
+		*Next_order = In_order;
+	}
+	else if (Curr_op_entry <= Entry)
+	{
+		*Next_curr_op_entry = Curr_op_entry + 1;
+		if (HT.findfact("prog_stmt(" + Module + "," + to_string(Hop) + ",*)"))
+		{
+			Operator = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Hop) + ",*)"), 4));
+			Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Hop) + ",*)"), 6));
+			if (Operator != 109)
+			{
+				*Next_order = In_order;
+			}
+			else if (Operator == 109)
+			{
+				if (HT.findfact("call_stmt("+Module+","+to_string(Call_entry)+",*)"))
+				{
+					Called_Module = returnpar(HT.findandreturn("call_stmt(" + Module + "," + to_string(Call_entry) + ",*)"), 3);
+					if (HT.findfact("prog_stmt(" + Module + "," + to_string(List.front()) + ",*)"))
+					{
+						Call_entry1 = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(List.front()) + ",*)"), 6));
+						if (Operator == 109)
+						{
+							if (HT.findfact("call_stmt(" + Module + "," + to_string(Call_entry1) + ",*)"))
+							{
+								Called_Module1 = returnpar(HT.findandreturn("call_stmt(" + Module + "," + to_string(Call_entry1) + ",*)"), 3);
+								if (Called_Module != Called_Module1)
+								{
+									*Next_order = In_order;
+								}
+								else if (Called_Module == Called_Module1)
+								{
+									*Next_order = In_order + 1;
+								}
+							}
+						}
+					}
+				}
+				else if (HT.findfact("prog_stmt(" + Module + "," + to_string(List.front()) + ",_,106,_,_,_,_)"))
+				{
+					if (In_order == 0)
+					{
+						*Next_order = 1;
+					}
+				}
+				else if (HT.findfact("prog_stmt(" + Module + "," + to_string(List.front()) + ",*)"))
+				{
+					Operator1 = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(List.front()) + ",*)"), 4));
+					if (Operator1 != 109 && Operator1 != 106)
+					{
+						*Next_order = In_order;
+					}
+				}
+			}
+		}
+	}
+}
+
+void set_ifthen_chain_end_operations_written_fact(int Value)
+{
+	int OldValue;
+	if (!HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
+	{
+		HT.assertz("local_ifthen_chain_end_operations_were_written(" + to_string(Value) + ")");
+	}
+	if (HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
+	{
+		if (HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
+		{
+			OldValue = stoi(returnpar(HT.findandreturn("local_ifthen_chain_end_operations_were_written(*)"), 1));
+			HT.retractall("local_ifthen_chain_end_operations_were_written(" + to_string(OldValue) + ")");
+			HT.assertz("local_ifthen_chain_end_operations_were_written(" + to_string(Value) + ")");
+		}
+	}
+}
+
+void closefile_when_debug(int* output)
+{
+	if (HT.findfact("debug_mode(2)"))
+	{
+		*output = 1;
+	}
+	else *output = 0;
+}
+
+string debug_message1(int State_entry)
+{
+	stringstream ss;
+	if (HT.findfact("debug_mode(2)"))
+	{
+		ss << "os=" << State_entry << endl;
+	}
+	return ss.str();
+}
+
+void write_parcs_c(string Module_name, int Local_list, int Last_parcs_state)
+{
+	string Schedule, Hdlform, Tool, Fname;
+	if (!HT.findfact("cac_mode(*)") || Last_parcs_state == 0 || !HT.findfact("massively_parallel_style(*)"))
+	{
+		return;
+	}
+	else if (Last_parcs_state > 0)
+	{
+		if (HT.findfact("massively_parallel_style(1)"))
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				Hdlform = "c";
+				Tool = "gnu";
+				HT.retractall("hdl_style(*)");
+				HT.retractall("print_C_main_body(*)");
+				HT.assertz("hdl_style(\"c\")");
+				HT.retractall("added_aux_call_signals("+Module_name+",*)");
+				HT.retractall("added_verilog_aux_call_outputs(" + Module_name + ",*)");
+				HT.retractall("local_ifthen_chain_end_operations_were_written(*)");
+				HT.concat(Module_name, "_parcs.c", &Fname);
+
+				fstream     File(Fname, ios::out | ios::in | ios::trunc);
+				if (File.is_open())
+				{
+					File << write_parcs_title(Module_name, Hdlform, Tool) << endl;
+					File << write_ieee_packages(Hdlform, Tool) << endl;
+					File << write_global_package(Module_name, Hdlform, Tool);
+					HT.retractall("hdl_io_pass(*)");
+					HT.assertz("hdl_io_pass(2)");
+					HT.assertz("print_C_main_body(1)");
+					File << write_parcs_interface(Module_name, 1, Hdlform, Tool) << endl;
+					File << write_locals(Module_name, 1, Hdlform, Tool);
+					File << "     long long int run_clock_cycles = 0;" << endl;
+					File << write_content_body_header(Module_name, Hdlform, Tool, "parcs");
+					File << write_fsm_header(Module_name, 1, Hdlform, Tool);
+					File << reset_locals(Module_name, Schedule, 1, Hdlform, Tool);
+					File << "         run_clock_cycles = 0;" << endl;
+					File << "       state = 0;" << endl;
+					File << "       break;" << endl;
+					File << "      case 'i': " << endl;
+					File << set_inputs(Module_name, 1, Hdlform, Tool);
+
+				}
+			}
+		}
+	}
+}
+
+string set_inputs(string Module_name, int In_entry, string HDL, string Tool)
+{
+	stringstream ss;
+	local_object Local;
+	if (HT.findfact("local_object(" + Module_name + "," + to_string(In_entry) + ",*)"))
+	{
+		local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_entry) + ",*)")));
+		Local = *ptr;
+		ss << set_input(Local, HDL, Tool);
+	}
+	return ss.str();
+}
+
+string set_input(local_object Local, string HDL, string Tool)
+{
+	stringstream ss;
+	GeneralFact* ptr;
+	ptr = &Local;
+	string Local_kind, Local_name, Type_name, var7, Local_value, be, af, Type_kind, TPLN1, TPLN2, Top_level_name;
+	int Local_size, Size, ParentType, TypeEntry, InferType, Comp_type, Firstd, Dimmension, Comp_type_size, Lastd, Number_of_fields, First_comp_type, Type_entry,
+		Dimension_depth, Last_comp_type;
+	Local_kind = returnpar(makeStringOf(ptr), 3);
+	Local_name = returnpar(makeStringOf(ptr), 4);
+	Type_name = returnpar(makeStringOf(ptr), 6);
+	var7 = returnpar(makeStringOf(ptr), 7);
+	Local_size = stoi(returnpar(makeStringOf(ptr), 8));
+	Local_value = returnpar(makeStringOf(ptr), 9);
+	be = Local_value.substr(0, Local_value.find(pa, 0));
+	af = Local_value.substr(be.length() + 1, Local_value.find(pacl, 0));
+	af.resize(af.size() - 1);
+
+	if (Tool == "gnu" && HDL == "c")
+	{
+		if (Local_kind == "par_out" || Local_kind == "constant" || Local_kind == "variable" || Local_kind == "signal")
+		{
+			return ss.str();
+		}
+		if (var7 == "standard")
+		{
+			if (Local_size == 1)
+			{
+				if (be == "bit_wire" && af == "std_logic")
+				{
+					if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"))
+					{
+						Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 3));
+						Type_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 6);
+						if (Type_kind != "single_t")
+						{
+							if (Size != Local_size)
+							{
+								ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+								ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+								ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+
+							}
+						}
+					}
+				}
+				else if (Type_name == "bool")
+				{
+					ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+					ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+					ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+				}
+				else if (Type_name == "std_logic")
+				{
+					ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+					ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+					ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+				}
+				else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"))
+				{
+					Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 3));
+					ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 5));
+					if (Size >= 1)
+					{
+						if (ParentType == 2)
+						{
+							ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+							ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+							ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+						}
+					}
+				}
+				else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"))
+				{
+					TypeEntry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 1));
+					Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 3));
+					ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 5));
+					InferType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 9));
+					if (Size >= 1)
+					{
+						if (InferType == 2)
+						{
+							if (HT.findfact("type_def(" + to_string(ParentType) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
+							{
+								if (TypeEntry > ParentType)
+								{
+									ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+									ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+									ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (Local_size > 1)
+			{
+				if (be == "bit_wire" && af == "std_logic")
+				{
+					if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"))
+					{
+						Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 3));
+						Type_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 6);
+						if (Type_kind != "single_t")
+						{
+							if (Size != Local_size)
+							{
+								ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+								ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+								ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+
+							}
+						}
+					}
+				}
+				else if (Type_name == "std_logic")
+				{
+					ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+					ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+					ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+				}
+				else if (Type_name == "integer")
+				{
+					ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+					ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+					ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+				}
+				else if (Type_name == "natural")
+				{
+					ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+					ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+					ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+				}
+				else if (HT.findfact("type_def(_,"+Type_name+",_,\"user\",_,\"single_t\",0,0,0)"))
+				{
+					Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 3));
+					ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,0)"), 5));
+					if (Size >= 1)
+					{
+						if (ParentType == 2)
+						{
+							ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+							ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+							ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+						}
+					}
+				}
+				else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"))
+				{
+					TypeEntry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 1));
+					Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 3));
+					ParentType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 5));
+					InferType = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,\"single_t\",0,0,_)"), 9));
+					if (Size >= 1)
+					{
+						if (InferType == 2)
+						{
+							if (HT.findfact("type_def(" + to_string(ParentType) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
+							{
+								if (TypeEntry > ParentType)
+								{
+									ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+									ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+									ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (var7 == "userarray")
+		{
+			if (HT.findfact("type_def(_,"+Type_name+","+to_string(Local_size)+",\"user\",0,\"vectorarray_t\",_,_,_)"))
+			{
+				Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
+				if (HT.findfact("type_def(" + to_string(Comp_type) + ",\"boolean\",1,\"standard\",0,\"single_t\",0,0,0)"))
+				{
+					ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
+					ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
+					ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
+				}
+			}
+			if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"))
+			{
+				Type_entry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 1));
+				Firstd = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 7));
+				Dimmension = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 8));
+				Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
+				if (Comp_type > 1)
+				{
+					if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,1,_,_,\"single_t\",_,_,_)"))
+					{
+						Lastd = Firstd + Dimmension - 1;
+						ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 ){" << endl;
+						ss << "        printf(" << '"' << " give me the value of input " << Local_name << "[%d] : " << " " << '"' << ", " << Local_name << "_i" << ");" << endl;
+						ss << "      scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << "[" << Local_name << "_i] );" << endl;
+						ss << "       " << Local_name << "[" << Local_name << "_i] = " << Local_name << "[" << Local_name << "_i] ; " << endl;
+						ss << "      printf(" << '"' << '\\' << "n" << '"' << ");}" << endl;
+					}
+					else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"))
+					{
+						Comp_type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"), 3));
+						if (Comp_type_size > 1)
+						{
+							Lastd = Firstd + Dimmension - 1;
+							ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 ){" << endl;
+							ss << "        printf(" << '"' << " give me the value of input " << Local_name << "[%d] : " << " " << '"' << ", " << Local_name << "_i" << ");" << endl;
+							ss << "        scanf(" << '"' << "%lld" << '"' << ", &(* " << Local_name << ")[" << Local_name << "_i] );" << endl;
+							ss << "        printf(" << '"' << " The value of input " << Local_name << "[%lld] = %lld \\n" << " " << '"' << ", " << Local_name << "_i, " << " (* " << Local_name << ")[" << Local_name << "_i] ); }" << endl;
+
+						}
+					}
+					else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"))
+					{
+						Number_of_fields = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 8));
+						First_comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 9));
+						Lastd = Firstd + Dimmension - 1;
+						ss << "       for  (" << Local_name << "_i = " << Firstd << "; " << Local_name << "_i <= " << Lastd << "; " << Local_name << "_i = " << Local_name << "_i + 1 ){" << endl;
+						ss << "        printf(" << '"' << " give me the value of input " << Local_name << "[" << '"' << ", " << Local_name << "_i," << '"' << "] " << " " << '"' << ");" << endl;
+						HT.concat(Local_name, ")[", &TPLN1);
+						HT.concat(TPLN1, Local_name, &TPLN2);
+						HT.concat(TPLN2, "_i]", &Top_level_name);
+						ss << set_record_fields(Type_name, Top_level_name, 1, Number_of_fields, First_comp_type);
+						ss << "       }" << endl;
+					}
+					else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+					{
+						ss << reset_multi_array(Local_name, Type_entry, 1, &Dimension_depth, &Last_comp_type, 1);
+						ss << "        ";
+						ss << write_array_comp_set_value(Local_name, Last_comp_type, Dimension_depth);
+
+					}
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string set_record_fields(string Type_name, string Top_name, int Field_number, int Number_of_fields, int Current_comp_type)
+{
+	stringstream ss;
+	string Field_kind, Field_name;
+	int Fields_parent_type, Next_field_number, Next_comp_type;
+	if (Field_number == Number_of_fields)
+	{
+		if (HT.findfact("type_def(" + to_string(Current_comp_type) + ",*)"))
+		{
+			Field_name = returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",*)"), 2);
+			Field_kind = returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",*)"), 6);
+			Fields_parent_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",*)"), 9));
+			ss << set_record_field(Type_name, Top_name, Field_name, Field_kind, Fields_parent_type);
+		}
+	}
+	else if (Field_number < Number_of_fields)
+	{
+		if (HT.findfact("type_def(" + to_string(Current_comp_type) + ",*)"))
+		{
+			Field_name = returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",*)"), 2);
+			Field_kind = returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",*)"), 6);
+			Fields_parent_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_comp_type) + ",*)"), 9));
+			ss << set_record_field(Type_name, Top_name, Field_name, Field_kind, Fields_parent_type);
+			Next_field_number = Field_number + 1;
+			Next_comp_type = Current_comp_type + 1;
+			ss << set_record_fields(Type_name, Top_name, Next_field_number, Number_of_fields, Next_comp_type);
+		}
+	}
+	return ss.str();
+}
+
+string set_record_field(string Type_name, string Top_name, string Field_name, string Field_kind, int int1)
+{
+	stringstream ss;
+	string Top_kind;
+	if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
+	{
+		Top_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 6);
+		if (Top_kind != "vectorarray_t")
+		{
+			if (Field_kind == "single_t")
+			{
+				ss << "       printf(" << '"' << " give me value for " << Top_name << Field_name << " " << '"' << ");" << endl;
+				ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Top_name << Field_name << ");" << endl;
+				ss << "       printf(" << '"' << '\\' << "n" << '"' << ");" << endl;
+			}
+		}
+		else if (Top_kind == "vectorarray_t")
+		{
+			if (Field_kind == "single_t")
+			{
+				ss << "       printf(" << '"' << " give me value for " << Top_name << Field_name << " " << '"' << ");" << endl;
+				ss << "       scanf(" << '"' << "%lld" << '"' << ", &(* " << Top_name << Field_name << ");" << endl;
+				ss << "       printf(" << '"' << '\\' << "n" << '"' << ");" << endl;
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_array_comp_set_value(string Local_name, int Last_comp_type, int Dimension_depth)
+{
+	stringstream ss;
+	int Type_size, Number_of_dims, First_comp;
+	if (HT.findfact("hdl_style(\"c\")"))
+	{
+		if (HT.findfact("type_def(" + to_string(Last_comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"))
+		{
+			ss << "printf(" << '"';
+			ss << Local_name;
+			ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+			ss << " = " << '"' << ");" << endl;
+			ss << "        scanf(" << '"' << "%lld" << '"' << ", &(* ";
+			ss << Local_name << ")";
+			ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+			ss << ");" << endl;
+			ss << "printf(" << '"';
+			ss << Local_name;
+			ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+			ss << " = %d \n " << '"' << " (* ";
+			ss << Local_name << ")";
+			ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+			ss << ");" << endl;
+		}
+		else if (HT.findfact("type_def(" + to_string(Last_comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"))
+		{
+			Type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Last_comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 3));
+			Number_of_dims = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Last_comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 8));
+			First_comp = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Last_comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"), 9));
+			if (Last_comp_type > 1)
+			{
+				if (Type_size > 1)
+				{
+					ss << "printf(" << '"';
+					ss << Local_name;
+					ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+					ss << " = " << '"' << ");" << endl;
+					ss << "        scanf(" << '"' << "%lld" << '"' << ", &";
+					ss << Local_name;
+					ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+					ss << write_record_set_aggregate(0, Number_of_dims, First_comp, Local_name, Dimension_depth);
+				}
+			}
+		}
+	}
+	return ss.str();
+}
+
+string write_record_set_aggregate(int In_dim, int Number_of_dims, int In_comp, string Local_name, int Dimension_depth)
+{
+	stringstream ss;
+	string Type_name;
+	int Next_dim, Next_comp;
+	if (In_dim != Number_of_dims)
+	{
+		if (In_dim == Number_of_dims - 1)
+		{
+			if (HT.findfact("type_def(" + to_string(In_comp) + ",_,_,_,_,\"single_t\",_,_,_)"))
+			{
+				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(In_comp) + ",_,_,_,_,\"single_t\",_,_,_)"), 2);
+				ss << "       printf(" << '"' << " give me the value of field : " << '"' << ");" << endl;
+				ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+				ss << "       printf(" << Type_name << '"' << " = " << '"' << ");" << endl;
+				ss << "       scanf(" << '"' << "%d" << '"' << ",";
+				ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+				ss << Type_name << ");";
+			}
+		}
+		if (In_dim < Number_of_dims - 1)
+		{
+			if (HT.findfact("type_def(" + to_string(In_comp) + ",_,_,_,_,\"single_t\",_,_,_)"))
+			{
+				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(In_comp) + ",_,_,_,_,\"single_t\",_,_,_)"), 2);
+				ss << "       printf(" << '"' << " give me the value of field : " << '"' << ");" << endl;
+				ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+				ss << "       printf(" << Type_name << '"' << " = " << '"' << ");" << endl;
+				ss << "       scanf(" << '"' << "%d" << '"' << ",";
+				ss << write_array_dim_depth(Local_name, 1, Dimension_depth);
+				ss << Type_name << ");";
+				Next_dim = In_dim + 1;
+				Next_comp = In_comp + 1;
+				write_record_set_aggregate(Next_dim, Number_of_dims, Next_comp, Local_name, Dimension_depth);
+			}
+		}
+	}
 	return ss.str();
 }
