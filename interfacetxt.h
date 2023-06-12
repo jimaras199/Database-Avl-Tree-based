@@ -1054,7 +1054,11 @@ string makeStringOf(GeneralFact* obj)
 			ss << "prog_stmt(" << ptr->q << co << ptr->w << co << ptr->e << co << ptr->r
 				<< co << ptr->t << co << ptr->y << co << ptr->u << co << ptr->i;
 		}
-
+		else if ("ptr_file_has_been_on" == ALine)
+		{
+			ptr_file_has_been_on* ptr = dynamic_cast<ptr_file_has_been_on*>(obj);
+			ss << "ptr_file_has_been_on(" << ptr->q;
+		}
 		break;
 	}
 	case 'q':
@@ -4402,7 +4406,16 @@ return new mem_port(q, w, e, r, t, y, u, i, o, p, a, s, d);
 	i = stoi(ALine);
 	return new prog_stmt(w, e, r, t, y, u, i, q);
 	}
+		else if (ALine == "ptr_file_has_been_on")
+		{
+			int				q;
 
+			ALine = subl.substr(0, subl.rfind(pacl, 0));
+			q = stoi(ALine);
+
+			return new ptr_file_has_been_on(q);
+
+		}
 		break;
 	}
 	case 'q':
@@ -10958,7 +10971,20 @@ factstar makefactstar(string inputline)
 		}
 		ptr = new prog_stmt(w, e, r, t, y, u, i, q);
 		}
+		else if (ALine == "ptr_file_has_been_on")
+		{
+			int				q{};
 
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			if ((subl.find(str, 0)) != 0)
+			{
+				params++;
+				ALine = subl.substr(0, subl.rfind(pacl, 0));
+				q = stoi(ALine);
+			}
+			ptr = new ptr_file_has_been_on(q);
+
+		}
 		break;
 	}
 	case 'q':
@@ -20126,7 +20152,22 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 		}
 		ptr = new prog_stmt(w, e, r, t, y, u, i, q);
 		}
-
+		else if (ALine == "ptr_file_has_been_on")
+		{
+			int				q{};
+			if (inputline != ALine)
+			{
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				if ((subl.find(us, 0)) != 0)
+				{
+					params.push_back(1);
+					ALine = subl.substr(0, subl.rfind(pacl, 0));
+					q = stoi(ALine);
+				}
+				else params.push_back(0);
+			}
+			ptr = new ptr_file_has_been_on(q);
+			}
 		break;
 	}
 	case 'q':
@@ -25753,7 +25794,17 @@ size_t matchfactsSpec(GeneralFact* Treesfact, factUnderInspection* obj) // node 
 				if (ptr->i != ptr2->i) return 0;
 		}
 		}
+		else if (ALine == "ptr_file_has_been_on")
+		{
+			ptr_file_has_been_on* ptr = dynamic_cast<ptr_file_has_been_on*>(fact);
+			ptr_file_has_been_on* ptr2 = dynamic_cast<ptr_file_has_been_on*>(Treesfact);
+			if (!tcmp.empty())
+			{
+				if (tcmp[0])
+					if (ptr->q != ptr2->q) return 0;
+			}
 
+			}
 		break;
 	}
 	case 'q':
@@ -28708,7 +28759,16 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			}
 		}
 		}
+		else if (ALine == "ptr_file_has_been_on")
+		{
+			ptr_file_has_been_on* ptr = dynamic_cast<ptr_file_has_been_on*>(fact);
+			ptr_file_has_been_on* ptr2 = dynamic_cast<ptr_file_has_been_on*>(Treesfact);
+			if (p)
+			{
+				if (ptr->q != ptr2->q) return 0;
+			}
 
+			}
 		break;
 	}
 	case 'q':
