@@ -6229,3 +6229,41 @@ public:
 	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
 };
 
+class ptr_file_has_been_on : public GeneralFact
+{
+	int				q{};
+public:
+	ptr_file_has_been_on(const int q1)
+		: q(q1) {}
+
+	ptr_file_has_been_on(const ptr_file_has_been_on& other)
+	{
+		if (this != &other)
+		{
+			this->q = other.q;
+		}
+	}
+	~ptr_file_has_been_on()
+	{
+		this->q = NULL;
+
+	}
+	void operator=(GeneralFact& other) override
+	{
+		ptr_file_has_been_on* ptr = dynamic_cast<ptr_file_has_been_on*>(&other);
+		this->q = ptr->q;
+	}
+
+	ptr_file_has_been_on(ptr_file_has_been_on&& other) noexcept
+		: q{ other.q } {}
+
+	void operator=(ptr_file_has_been_on&& other) noexcept
+	{
+		std::swap(q, other.q);
+	}
+	friend string makeStringOf(GeneralFact* obj);
+
+	friend size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj);
+
+	friend size_t matchfactsSpec(GeneralFact* otherf, factUnderInspection* obj);
+};
