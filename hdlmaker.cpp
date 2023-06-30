@@ -15,9 +15,11 @@
 #include <time.h>
 #include <ctype.h>
 #include <chrono>
+#include <filesystem>
 
 //feedback and typing predicates
 void itf_not_found_message();
+string terminate_if_not_hdlmaker_exe(string ExeName);
 void itf_found_message();
 void report_global_constraint();
 void code_for_module_created_message(string Module, int ModCount);
@@ -456,12 +458,12 @@ bool Iscmdlinearg(string Line)
 	if (Line.find(co, 0) != Line.npos) return true;
 	return false;
 }
-void fronttoken(string Line = "", string token = "", string rest = "")
+void fronttoken(string Line, string* token, string* rest)
 {
 	size_t pos = 0;
-	token = Line.substr(0, Line.find(co, 0));
-	pos = token.length();
-	rest = Line.substr(pos, Line.length() - pos);
+	*token = Line.substr(0, Line.find(co, 0));
+	pos = token->length();
+	*rest = Line.substr(pos, Line.length() - pos);
 }
 bool searchstring(string SourceStr, string SearchStr, size_t* Pos)
 {
@@ -862,9 +864,10 @@ void generate_top(string pathln, string exec, string cmdl)
 	//line 33885
 	string Line; //a line from the call in cmd
 	ifstream File;
+	string Hdlform;
 
 	File.open("TYPESOPSDB.DBA", fstream::in);
-	if (!File.is_open())
+	if (!filesystem::exists("TYPESOPSDB.DBA"))
 	{
 		itf_not_found_message();
 	}
@@ -879,7 +882,6 @@ void generate_top(string pathln, string exec, string cmdl)
 		HT.consult("TYPESOPSDB.DBA", "hdlmaker_dbase");
 		if (HT.findfact("hdl_style(*)"))
 		{
-			string Hdlform;
 			Hdlform = returnpar(HT.findandreturn("hdl_style(*)"), 1);
 			extract_loops_from_all_modules(2);
 			generate_hdl_recursive(Hdlform, "synergy", 1);
@@ -891,31 +893,30 @@ void generate_top(string pathln, string exec, string cmdl)
 
 void itf_not_found_message()
 {
-	fstream File("hdlmaker.log", ios::app);
-	stringstream line;
-	string str;
+	ofstream File("hdlmaker.log");
+	if (File.is_open())
+	{
+		auto currentTime = std::chrono::system_clock::now();
+		std::time_t time = std::chrono::system_clock::to_time_t(currentTime);
+		tm localTime{};
+		localtime_s(&localTime, &time);
+		int year = localTime.tm_year + 1900;
+		int month = localTime.tm_mon + 1;
+		int day = localTime.tm_mday;
+		int hour = localTime.tm_hour;
+		int min = localTime.tm_min;
+		int sec = localTime.tm_sec;
+		auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
+		int hud = currentTimepoint.time_since_epoch().count() % 100;
 
-	auto currentTime = std::chrono::system_clock::now();
-	std::time_t time = std::chrono::system_clock::to_time_t(currentTime);
-	tm localTime{};
-	localtime_s(&localTime, &time);
-	int year = localTime.tm_year + 1900;
-	int month = localTime.tm_mon + 1;
-	int day = localTime.tm_mday;
-	int hour = localTime.tm_hour;
-	int min = localTime.tm_min;
-	int sec = localTime.tm_sec;
-	auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
-	int hud = currentTimepoint.time_since_epoch().count() % 100;
-
-	line << " hdlmaker CCC compiler run on: " <<  day << "/" << month << "/" << year << endl;
-	line << "        ...with errors    at: " <<  hour << ":" << min << ":" << sec << " ____ :" << hud << endl << endl;
-	line << " hdlmaker CCC compiler runtime error : " << endl;
-	line << "    there is no TYPESOPSDB.DBA file....; run first the front-end CCC compiler SUBADA.EXE" << endl;
-	str = line.str();
-	File << str;
-	File.close();
+		File << " hdlmaker CCC compiler run on: " << day << "/" << month << "/" << year << endl;
+		File << "        ...with errors    at: " << hour << ":" << min << ":" << sec << " ____ :" << hud << endl << endl;
+		File << " hdlmaker CCC compiler runtime error : " << endl;
+		File << "    there is no TYPESOPSDB.DBA file....; run first the front-end CCC compiler SUBADA.EXE" << endl;
+		File.close();
+	}
 }
+
 void itf_found_message()
 {
 	auto currentTime = std::chrono::system_clock::now();
@@ -932,31 +933,31 @@ void itf_found_message()
 	int hud = currentTimepoint.time_since_epoch().count() % 100;
 
 	fstream File("hdlmaker.log", ios::app);
-	stringstream line;
-	string str;
-	line << endl;
-	line << "------------------------------------------------------------------" << endl;
-	line << "  ITF file itf_fact.dba was processed on: " << day << "/" << month << "/" << year << endl;
-	line << "   hdlmaker compilation started successfully at: " << hour << ":" << min << ":" << sec << endl << endl;
-	line << "------------------------------------------------------------------" << endl;
-	str = line.str();
-	File << str;
-	File.close();
+	if (File.is_open())
+	{
+		File << endl;
+		File << "------------------------------------------------------------------" << endl;
+		File << "  ITF file itf_fact.dba was processed on: " << day << "/" << month << "/" << year << endl;
+		File << "   hdlmaker compilation started successfully at: " << hour << ":" << min << ":" << sec << endl << endl;
+		File << "------------------------------------------------------------------" << endl;
+		File.close();
+	}
 }
 void report_global_constraint()
 {
-	if (HT.findfact("global_resource(\"Global_constraint\")"))
+	string Global_constraint;
+	if (HT.findfact("global_resource(*)"))
 	{
+		Global_constraint = returnpar(HT.findandreturn("global_resource(*)"), 1);
 		fstream File("hdlmaker.log", ios::app);
-		stringstream line;
-		string str;
-		line << endl;
-		line << "  Global constraint from command-line is " << endl;
-		line << "            Global_constraint     parallel operations at maximum " << endl;
-		line << "------------------------------------------------------------------" << endl << endl;
-		str = line.str();
-		File << str;
-		File.close();
+		if (File.is_open())
+		{
+			File << endl;
+			File << "  Global constraint from command-line is " << endl;
+			File << "         " << Global_constraint << "  parallel operations at maximum " << endl;
+			File << "------------------------------------------------------------------" << endl << endl;
+			File.close();
+		}
 	}
 	else return;
 }
@@ -997,7 +998,8 @@ void reset_debug()
 }
 void set_cac(string Line)
 {
-	if (!HT.findfact("cac_mode(*)")) HT.assertz("cac_mode(1)");
+	if (!HT.findfact("cac_mode(*)")) 
+		HT.assertz("cac_mode(1)");
 }
 void reset_cac()
 {
@@ -1007,81 +1009,75 @@ void reset_cac()
 // This is used to assert the HDL type (VHDL, or Verilog)
 void assert_global_constraint_conditionally0(string Command_line_args)
 {
-	string Hdl = "", Rest_of_command_line = "";
+	string Hdl, Rest_of_command_line, Hdl1, Rest_of_command_line1, Hdl2, Rest_of_command_line2;
 	if (Command_line_args == "")
 	{
 		assert_hdl_conditionally("");
 		assert_mp_conditionally("");
-		return;
 	}
 	else if (Command_line_args == "debug")		//line 32835
 	{
 		set_debug("debug");
 		assert_hdl_conditionally("");
 		assert_mp_conditionally("");
-		return;
 	}
 	else
 	{
-		fronttoken(Command_line_args, Hdl, Rest_of_command_line);
+		fronttoken(Command_line_args, &Hdl, &Rest_of_command_line);
 		if (Hdl == "")
 		{
 			assert_hdl_conditionally("");
 			assert_mp_conditionally("");
-			return;
 		}
-		else if (Hdl == "debug")
+		else if (Rest_of_command_line == "")
 		{
-			set_debug("debug");
-			if (!Rest_of_command_line.empty())
+			if (Hdl == "debug")
 			{
-				string Hdl1 = "", Rest_of_command_line1 = "";
-				fronttoken(Rest_of_command_line, Hdl1, Rest_of_command_line1);
-				if (Hdl1 != "debug")
-				{
-					assert_hdl_conditionally(Hdl1);
-					assert_global_constraint_conditionally1(Rest_of_command_line1);
-					return;
-				}
-				else if (Hdl1 == "debug")
-				{
-					set_debug("debug");
-					if (!Rest_of_command_line1.empty())
-					{
-						string Hdl2 = "", Rest_of_command_line2 = "";
-						fronttoken(Rest_of_command_line1, Hdl2, Rest_of_command_line2);
-						if (!Hdl2.empty())
-						{
-							if (Rest_of_command_line2.empty())
-							{
-								assert_hdl_conditionally(Hdl2);
-								return;
-							}
-							else if (!Rest_of_command_line2.empty())
-							{
-								assert_hdl_conditionally(Hdl2);
-								assert_global_constraint_conditionally1(Rest_of_command_line2);
-								return;
-							}
-						}
-					}
-				}
+				set_debug("debug");
+				assert_hdl_conditionally("");
+				assert_mp_conditionally("");
 			}
-			assert_hdl_conditionally("");
-			assert_mp_conditionally("");
-			return;
 		}
 		else if (Hdl != "debug" && Hdl != "cac")
 		{
 			assert_hdl_conditionally(Hdl);
 			assert_global_constraint_conditionally1(Rest_of_command_line);
 		}
+		else if (Hdl == "debug")
+		{
+			set_debug("debug");
+			fronttoken(Rest_of_command_line, &Hdl1, &Rest_of_command_line1);
+			if (Hdl1 != "debug")
+			{
+				assert_hdl_conditionally(Hdl1);
+				assert_global_constraint_conditionally1(Rest_of_command_line1);
+			}
+			if (Hdl1 == "debug")
+			{
+				set_debug("debug");
+				if (Rest_of_command_line1 != "")
+				{
+					fronttoken(Rest_of_command_line1, &Hdl2, &Rest_of_command_line2);
+					if (Hdl2 != "")
+					{
+						if (Rest_of_command_line2 == "")
+						{
+							assert_hdl_conditionally(Hdl2);
+						}
+						else if (Rest_of_command_line2 != "")
+						{
+							assert_hdl_conditionally(Hdl2);
+							assert_global_constraint_conditionally1(Rest_of_command_line2);
+						}
+					}
+				}
+			}
+		}
 		else if (Hdl == "cac")
 		{
 			set_cac("cac");
 			assert_hdl_conditionally("c");
 			HT.assertz("massively_parallel_style(1)");
-			return;
 		}
 	}
 }
@@ -1089,19 +1085,18 @@ void assert_global_constraint_conditionally0(string Command_line_args)
 // Now this predicate is used for the assertion of other command-line parameter facts as well
 void assert_global_constraint_conditionally1(string Command_line_args)
 {
-	string Massively_parallel = "", Rest_of_command_line = "";
+	string Massively_parallel, Rest_of_command_line;
 	if (Command_line_args.empty())
 		assert_mp_conditionally("");
 	else
 	{
-		fronttoken(Command_line_args, Massively_parallel, Rest_of_command_line);
+		fronttoken(Command_line_args, &Massively_parallel, &Rest_of_command_line);
 		if (Massively_parallel.empty())
 		{
 			assert_mp_conditionally(Massively_parallel);
 		}
 		else if (!Command_line_args.empty())
 		{
-			fronttoken(Command_line_args, Massively_parallel, Rest_of_command_line);
 			assert_mp_conditionally(Massively_parallel);
 			assert_global_constraint_conditionally2(Rest_of_command_line);
 		}
@@ -1111,15 +1106,14 @@ void assert_global_constraint_conditionally1(string Command_line_args)
 //26 / 6 / 2018 this predicate is used for the assertion of syncronous or asynchronous reset style of the generated coprocessors FSMs
 void assert_global_constraint_conditionally2(string Command_line_args)
 {
-	string SyncAsyncReset = "", Rest_cl_args = "";
+	string SyncAsyncReset, Rest_cl_args;
 	if (Command_line_args.empty())
 	{
 		HT.assertz("resetstyle(\"syncreset\")");
-		return;
 	}
 	else
 	{
-		fronttoken(Command_line_args, SyncAsyncReset, Rest_cl_args);
+		fronttoken(Command_line_args, &SyncAsyncReset, &Rest_cl_args);
 		if (!SyncAsyncReset.empty() && SyncAsyncReset.empty())
 			HT.assertz("resetstyle(" + SyncAsyncReset + ")");
 		else if (!SyncAsyncReset.empty() && !Rest_cl_args.empty())
@@ -1128,11 +1122,16 @@ void assert_global_constraint_conditionally2(string Command_line_args)
 			assert_global_constraint_conditionally3(Rest_cl_args);
 		}
 		else if (SyncAsyncReset.empty())
+		{
 			HT.assertz("resetstyle(\"syncreset\")");
+		}
 		else if (!SyncAsyncReset.empty())
 		{
 			HT.assertz("resetstyle(" + SyncAsyncReset + ")");
-			assert_global_constraint_conditionally3(Rest_cl_args);
+			if (Rest_cl_args != "")
+			{
+				assert_global_constraint_conditionally3(Rest_cl_args);
+			}
 		}
 	}
 }
@@ -1140,12 +1139,12 @@ void assert_global_constraint_conditionally2(string Command_line_args)
 //28/6/2018 this predicate is used for the prevention of hierarchy checking of modules and reliance on the validity of the input code order.
 void assert_global_constraint_conditionally3(string Command_line_args)
 {
+	string Check, Rest_cl_args;
 	if (Command_line_args.empty())
 		HT.assertz("checkstyle(\"checkhierarchy\")");
 	else
 	{
-		string Check = "", Rest_cl_args = "";
-		fronttoken(Command_line_args, Check, Rest_cl_args);
+		fronttoken(Command_line_args, &Check, &Rest_cl_args);
 		if (Check == "checkhierarchy")
 			HT.assertz("checkstyle(\"checkhierarchy\")");
 		else
@@ -1155,38 +1154,37 @@ void assert_global_constraint_conditionally3(string Command_line_args)
 
 void check_for_program_name(string pathln, string exec)
 {
-	fstream File("hdlmaker.log", ios::app);
-	stringstream line;
-	string str;
-
-	line << "------------------------------------------------------------------" << endl;
-	line << " home directory = " + pathln << endl;
-	line << " executable name = " + exec << endl;
-	line << "------------------------------------------------------------------" << endl;
-	str = line.str();
-	File << str;
-	//terminate_if_not_hdlmaker_exe(ExeName)
-	if (exec != "hdlmaker.exe")
+	ofstream File("hdlmaker.log");
+	if (File.is_open())
 	{
-		line.clear();
-		str.clear();
-		line << " incorrect or illegal program name " + exec << endl;
-		str = line.str();
-		File << str;
+		File << "------------------------------------------------------------------" << endl;
+		File << " home directory = " + pathln << endl;
+		File << " executable name = " + exec << endl;
+		File << "------------------------------------------------------------------" << endl;
+		File << terminate_if_not_hdlmaker_exe(exec);
 		File.close();
-		exit(0);
 	}
-	File.close();
+}
+
+string terminate_if_not_hdlmaker_exe(string ExeName)
+{
+	stringstream ss;
+	if (ExeName != "hdlmaker.exe")
+	{
+		ss << " incorrect or illegal program name " + ExeName << endl;
+		exit(1);
+	}
+	return ss.str();
 }
 
 void extract_loops_from_all_modules(int Entry)
 {
+	string Module_name;
+	int Next_entry;
 	if (!HT.findfact("hierarchy_part(" + to_string(Entry) + ",*)"))
 		return;
 	else if (HT.findfact("hierarchy_part(" + to_string(Entry) + ",_,_,\"libpart\",_,_,_)"))
 	{
-		string Module_name;
-		int Next_entry;
 		Module_name = stoi(returnpar(HT.findandreturn("hierarchy_part(" + to_string(Entry) + ",_,_,\"libpart\",_,_,_)"), 2));
 		HT.assertz("last_for_loop_entry(0)");
 		HT.assertz("last_while_loop_entry(0)");
@@ -1196,23 +1194,21 @@ void extract_loops_from_all_modules(int Entry)
 		Next_entry = Entry + 1;
 		extract_loops_from_all_modules(Next_entry);
 	}
-
 }
 
 void extract_loops(string name, int Entry)
 {
+	int Next_entry;
 	if (!HT.findfact("prog_stmt(" + name + "," + to_string(Entry) + ",*)"))
 		return;
-	else
+	else if (HT.findfact("prog_stmt(" + name + "," + to_string(Entry) + ",*)"))
 	{
-		int Next_entry;
 		build_loop_cond(name, Entry);
 		Next_entry = Entry + 1;
 		extract_loops(name, Next_entry);
 	}
 }
 
-//Checks if there is a for loop and builds the associated fact
 void build_loop_cond(string name, int Entry)
 {
 	int op, One_after_110, Target_statement, If_entry, Condition, Body_first, Previous_statement, Previous_target, Condition_statement,
@@ -1226,234 +1222,122 @@ void build_loop_cond(string name, int Entry)
 		op = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,_,_,_,_,_)"), 4));
 		if (op != 110)
 			return;
+	}
+	if (HT.findfact("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"))
+	{
+		Target_statement = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
+		If_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
+		Condition_statement = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
 		One_after_110 = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 8));
 		if (!HT.findfact("prog_stmt(" + name + ",_,_,106,_,_," + to_string(One_after_110) + ",_)"))
 			return;
-		/* now when the target stmt of the jump is larger than its Entry, (which comes from
-		if then else statements in ADA */
-		Target_statement = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
-		if (Target_statement > Entry) //comes from ifthenelse
+		else if (Target_statement > Entry)
 			return;
-		/* now just the case that it is a while loop, without a Condition operation */
-		if (HT.findfact("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"))
+		else if (HT.findfact("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"))
 		{
-			If_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
-			Condition_statement = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_," + to_string(One_after_110) + ")"), 7));
-			if (HT.findfact("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"))
+			Condition = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"), 6));
+			Body_first = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_," + to_string(Condition) + "," + to_string(One_after_110) + ",_)"), 8));
+			if (If_entry < Entry)
 			{
+				Previous_statement = If_entry - 1;
+				if (HT.findfact("prog_stmt(" + name + "," + to_string(Previous_statement) + ",*)"))
+				{
+					Previous_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Previous_statement) + ",*)"), 6));
+					if (Previous_target != Condition)
+					{
+						Condition_statement = If_entry;
+						Body_last = Entry - 1;
+						End_of_loop = Entry;
+						add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+					}
+					else if (Previous_target == Condition)
+					{
+						Condition_statement = Previous_target;
+						Body_last = Entry - 1;
+						End_of_loop = Entry;
+						add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+					}
+				}
+				else if (!HT.findfact("prog_stmt(" + name + "," + to_string(Previous_statement) + ",*)"))
+				{
+					Condition_statement = Previous_statement;
+					Body_last = Entry - 1;
+					End_of_loop = Entry;
+					add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+				}
+			}
+		}
+		else if (Condition_statement < Entry)
+		{
+			if (HT.findfact("prog_stmt(" + name + ",_,_,106,_,_," + to_string(One_after_110) + ",_)"))
+			{
+				If_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + ",_,_,106,_,_," + to_string(One_after_110) + ",_)"), 2));
 				Condition = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"), 6));
 				Body_first = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_," + to_string(Condition) + "," + to_string(One_after_110) + ",_)"), 8));
 				if (If_entry < Entry)
 				{
-					Previous_statement = If_entry - 1;
-					if (HT.findfact("prog_stmt(" + name + "," + to_string(Previous_statement) + ",_,_,_,_,_,_)"))
+					if (Condition_statement <= If_entry - 1)
 					{
-						Previous_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Previous_statement) + ",_,_,_,_,_,_)"), 6));
-						/* now just the case that it is a while loop, without a Condition operation */
-						if (Previous_target != Condition)
+						Increment_instruction = Entry - 1;
+						if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"))
 						{
-							Condition_statement = If_entry;
-							Body_last = Entry - 1;
-							End_of_loop = Entry;
-							add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-							return;
-						}
-						/* now just the case that it is a while loop, with a Condition operation */
-						else if (Previous_target == Condition)
-						{
-							Condition_statement = Previous_target;
-							Body_last = Entry - 1;
-							End_of_loop = Entry;
-							add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-							return;
-						}
-					}
-					/* now just the case that it is a while loop, with the 106 being the first operation in the program */
-					else if (!HT.findfact("prog_stmt(" + name + "," + to_string(Previous_statement) + ",_,_,_,_,_,_)"))
-					{
-						Condition_statement = Previous_statement;
-						Body_last = Entry - 1;
-						End_of_loop = Entry;
-						add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-						return;
-					}
-				}
-			}
-			/* now just the case that it is a while loop, with (maybe) a loop-like condition operation,
-			but it is not an increment operation, thus it is a while */
-			if (Condition_statement < Entry)
-			{
-				if (HT.findfact("prog_stmt(" + name + ",_,_,106,_,_," + to_string(One_after_110) + ",_)"))
-				{
-					If_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + ",_,_,106,_,_," + to_string(One_after_110) + ",_)"), 2));
-					Condition = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"), 6));
-					Body_first = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_," + to_string(Condition) + "," + to_string(One_after_110) + ",_)"), 8));
-					if (If_entry < Entry)
-					{
-						if (Condition_statement <= If_entry - 1)
-						{
-							Increment_instruction = Entry - 1;
-							/* now find the pseudo-increment instruction that exists only in for loops */
-							if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,_,_,_,_,_)"))
+							Inc_op = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"), 4));
+							Condition_statement1 = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"), 8));
+							if (Inc_op != 104)
 							{
-								Inc_op = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,_,_,_,_,_)"), 4));
-								Condition_statement1 = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_," + to_string(Inc_op) + ",_,_,_,_)"), 8));
-								if (Inc_op != 104)
+								if (Condition_statement1 <= Entry)
 								{
-									if (Condition_statement1 <= Entry)
+									if (Condition_statement1 > If_entry)
 									{
-										if (Condition_statement1 > If_entry)
-										{
-											Body_last = Increment_instruction;
-											End_of_loop = Entry;
-											add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-											return;
-										}
+										Body_last = Increment_instruction;
+										End_of_loop = Entry;
+										add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
 									}
 								}
 							}
-							/* now just the case that it is a while loop, without a loop-like condition operation, thus it is a while */
-							/* now find the loop variable which forms the condition */
-							else if (HT.findfact("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"))
+						}
+						else if (HT.findfact("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"))
+						{
+							Loop_comparison = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 2));
+							For_loop_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Loop_comparison) + ",_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 5));
+							if (!HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,_,_," + to_string(For_loop_variable) + ",_,_)"))
 							{
-								Loop_comparison = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 2));
-								For_loop_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Loop_comparison) + ",_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 5));
+								Body_last = Increment_instruction;
+								End_of_loop = Entry;
+								add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);								
+							}
+							else
+							{
+								For_loop_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Loop_comparison) + ",_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 6));
 								if (!HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,_,_," + to_string(For_loop_variable) + ",_,_)"))
 								{
 									Body_last = Increment_instruction;
 									End_of_loop = Entry;
 									add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-									return;
 								}
-							}
-							Loop_comparison = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 2));
-							For_loop_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Loop_comparison) + ",_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 6));
-							if (!HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,_,_," + to_string(For_loop_variable) + ",_,_)"))
-							{
-								Body_last = Increment_instruction;
-								End_of_loop = Entry;
-								add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-								return;
 							}
 						}
-						/* now the case of a for loop, with an increment instruction, just before the jump
-						and the upper limit of the loop being assigned to a constant*/
-						if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14,_,_,_," + to_string(If_entry) + ")"))
+					}
+					else if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14,_,_,_," + to_string(If_entry) + ")"))
+					{
+						Increment_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14,_,_,_," + to_string(If_entry) + ")"), 5));
+						End_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14," + to_string(Increment_variable) + ",_,_," + to_string(If_entry) + ")"), 6));
+						Condition = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14," + to_string(Increment_variable) + "," + to_string(End_val_data) + ",_," + to_string(If_entry) + ")"), 7));
+						Initiation_statement = Condition_statement - 1;
+						if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"))
 						{
-							Increment_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14,_,_,_," + to_string(If_entry) + ")"), 5));
-							End_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14," + to_string(Increment_variable) + ",_,_," + to_string(If_entry) + ")"), 6));
-							Condition = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,14," + to_string(Increment_variable) + "," + to_string(End_val_data) + ",_," + to_string(If_entry) + ")"), 7));
-							Initiation_statement = Condition_statement - 1;
-							if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"))
+							Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"), 6));
+							Init_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"), 6));
+							Initiation_statement_b = Initiation_statement - 1;
+							if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"))
 							{
-								Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"), 6));
-								Init_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"), 6));
-								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"var\",\"sym(\"node\")\")"))
+								Init_constant_b = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"), 6));
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"))
 								{
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"))
+									Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
+									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",_,\"const\",i(*))"))
 									{
-										Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
-										if (trace_back(name, Initiation_statement, End_val_data, &Up_limit))
-										{
-											Increment_instruction = Entry - 1;
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
-											{
-												Increment_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"), 6));
-												Iterations = (Up_limit - Low_limit + 1) / Increment_step;
-												trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
-												{
-													Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"), 6));
-													End_of_loop = Entry;
-													Header_start = Assign_stmt;
-													Body_last = Entry - 1;
-													add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-													Increment_instruction, Increment_variable, Start_val_data, End_val_data,
-													Increment_step, Body_first, Body_last, Iterations, &For_loop_entry);
-													return;
-												}
-											}
-										}
-										else if (!trace_back(name, Initiation_statement, End_val_data, 0))
-										{
-											Increment_instruction = Entry - 1;
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
-											{
-												trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
-												{
-													End_of_loop = Entry;
-													Header_start = Assign_stmt;
-													Body_last = Entry - 1;
-													//% now create a pseudo - while loop, since you don't know the upper limit of the for loop
-													add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-													return;
-												}
-											}
-										}
-									}
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"var\",sym(\"node\"))"))
-									{
-										if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_variable) + ",_,\"var\",_)"))
-										{
-											if (!trace_back(name, Initiation_statement, End_val_data, 0))
-											{
-												Increment_instruction = Entry - 1;
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
-												{
-													trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-													if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
-													{
-														End_of_loop = Entry;
-														Header_start = Assign_stmt;
-														Body_last = Entry - 1;
-														add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-														return;
-													}
-												}
-											}
-										}
-									}
-								}
-								Initiation_statement_b = Initiation_statement - 1;
-								if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"))
-								{
-									Init_constant_b = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"), 6));
-									//% now find the values of the lowand up limit
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",  _,\"const\",i(*))"))
-									{
-										Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ", _,\"const\",i(*)))"), 7));
-										if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",  _,\"const\",i(*)))") || HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",  _,\"const\",_)"))
-										{
-											Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ", _,\"const\",i(*)))"), 7));
-											Increment_instruction = Entry - 1;
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
-											{
-												Increment_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"), 6));
-												Iterations = (Up_limit - Low_limit + 1) / Increment_step;
-												trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
-												{
-													Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"), 6));
-													End_of_loop = Entry;
-													Header_start = Assign_stmt;
-													//% Body_last = Increment_instruction - 1, % this produces wrong results in cccutils
-													Body_last = Entry - 1;
-													add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-													Increment_instruction, Increment_variable, Start_val_data, End_val_data,
-													Increment_step, Body_first, Body_last, Iterations, &For_loop_entry);
-													return;
-												}
-											}
-										}
-									}
-								}
-								else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",  _,\"const\",i(*))"))
-								{
-									Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ", _,\"const\",i(*))"), 7));
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",  _,\"const\",i(*))"))
-									{
-										Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",  _,\"const\",i(*))"), 7));
+										Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
 										Increment_instruction = Entry - 1;
 										if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
 										{
@@ -1469,153 +1353,175 @@ void build_loop_cond(string name, int Entry)
 												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
 												Increment_instruction, Increment_variable, Start_val_data, End_val_data,
 												Increment_step, Body_first, Body_last, Iterations, &For_loop_entry);
-												return;
-											}
-
-										}
-									}
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",  _,_,_)"))
-									{
-										Kind = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",  _,_,_)"), 5));
-										if (Kind != "const")
-										{
-											Increment_instruction = Entry - 1;
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
-											{
-												trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
-												{
-													End_of_loop = Entry;
-													Header_start = Assign_stmt;
-													Body_last = Entry - 1;
-													add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
-												}
 											}
 										}
 									}
 								}
 							}
-						}
-						/* 12/11/2020: now the case of a for loop, with an increment instruction, just before the jump
-						with the upper limit being hold by a constant */
-						if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,_,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"))
-						{
-							Condition_operator = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,_,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 4));
-							Increment_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_," + to_string(Condition_operator) + ",_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 5));
-							End_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_," + to_string(Condition_operator) + "," + to_string(Increment_variable) + ",_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 6));
-							if (Condition_operator >= 11 && Condition_operator <= 58)
+							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"var\",\"sym(\"node\")\")"))
 							{
-								Initiation_statement = Condition_statement - 1;
-								if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"))
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"))
 								{
-									Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"), 6));
-									//% now find the values of the lowand up limit
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"))
+									Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
+									if (trace_back(name, Initiation_statement, End_val_data, &Up_limit))
 									{
-										Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
-										if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",  _,\"const\",i(*))"))
+										Increment_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
 										{
-											Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ", _,\"const\",i(*))"), 7));
-											Increment_instruction = Entry - 1;
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
+											Increment_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"), 6));
+											Iterations = (Up_limit - Low_limit + 1) / Increment_step;
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
 											{
-												Increment_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"), 6));
-												Iterations = (Up_limit - Low_limit + 1) / Increment_step;
-												trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
-												{
-													Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"), 6));
-													End_of_loop = Entry;
-													Header_start = Assign_stmt;
-													//% Body_last = Increment_instruction - 1, % this produces wrong results in cccutils
-													Body_last = Entry - 1;
-													add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-													Increment_instruction, Increment_variable, Start_val_data, End_val_data,
-													Increment_step, Body_first, Body_last, Iterations, &For_loop_entry);
-													return;
-												}
+												Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"), 6));
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+												Increment_instruction, Increment_variable, Start_val_data, End_val_data,
+												Increment_step, Body_first, Body_last, Iterations, &For_loop_entry);
+											}
+										}
+									}
+									else if (!trace_back(name, Initiation_statement, End_val_data, 0))
+									{
+										Increment_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
+										{
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
+											{
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
+											}
+										}
+									}
+								}
+								else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_variable) + ",_,\"var\",_)"))
+								{
+									if (!trace_back(name, Initiation_statement, End_val_data, 0))
+									{
+										Increment_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
+										{
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
+											{
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
+											}
+										}
+									}
+								}
+							}
+							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"))
+							{
+								Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"))
+								{
+									Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"), 7));
+									Increment_instruction = Entry - 1;
+									if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
+									{
+										Increment_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"), 6));
+										Iterations = (Up_limit - Low_limit + 1) / Increment_step;
+										trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
+										{
+											Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"), 6));
+											End_of_loop = Entry;
+											Header_start = Assign_stmt;
+											Body_last = Entry - 1;
+											add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+											Increment_instruction, Increment_variable, Start_val_data, End_val_data,
+											Increment_step, Body_first, Body_last, Iterations, &For_loop_entry);
+										}
+									}
+								}
+								else if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,_,_)"))
+								{
+									Kind = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,_,_)"), 5));
+									if (Kind != "const")
+									{
+										Increment_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
+										{
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
+											{
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
 											}
 										}
 									}
 								}
 							}
 						}
-						/* now the case of a for loop, with a decrement instruction, just before the jump
-						and the upper limit of the loop being assigned to a constant*/
-						else if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_," + to_string(End_val_data) + "," + to_string(Condition) + "," + to_string(If_entry) + ")"))
+					}
+					else if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,_,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"))
+					{
+						Condition_operator = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,_,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 4));
+						Increment_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_," + to_string(Condition_operator) + ",_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 5));
+						End_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_," + to_string(Condition_operator) + "," + to_string(Increment_variable) + ",_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 6));
+						if (Condition_operator >= 11 && Condition_operator <= 58)
 						{
-							Decrement_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_," + to_string(End_val_data) + "," + to_string(Condition) + "," + to_string(If_entry) + ")"), 5));
 							Initiation_statement = Condition_statement - 1;
-							if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"))
+							if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"))
 							{
-								Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
-								Init_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
-								Initiation_statement_b = Initiation_statement - 1;
-								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_variable) + ", _,\"var\",\"sym(\"node\")\")"))
+								Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Increment_variable) + "," + to_string(Condition_statement) + ")"), 6));
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"))
 								{
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(*))"))
+									Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
+									if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"))
 									{
-										Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(*))"), 7));
-										if (trace_back(name, Initiation_statement, Init_variable, &Up_limit))
+										Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ", _,\"const\",i(*))"), 7));
+										Increment_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
 										{
-											Decrement_instruction = Entry - 1;
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
+											Increment_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"), 6));
+											Iterations = (Up_limit - Low_limit + 1) / Increment_step;
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"))
 											{
-												Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
-												Iterations = (Up_limit - Low_limit + 1);
-												trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
-												{
-													Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
-													End_of_loop = Entry;
-													Header_start = Assign_stmt;
-													Body_last = Entry - 1;
-													add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-													Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
-													Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
-												}
+												Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Increment_variable) + ",_)"), 6));
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+												Increment_instruction, Increment_variable, Start_val_data, End_val_data,
+												Increment_step, Body_first, Body_last, Iterations, &For_loop_entry);
 											}
 										}
 									}
 								}
-								/* now the case of a for loop, with a decrement instruction, just before the jump
-								and the	upper limit of the loop being assigned to a constant*/
-								Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
-								if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"))
+							}
+						}
+					}
+					else if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"))
+					{
+						Decrement_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 5));
+						End_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 6));
+						Initiation_statement = Condition_statement - 1;
+						if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"))
+						{
+							Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
+							Init_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
+							Initiation_statement_b = Initiation_statement - 1;
+							if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"))
+							{
+								Init_constant_b = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"), 6));
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",  _,\"const\",i(*))"))
 								{
-									Init_constant_b = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"), 6));
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",  _,\"const\",i(*))"))
+									Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"), 7));
+									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",  _,\"const\",i(*))"))
 									{
-										Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"), 7));
-										if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",  _,\"const\",i(*))"))
-										{
-											Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"), 7));
-											Decrement_instruction = Entry - 1;
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
-											{
-												Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
-												Iterations = (Up_limit - Low_limit + 1) / Decrement_step;
-												trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-												if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
-												{
-													Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
-													End_of_loop = Entry;
-													Header_start = Assign_stmt;
-													Body_last = Entry - 1;
-													add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-													Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
-													Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
-												}
-											}
-										}
-									}
-								}
-								else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",  _,\"const\",i(*))"))
-								{
-									Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ", _,\"const\",i(*))"), 7));
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",  _,\"const\",i(*))"))
-									{
-										Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ", _,\"const\",i(*))"), 7));
+										Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"), 7));
 										Decrement_instruction = Entry - 1;
 										if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
 										{
@@ -1636,6 +1542,58 @@ void build_loop_cond(string name, int Entry)
 									}
 								}
 							}
+							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_variable) + ",_,\"var\",\"sym(\"node\")\")"))
+							{
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(*))"))
+								{
+									Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(*))"), 7));
+									if (trace_back(name, Initiation_statement, Init_variable, &Up_limit))
+									{
+										Decrement_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
+										{
+											Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
+											Iterations = (Up_limit - Low_limit + 1);
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
+											{
+												Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+												Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
+												Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
+											}
+										}
+									}
+								}
+							}
+							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"))
+							{
+								Up_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(*))"), 7));
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"))
+								{
+									Low_limit = stoi(returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(*))"), 7));
+									Decrement_instruction = Entry - 1;
+									if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
+									{
+										Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
+										Iterations = (Up_limit - Low_limit + 1) / Decrement_step;
+										trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
+										{
+											Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
+											End_of_loop = Entry;
+											Header_start = Assign_stmt;
+											Body_last = Entry - 1;
+											add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+											Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
+											Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -1644,7 +1602,6 @@ void build_loop_cond(string name, int Entry)
 	}
 }
 
-/* Adds a for_loop fact */
 void add_while_loop(string Module, int If_statement, int Condition_statement, int End_of_loop, int Body_first, int Body_last, int* While_loop_entry)
 {
 	int Last_while_loop;
@@ -1659,13 +1616,18 @@ void add_while_loop(string Module, int If_statement, int Condition_statement, in
 void trace_previous_assign_op(string Module_name, int Condition_statement, int* Assign_stmt)
 {
 	int  Previous_stmt, Previous_op;
+	if (Condition_statement == 1)
+	{
+		*Assign_stmt = 0;
+		return;
+	}
 	*Assign_stmt = Condition_statement - 1;
 	if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(*Assign_stmt) + ",_,102,_,_,_,_)"))
 		return;
 	Previous_stmt = Condition_statement - 1;
-	if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Previous_stmt) + ",_,_,_,_,_,_)"))
+	if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Previous_stmt) + ",*)"))
 	{
-		Previous_op = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Previous_stmt) + ",_,_,_,_,_,_)"), 4));
+		Previous_op = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Previous_stmt) + ",*)"), 4));
 		if (Previous_op != 102 && Previous_stmt >= 1)
 			trace_previous_assign_op(Module_name, Previous_stmt, Assign_stmt);
 	}
@@ -1680,11 +1642,10 @@ void add_for_loop(string Module_name, int If_entry, int Condition_statement, int
 		*For_loop_entry = Last_for_loop + 1;
 		HT.assertz("for_loop(" + to_string(*For_loop_entry) + "," + Module_name + "," + to_string(If_entry) + "," + to_string(Condition_statement) + "," + to_string(End_of_loop) + "," + to_string(Header_start) + "," + to_string(Increment_instruction) + "," + to_string(Increment_variable) + "," + to_string(Start_value) + "," + to_string(End_value) + "," + to_string(Increment_step) + "," + to_string(Body_first) + "," + to_string(Body_last) + "," + to_string(Iterations) + ")");
 		HT.retractall("last_for_loop_entry(*)");
-		HT.assertz("last_for_loop_entry(For_loop_entry)");
+		HT.assertz("last_for_loop_entry("+ to_string(*For_loop_entry)+")");
 	}
 }
 
-/* Traces back the last operation which targets the variable */
 bool trace_back(string Module, int Previous, int Variable, int* Result)
 {
 	if (!HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",*)"))
@@ -1718,33 +1679,38 @@ bool trace_back(string Module, int Previous, int Variable, int* Result)
 	return false;
 }
 
-/* Calculate the value of variable on a targeting operation */
 void calc_target_var(string Module, int Operator, int Left, int Right, int* Result)
 {
+	int Right_Value, Left_Value;
 	if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Right) + ",_,\"const\",i(*))"))
 	{
-		int Right_Value, Left_Value;
 		Right_Value = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Right) + ",_,\"const\",i(*))"), 7));
-		Left_Value = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Left) + ",_,\"const\",i(*))"), 7));
-		if (Operator == 60)
-			*Result -= Right_Value;
-		else if (Operator == 62)
-			*Result = Left_Value + Right_Value;
-		else if (Operator == 63)
-			*Result = Left_Value - Right_Value;
-		else if (Operator == 64)
-			*Result = Left_Value * Right_Value;
-		else if (Operator == 65)
-			*Result = Left_Value / Right_Value;
-		else if (Operator == 102)
-			*Result = Right_Value;
+		if (Left == 0)
+		{
+			if (Operator == 60)
+				*Result -= Right_Value;
+			else if (Operator == 102)
+				*Result = Right_Value;
+		}
+		else if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Left) + ",_,\"const\",i(*))"))
+		{
+			Left_Value = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Left) + ",_,\"const\",i(*))"), 7));
+			if (Operator == 62)
+				*Result = Left_Value + Right_Value;
+			else if (Operator == 63)
+				*Result = Left_Value - Right_Value;
+			else if (Operator == 64)
+				*Result = Left_Value * Right_Value;
+			else if (Operator == 65)
+				*Result = Left_Value / Right_Value;
+		}
 	}
 }
 
 void generate_hdl_recursive(string Hdlform, string Tool, int Entry)
 {
 	int Next_entry;
-	if (!HT.findfact("hierarchy_part(" + to_string(Entry) + ", _, _, \"libpart\",_,_,_)"))
+	if (!HT.findfact("hierarchy_part(" + to_string(Entry) + ",_,_,\"libpart\",_,_,_)"))
 		return;
 	else
 	{
@@ -1808,7 +1774,7 @@ void generate_hdl_recursive(string Hdlform, string Tool, int Entry)
 
 void store_package_name(int Entry, string Module)
 {
-	if (Entry <= 1)
+	if (Entry == 1)
 	{
 		if (HT.findfact("hierarchy_part(1," + Module + ",_,_,_,_,_)"))
 		{
@@ -1842,11 +1808,11 @@ void store_package_name(int Entry, string Module)
 
 void increment_module_counter()
 {
+	int x, z;
 	if (!HT.findfact("module_counter(*)"))
 		HT.assertz("module_counter(0)");
-	else
+	else if (HT.findfact("module_counter(*)"))
 	{
-		int x, z;
 		x = stoi(returnpar(HT.findandreturn("module_counter(*)"), 1));
 		z = x + 1;
 		HT.retractall("module_counter(" + to_string(x) + ")");
@@ -1858,7 +1824,7 @@ void code_for_module_created_message(string Module, int ModCount)
 {
 	if (!HT.findfact("cac_mode(*)"))
 		cout << " HDL code for module no : " << to_string(ModCount) << " : " << Module << " is being created...";
-	else
+	else if (HT.findfact("cac_mode(*)"))
 		cout << " CycleAccurateSimulator code for module no: " << to_string(ModCount) << " : " << Module << " is being created...";
 }
 
@@ -1944,17 +1910,19 @@ void generate_hdl_2(string Hdlform, string tool, string Module_name, int Level)
 	}
 }
 
-/* The following is true if the module name is a custom block */
-bool custom_block(string* Module_name)
+bool custom_block(string Module_name)
 {
-	return HT.findfact("combo(_," + *Module_name + ",_)") || HT.findfact("sequence(_," + *Module_name + ",_)");
+	return HT.findfact("combo(_," + Module_name + ",_)") || HT.findfact("sequence(_," + Module_name + ",_)");
 }
 
 void get_and_append_local(string Module_name, vector<local_object> LList, int Onumber, vector<local_object>* cosLList, int* cosOnumber)
 {
-	if ((*cosOnumber == 0 && Onumber == 0) && !HT.findfact("local_object(" + Module_name + "," + to_string(*cosOnumber) + ",*)"))
+	if ((Onumber == 0) && !HT.findfact("local_object(" + Module_name + "," + to_string(Onumber) + ",*)"))
+	{
+		*cosOnumber = Onumber;
 		return;
-	else if (Onumber > 0 && !HT.findfact("local_object(" + Module_name + "," + to_string(*cosOnumber) + ",*)"))
+	}
+	else if (Onumber > 0 && !HT.findfact("local_object(" + Module_name + "," + to_string(Onumber) + ",*)"))
 	{
 		*cosOnumber = Onumber - 1;
 	}
@@ -1992,19 +1960,17 @@ void add_local_conditionally(string Module_name, vector<local_object> In_local_l
 					Local1 = *ptr;
 					append_local(In_local_list, Local1, &Next_local_list);
 					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
-					return;
 				}
 			}
-			if (HT.findfact("local_object(" + Top_package_module + ",_,_," + Object_name + ",_,_,_,_,_)"))
+			else if (HT.findfact("local_object(" + Top_package_module + ",_,_," + Object_name + ",_,_,_,_,_)"))
 			{
 				if (Top_package_module != Module_name)
 				{
 					vector<local_object> Next_local_list;
 					Next_local_list = In_local_list;
 					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
-					return;
 				}
-				else
+				else if (Top_package_module != Module_name)
 				{
 					vector<local_object> Next_local_list{};
 					local_object Local;
@@ -2149,12 +2115,12 @@ string write_ieee_packages(string str1, string str2)
 string write_global_package(string Module, string str1, string str2)
 {
 	stringstream ss;
+	string Package_name;
 
 	if (str1 == "vhdl" && str2 == "synergy")
 	{
 		if (HT.findfact("hierarchy_part(1,_,0,\"libpart\",_,_,_)"))
 		{
-			string Package_name;
 			Package_name = returnpar(HT.findandreturn("hierarchy_part(1,_,0,\"libpart\",_,_,_)"), 2);
 			ss << "  PACKAGE " << Package_name << " IS " << endl;
 			ss << print_global_constants(1, "vhdl") << endl;
@@ -2205,19 +2171,17 @@ string  print_global_constants(int DEntry, string HDL)
 {
 	stringstream ss;
 	int Next_entry;
+	string Package_name;
 	if (HT.findfact("hierarchy_part(1,_,0,\"libpart\",_,_,_)"))
 	{
-		string Package_name;
 		Package_name = returnpar(HT.findandreturn("hierarchy_part(1,_,0,\"libpart\",_,_,_)"), 2);
-		if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,_,_)"))
+		if (!HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,_,_)"))
 			return ss.str();
 	}
-	else
-	{
-		ss << print_global_constant(DEntry, HDL);
-		Next_entry = DEntry + 1;
-		print_global_constants(Next_entry, HDL);
-	}
+	ss << print_global_constant(DEntry, HDL);
+	Next_entry = DEntry + 1;
+	ss << print_global_constants(Next_entry, HDL);
+
 	return ss.str();
 }
 
@@ -2234,9 +2198,9 @@ string print_global_constant(int DEntry, string str)
 			if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"))
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"), 2);
-				cout << "   CONSTANT " << Const_name << " : boolean := ";
-				type_value(Package_name, DEntry, "vhdl");
-				cout << ";" << endl;
+				ss << "   CONSTANT " << Const_name << " : boolean := ";
+				ss << type_value(Package_name, DEntry, "vhdl");
+				ss << ";" << endl;
 			}
 			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,_,_)"))
 			{
@@ -2248,11 +2212,13 @@ string print_global_constant(int DEntry, string str)
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
 				Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 4));
-				parent_type_is_integer(Type_entry, &Type_size);
-				Highest_order = Type_size - 1;
-				ss << "   CONSTANT " << Const_name << " : std_logic_vector(" << Highest_order << " DOWNTO 0) := std_logic_vector(conv_unsigned(";
-				type_value(Package_name, DEntry, "vhdl");
-				ss << ", " << Type_size << "))" << ";" << endl;
+				if (parent_type_is_integer(Type_entry, &Type_size))
+				{
+					Highest_order = Type_size - 1;
+					ss << "   CONSTANT " << Const_name << " : std_logic_vector(" << Highest_order << " DOWNTO 0) := std_logic_vector(conv_unsigned(";
+					ss << type_value(Package_name, DEntry, "vhdl");
+					ss << ", " << Type_size << "))" << ";" << endl;
+				}
 			}
 		}
 	}
@@ -2266,7 +2232,7 @@ string print_global_constant(int DEntry, string str)
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"), 2);
 				ss << "   `define " << Const_name << " = ";
-				type_value(Package_name, DEntry, "verilog");
+				ss << type_value(Package_name, DEntry, "verilog");
 				ss << ";" << endl;
 			}
 			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"))
@@ -2279,10 +2245,12 @@ string print_global_constant(int DEntry, string str)
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
 				Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 4));
-				parent_type_is_integer(Type_entry, 0);
-				ss << "   parameter " << Const_name << " = ";
-				type_value(Package_name, DEntry, "verilog");
-				ss << ";" << endl;
+				if (parent_type_is_integer(Type_entry, 0))
+				{
+					ss << "   parameter " << Const_name << " = ";
+					ss << type_value(Package_name, DEntry, "verilog");
+					ss << ";" << endl;
+				}
 			}
 		}
 	}
@@ -2295,28 +2263,30 @@ string print_global_constant(int DEntry, string str)
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
 				Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 4));
-				parent_type_is_integer(Type_entry, 0);
-				if (HT.findfact("type_def(Type_entry,_,_,_,_,\"single_t\",_,_,_)"))
+				if (parent_type_is_integer(Type_entry, 0))
 				{
-					Type_name = stoi(returnpar(HT.findandreturn("type_def(Type_entry,_,_,_,_,\"single_t\",_,_,_)"), 2));
+					if (HT.findfact("type_def(Type_entry,_,_,_,_,\"single_t\",_,_,_)"))
+					{
+						Type_name = stoi(returnpar(HT.findandreturn("type_def(Type_entry,_,_,_,_,\"single_t\",_,_,_)"), 2));
 
-					ss << "const " << Type_name << " " << Const_name << " = ";
-					type_value(Package_name, DEntry, "verilog");
-					ss << ";" << endl;
+						ss << "const " << Type_name << " " << Const_name << " = ";
+						ss << type_value(Package_name, DEntry, "verilog");
+						ss << ";" << endl;
+					}
 				}
-				else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"))
-				{
-					Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"), 2);
-					ss << "const bool " << Const_name << " = ";
-					type_value(Package_name, DEntry, "verilog");
-					ss << ";" << endl;
-				}
-				else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"))
-				{
-					Kind = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"), 5);
-					if (Kind != "const")
-						ss << "";
-				}
+			}
+			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"))
+			{
+				Kind = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"), 5);
+				if (Kind != "const")
+					ss << "";
+			}
+			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"))
+			{
+				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"), 2);
+				ss << "const bool " << Const_name << " = ";
+				ss << type_value(Package_name, DEntry, "verilog");
+				ss << ";" << endl;
 			}
 		}
 	}
@@ -2325,131 +2295,132 @@ string print_global_constant(int DEntry, string str)
 
 bool parent_type_is_integer(int Type, int* Par_Size)
 {
+	int Parent;
 	if (Type == 2)
 	{
 		if (HT.findfact("type_def(2,*)"))
 		{
-			int Parent;
 			Parent = stoi(returnpar(HT.findandreturn("type_def(2,*)"), 5));
-			*Par_Size = stoi(returnpar(HT.findandreturn("type_def(2,*)"), 3));
 			if (Parent == 0)
 			{
+				*Par_Size = stoi(returnpar(HT.findandreturn("type_def(2,*)"), 3));
 				return true;
 			}
 		}
 	}
 	else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
 	{
-		int Parent;
 		Parent = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 5));
 		if (Type != 2 && Parent != 0)
 		{
-			parent_type_is_integer(Parent, Par_Size);
-			return true;
+			if (parent_type_is_integer(Parent, Par_Size))
+			{
+				return true;
+			}
 		}
 	}
 	return false;
 }
 
-/* The following is used to print the name of the variable, or the value of the constant */
 string type_value(string PModule, int Data_entry, string str)
 {
+	stringstream ss;
 	if (str == "vhdl")
 	{
 		if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,_,_)"))
 		{
-			return "";
+			ss << "";
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"), 2);
-			return "CONV_INTEGER(" + Var_name + ")";
+			ss << "CONV_INTEGER(" + Var_name + ")";
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"))
-			return returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"), 7);
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*))"))
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"))
+			ss << returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"), 7);
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*))"))
 		{
 			string cond;
 			cond = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*))"), 7);
 			if (cond == "0")
-				return "false";
+				ss << "false";
 			else
-				return "true";
+				ss << "true";
 		}
 		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"), 2);
-			return "CONV_INTEGER(" + Var_name + ")";
+			ss << "CONV_INTEGER(" + Var_name + ")";
 		}
 	}
 	else if (str == "verilog")
 	{
-		if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
+		if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"), 2);
-			return Var_name;
+			ss << Var_name;
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"))
-			return returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"), 7);
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*))"))
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"))
+			ss << returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"), 7);
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*))"))
 		{
 			string cond;
 			cond = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*))"), 7);
 			if (cond == "0")
-				return "false";
+				ss << "0";
 			else
-				return "true";
+				ss << "1";
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"))
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"), 2);
-			return Var_name;
+			ss << Var_name;
 		}
 	}
 	else if (str == "c")
 	{
-		if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
+		if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"), 2);
-			return Var_name;
+			ss << Var_name;
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"))
-			return returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"), 7);
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"))
+			ss << returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",i(*))"), 7);
 		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*))"))
 		{
 			string cond;
 			cond = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"const\",bol(*)"), 7);
 			if (cond == "0")
-				return "false";
+				ss << "0";
 			else
-				return "true";
+				ss << "1";
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"))
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"), 2);
-			return Var_name;
+			ss << Var_name;
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_inout\",_)"))
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_inout\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_inout\",_)"), 2);
-			return Var_name;
+			ss << Var_name;
 		}
-		if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,_,_)"))
+		if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,_,_)"))
 		{
 			if (!HT.findfact("special_dt(" + PModule + "," + to_string(Data_entry) + ",_,_,_,\"const\",i(*))"))
 			{
-				return returnpar(HT.findandreturn("special_dt(" + PModule + "," + to_string(Data_entry) + ",_,_,_,\"const\",i(*))"), 8);
+				ss << returnpar(HT.findandreturn("special_dt(" + PModule + "," + to_string(Data_entry) + ",_,_,_,\"const\",i(*))"), 8);
 			}
 		}
 	}
-	return "ERROR function: type_value the third parameter was not vhdl or verilog or c";
+	return ss.str();
 }
 
 string print_array_types(int Entry, string HDL)
@@ -2469,22 +2440,18 @@ string print_array_types(int Entry, string HDL)
 	return ss.str();
 }
 
-/**------ From 6/12/05 print_array_types prints records as well ------**/
-/*-- before 29/4/2015 this predicate was used for VHDL types only
-	 after (inclusive) 29/4/2015, the C cycle-accurate simulator case
-	 was added as well --*/
 string print_array_type(int Entry, string str)
 {
 	stringstream ss;
+	string Type_name, Comp_name, Comp_kind, Parent_kind, Array_name, Just_field_type_name, Type_built, Type_kind;
+	int Dimmension, First_comp_type_entry, First_index, Comp_type, Last_index, Comp_size, Comp_msb, Comp_dim, Parent_type, Array_size,
+		Parent_Type_name;
 	if (!HT.findfact("type_def(" + to_string(Entry) + ",*)"))
 	{
 		return ss.str();
 	}
-	else
+	else if (HT.findfact("hdl_style(\"vhdl\")"))
 	{
-		string Type_name, Comp_name, Comp_kind, Parent_kind, Array_name, Just_field_type_name, Type_built, Type_kind;
-		int Dimmension, First_comp_type_entry, First_index, Comp_type, Last_index, Comp_size, Comp_msb, Comp_dim, Parent_type, Array_size,
-			Parent_Type_name;
 		if (str == "vhdl")
 		{
 			if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
@@ -2557,9 +2524,11 @@ string print_array_type(int Entry, string str)
 					ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF boolean;" << endl << endl;
 				}
 			}
-			if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"))
+			else if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"))
 			{
 				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 2);
+				Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 3));
+				Parent_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 5));
 				First_index = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 7));
 				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 8));
 				Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 9));
@@ -2575,21 +2544,20 @@ string print_array_type(int Entry, string str)
 							ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(" << Comp_msb << " DOWNTO 0);" << endl << endl;
 						}
 					}
+					else if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
+					{
+						Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",*)"), 3));
+						if (Comp_size == 1)
+						{
+							ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic;" << endl << endl;
+						}
+					}
 				}
-			}
-			if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"))
-			{
-				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 2);
-				Parent_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 5));
-				First_index = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 7));
-				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 8));
-				Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 9));
-				if (HT.findfact("type_def(" + to_string(Parent_type) + ",*)"))
+				else if (HT.findfact("type_def(" + to_string(Parent_type) + ",*)"))
 				{
 					Parent_kind = returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",*)"), 6);
 					if (Parent_kind != "record_t")
 					{
-						Last_index = First_index + Dimmension - 1;
 						if (Comp_type > 1)
 						{
 							if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
@@ -2612,69 +2580,29 @@ string print_array_type(int Entry, string str)
 						}
 					}
 				}
-			}
-			if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"))
-			{
-				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 2);
-				Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 3));
-				Parent_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 5));
-				First_index = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 7));
-				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 8));
-				Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 9));
-				Last_index = First_index + Dimmension - 1;
-				if (Comp_type > 1)
+				else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"))
 				{
-					if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"))
+					Array_name = returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 2);
+					Array_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 3));
+					Comp_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 6));
+					Comp_dim = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 8));
+					if (Comp_kind != "single_t")
 					{
-						Array_name = returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 2);
-						Array_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 3));
-						Comp_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 6));
-						Comp_dim = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 8));
-						if (Comp_kind != "single_t")
+						if (HT.findfact("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
 						{
-							if (HT.findfact("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
+							Parent_Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 2));
+							if (Comp_dim > 0)
 							{
-								Parent_Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 2));
-								if (Comp_dim > 0)
+								if (Comp_size > 1)
 								{
-									if (Comp_size > 1)
-									{
-										if (HT.concat(".", &Just_field_type_name, Type_name))
-											ss << "   TYPE " << Parent_Type_name << "_" << Just_field_type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(31 DOWNTO 0) ;" << endl << endl;
-									}
+									if (HT.concat(".", &Just_field_type_name, Type_name))
+										ss << "   TYPE " << Parent_Type_name << "_" << Just_field_type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(31 DOWNTO 0) ;" << endl << endl;
 								}
 							}
 						}
 					}
 				}
-			}
-			if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"))
-			{
-				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 2);
-				First_index = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 7));
-				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 8));
-				Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 9));
-				Last_index = First_index + Dimmension - 1;
-				if (Comp_type > 1)
-				{
-					if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
-					{
-						Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",*)"), 3));
-						if (Comp_size == 1)
-						{
-							ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic;" << endl << endl;
-						}
-					}
-				}
-			}
-			if (HT.findfact("type_def(" + to_string(Entry) + ",*)"))
-			{
-				Type_built = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",*)"), 4);
-				Type_kind = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",*)"), 6);
-				if (Type_built != "user" || Type_kind != "vectorarray_t" || Type_kind != "record_t")
-				{
-					ss << "";
-				}
+
 			}
 		}
 	}
@@ -2686,7 +2614,7 @@ string print_records_fields_declarations(int First_entry, int Dimmension, int Cu
 	stringstream ss;
 	int Next_entry;
 	if (Dimmension == Current_entry - First_entry)
-		ss << "";
+		return ss.str();
 	else
 	{
 		ss << print_records_fields_declarations_core(First_entry, Dimmension, Current_entry, &Next_entry, hdlform);
@@ -2715,11 +2643,11 @@ string print_records_fields_declarations_core(int First_entry, int Dimmension, i
 					*Next_entry = Current_entry + 1;
 				}
 			}
-			else if (HT.findfact("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"))
+			else if (HT.findfact("type_def(" + to_string(Current_entry) + ",*)"))
 			{
-				Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 2));
-				Type_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 6));
-				Inherent_type_entry = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 2));
+				Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",*)"), 2));
+				Type_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",*)"), 6));
+				Inherent_type_entry = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",*)"), 2));
 				if (Type_kind != "single_t")
 				{
 					if (HT.findfact("type_def(" + to_string(Inherent_type_entry) + ",*)"))
@@ -2735,7 +2663,7 @@ string print_records_fields_declarations_core(int First_entry, int Dimmension, i
 			}
 		}
 	}
-	else
+	else if (str == "c")
 	{
 		if (Dimmension > Current_entry - First_entry)
 		{
@@ -2756,11 +2684,11 @@ string print_records_fields_declarations_core(int First_entry, int Dimmension, i
 					}
 				}
 			}
-			else if (HT.findfact("type_def(" + to_string(Current_entry) + ",_,_,_,_,_,_,_,_)"))
+			else if (HT.findfact("type_def(" + to_string(Current_entry) + ",*)"))
 			{
-				Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 2));
-				Type_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 6));
-				Inherent_type_entry = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 9));
+				Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",*)"), 2));
+				Type_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",*)"), 6));
+				Inherent_type_entry = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Current_entry) + ",*)"), 9));
 				if (Type_kind != "single_t")
 				{
 					if (HT.findfact("type_def(" + to_string(Inherent_type_entry) + ",*)"))
@@ -2783,8 +2711,8 @@ string print_custom_functions_title(string Package_name, string str)
 {
 	stringstream ss;
 	if (!HT.findfact("custom_block(*)"))
-		ss << "";
-	else
+		return ss.str();
+	if (HT.findfact("custom_block(*)"))
 	{
 		ss << endl;
 		if (str == "vhdl")
@@ -2795,12 +2723,10 @@ string print_custom_functions_title(string Package_name, string str)
 	return ss.str();
 }
 
-/* to print the default boolean<->std_logic conversion routines,
-   if there are arrays of booleans types in this ITF */
 string write_boolean_default_procedures_headers(string str)
 {
 	stringstream ss;
-	if (str == "vhdl" && HT.findfact("type_def(_,_,_,_,_,_,_,_,1)") && str == "vhdl")
+	if (str == "vhdl" && HT.findfact("type_def(_,_,_,_,_,_,_,_,1)"))
 	{
 		ss << write_boolean_default_procedures_for_type(1, 0, "vhdl");
 		ss << "   FUNCTION bool_vec_to_std_logic(inboolean : IN boolean) RETURN std_logic;" << endl;
@@ -2809,9 +2735,6 @@ string write_boolean_default_procedures_headers(string str)
 	return ss.str();
 }
 
-/* recursive: to print the default boolean<->std_logic conversion routines,
-   if there are arrays of booleans types in this ITF .
-   First parameter (Level) = 0 for headers; 1 for bodies */
 string write_boolean_default_procedures_for_type(int Entry, int Level, string str)
 {
 	stringstream ss;
@@ -2825,18 +2748,15 @@ string write_boolean_default_procedures_for_type(int Entry, int Level, string st
 	return ss.str();
 }
 
-/* core of recursion: to print the default boolean<->std_logic conversion routines,
-   if there are arrays of booleans types in this ITF .
-   First parameter (Level) = 0 for headers; 1 for bodies */
 string write_boolean_default_procedures_for_type_core(int Entry, int Level, string str)
 {
 	stringstream ss;
 	string Type_name;
 	if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,_,_,\"vectorarray_t\",_,_,1)") && str == "vhdl")
 	{
+		Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"), 2));
 		if (Level == 0)
 		{
-			Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,_,_,\"vectorarray_t\",_,_,1)"), 2));
 			ss << "   FUNCTION bool_vec_to_std_logic(invec : IN " << Type_name << ") RETURN std_logic_vector;" << endl;
 			ss << "   FUNCTION std_logic_to_bool_vec(invec : IN std_logic_vector) RETURN " << Type_name << ";" << endl;
 		}
@@ -2874,12 +2794,6 @@ string write_boolean_default_procedures_for_type_core(int Entry, int Level, stri
 	return ss.str();
 }
 
-/* use:
-	print_custom_function_headers(Module, Entry, Ending_string)
-   where Module is the top-level custom block, and
-   Entry is the next entry to process (start from 2, the first
-   after the package's name in the hierarchy table)
-*/
 string print_custom_function_headers(string Module, int Entry, string EndSt)
 {
 	stringstream ss;
@@ -4005,13 +3919,6 @@ string print_custom_functions(string Module, int Entry, string HDL)
 	}
 
 	return ss.str();
-}
-
-bool custom_block(string Module_name)
-{
-	if (HT.findfact("combo(_," + Module_name + ",_)") || HT.findfact("sequence(_," + Module_name + ",_)"))
-		return true;
-	return false;
 }
 
 string print_custom_function(int int1, string Module, string PModule, string HDL)
