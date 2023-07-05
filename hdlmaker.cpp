@@ -861,8 +861,7 @@ int main(int argc, char* argv[])
 
 void generate_top(string pathln, string exec, string cmdl)
 {
-	//line 33885
-	string Line; //a line from the call in cmd
+	string Line; 
 	ifstream File;
 	string Hdlform;
 
@@ -962,11 +961,6 @@ void report_global_constraint()
 	else return;
 }
 
-//This predicate is used for the assertion of the massively parallel
-//  (mp) FSM generation fact.
-//  use example:
-// assert_mp_conditionally(Massively_parallel)
-// when no command - line options, then massively parallel by default
 void assert_mp_conditionally(string Massively_parallel)
 {
 	if (Massively_parallel == "")
@@ -2348,7 +2342,7 @@ string type_value(string PModule, int Data_entry, string str)
 			else
 				ss << "true";
 		}
-		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"))
+		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_in\",_)"), 2);
@@ -2412,9 +2406,9 @@ string type_value(string PModule, int Data_entry, string str)
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"par_inout\",_)"), 2);
 			ss << Var_name;
 		}
-		if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,_,_)"))
+		else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,_,_)"))
 		{
-			if (!HT.findfact("special_dt(" + PModule + "," + to_string(Data_entry) + ",_,_,_,\"const\",i(*))"))
+			if (HT.findfact("special_dt(" + PModule + "," + to_string(Data_entry) + ",_,_,_,\"const\",i(*))"))
 			{
 				ss << returnpar(HT.findandreturn("special_dt(" + PModule + "," + to_string(Data_entry) + ",_,_,_,\"const\",i(*))"), 8);
 			}
@@ -2856,7 +2850,7 @@ void dont_find_call_in_range(int Em1, int EEm1, int Em, int InDFC, int* OutDFC)
 			{
 				*OutDFC = 1;
 			}
-			else
+			else if (!HT.findfact("call_stmt(" + Module + ",_," + to_string(Em1) + ",_)"))
 			{
 				Nem1 = EEm1 + 1;
 				dont_find_call_in_range(Em1, Nem1, Em, InDFC, OutDFC);
@@ -3028,8 +3022,6 @@ string write_cus_function_header_params(string PModule, int Entry, string VarSig
 	return ss.str();
 }
 
-/* module name, name of the data object, type of the data,
-   and par_in/par_out/par_inout */
 string write_cus_function_header_param(int Entry, string PModule, string Data_name, int Type, string InOutType, string str1, string str2)
 {
 	stringstream ss;
@@ -3339,8 +3331,6 @@ string write_inout_type(string str1, string str2)
 	return ss.str();
 }
 
-/* Depending on the type of the data variable, of the custom function
-   it writes ("completes") out the type of the parameter */
 string write_cus_func_param_type(string PModule, string str, int int1, string Separator)
 {
 	stringstream ss;
@@ -3381,7 +3371,7 @@ string write_cus_func_param_type(string PModule, string str, int int1, string Se
 		{
 			if (HT.findfact("type_def(" + to_string(int1) + ",\"positive\",32,\"standard\",2,\"single_t\",0,0,0)"))
 			{
-				if (!HT.findfact("data_stmt(" + PModule + "," + PModule + ",*)"))
+				if (HT.findfact("data_stmt(" + PModule + "," + PModule + ",*)"))
 					ss << " std_logic_vector" << Separator;
 			}
 		}
@@ -3389,12 +3379,9 @@ string write_cus_func_param_type(string PModule, string str, int int1, string Se
 		{
 			if (HT.findfact("type_def(" + to_string(int1) + ",\"positive\",32,\"standard\",2,\"single_t\",0,0,0)"))
 			{
-				if (!HT.findfact("data_stmt(" + PModule + "," + PModule + ",*)"))
-				{
-					Size = 32;
-					Sizeminusone = Size - 1;
-					ss << " std_logic_vector(" << Sizeminusone << " DOWNTO 0) " << Separator;
-				}
+				Size = 32;
+				Sizeminusone = Size - 1;
+				ss << " std_logic_vector(" << Sizeminusone << " DOWNTO 0) " << Separator;
 			}
 		}
 		else if (HT.findfact("type_def(" + to_string(int1) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
@@ -3417,17 +3404,17 @@ string write_cus_func_param_type(string PModule, string str, int int1, string Se
 		if (HT.findfact("type_def(" + to_string(int1) + ",_,_,_,2,\"single_t\",_,_,_)"))
 		{
 			Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(int1) + ",_,_,_,2,\"single_t\",_,_,_)"), 3));
-			if (!HT.findfact("data_stmt(" + PModule + "," + PModule + ",*)"))
+			if (HT.findfact("data_stmt(" + PModule + "," + PModule + ",*)"))
 			{
 				if (Size > 1)
 				{
 					Sizeminusone = Size - 1;
 					ss << " std_logic_vector(" << Sizeminusone << " DOWNTO 0) " << Separator;
 				}
-				else if (Size == 1)
-				{
-					ss << " std_logic" << Separator;
-				}
+			}
+			else if (Size == 1)
+			{
+				ss << " std_logic" << Separator;
 			}
 		}
 	}
@@ -3472,9 +3459,6 @@ string write_cus_func_param_type(string PModule, string str, int int1, string Se
 	return ss.str();
 }
 
-/* Now (23/12/11) updated to include both VHDL and Verilog as well
- example:
-	write_size(Length,Kind,HDL,Tool,Is_last_parameter)*/
 string write_size(int int1, string str1, string str2, string str3, int int2)
 {
 	stringstream ss;
@@ -3644,7 +3628,6 @@ string continue_verilog_dimmension_component(int Comp_type)
 	return ss.str();
 }
 
-// It prints the array declaration, just after the input/output/reg words.
 string print_verilog_array_decl(int Type_number, string Local_name, string Separator)
 {
 	stringstream ss;
@@ -3870,6 +3853,8 @@ string print_custom_functions(string Module, int Entry, string HDL)
 	int Centry, Next_entry;
 	if ((HDL == "vhdl" || HDL == "verilog") && (!HT.findfact("combo(*)") && !HT.findfact("sequence(*)")))
 		return ss.str();
+	if ((HDL == "vhdl" || HDL == "verilog") && !HT.findfact("call_stmt("+Module+","+to_string(Entry)+",*)"))
+		return ss.str();
 	if (HT.findfact("hierarchy_part(" + to_string(Entry) + ",_,_,\"libpart\",_,_,_)"))
 	{
 		PModule = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Entry) + ",_,_,\"libpart\",_,_,_)"), 2);
@@ -3884,7 +3869,6 @@ string print_custom_functions(string Module, int Entry, string HDL)
 			Next_entry = Entry + 1;
 			ss << print_custom_functions(Module, Next_entry, HDL);
 		}
-
 	}
 	else if (HT.findfact("hierarchy_part(_," + Module + ",_,\"libpart\",_,_,_)"))
 	{
@@ -3904,9 +3888,7 @@ string print_custom_functions(string Module, int Entry, string HDL)
 				}
 			}
 		}
-
 	}
-
 	return ss.str();
 }
 
@@ -5737,7 +5719,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 										else if (HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",_)"))
 										{
 											FunctionNameEntry = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",_)"), 3));
-											if (HT.findfact("prog_stmt(" + PModule + ",_,0,102,0," + to_string(Result) + "," + to_string(FunctionNameEntry) + ",_)"))
+											if (!HT.findfact("prog_stmt(" + PModule + ",_,0,102,0," + to_string(Result) + "," + to_string(FunctionNameEntry) + ",_)"))
 											{
 												*Next_intend = Intend;
 												ss << Intend << " " << ArrayName << "[" << Index << "] = " << Source << ";" << endl;
@@ -7325,11 +7307,7 @@ string write_io_ports_core_cond(local_object Local, string HDL, string Tool, str
 	return ss.str();
 }
 
-/** probably needs more work for std_logic, referenced(Type_name)...**/
-/** which is the 5th field of local_object **/
-/** also the userrecord case should be added in the future for IN, OUT,
-	and INOUT ports **/
-string  write_io_port(local_object Local, string HDL, string tool)
+string write_io_port(local_object Local, string HDL, string tool)
 {
 	stringstream ss;
 	string Module, var3, Local_name, Local_type, var7, var9, NewName;
@@ -8541,6 +8519,7 @@ string  write_io_port(local_object Local, string HDL, string tool)
 bool is_it_the_last_io(string Module_name, string HDL, int Current_entry, int* Last)
 {
 	int Next_entry;
+	string Kind;
 	Next_entry = Current_entry + 1;
 	if (!HT.findfact("local_object(" + Module_name + "," + to_string(Next_entry) + ",*)"))
 	{
@@ -8549,7 +8528,9 @@ bool is_it_the_last_io(string Module_name, string HDL, int Current_entry, int* L
 	}
 	else if (HT.findfact("local_object(" + Module_name + "," + to_string(Next_entry) + ",*)"))
 	{
-		*Last = 0;
+		Kind = returnpar(HT.findandreturn("local_object(" + Module_name + "," + to_string(Next_entry) + ",*)"), 3);
+		if (is_io_type(Kind))
+			*Last = 0;
 		return true;
 	}
 	return false;
@@ -8845,7 +8826,7 @@ string write_verilog_port(string Module_name, local_object Local, string HDL)
 	string var3, Local_name;
 	GeneralFact* ptr = &Local;
 	var3 = returnpar(makeStringOf(ptr), 3);
-	Local_name = returnpar(makeStringOf(ptr), 4);//4
+	Local_name = returnpar(makeStringOf(ptr), 4);
 	if (HDL == "verilog")
 	{
 		if (var3 == "par_in" || var3 == "par_out" || var3 == "par_inout")
@@ -9078,13 +9059,13 @@ string write_comma_cond_all(string Module_name, int In_entry, string str)
 	{
 		return ss.str();
 	}
-	else if (!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Next_entry) + ",_,\"par_in\",_)") &&
+	if (!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Next_entry) + ",_,\"par_in\",_)") &&
 	!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Next_entry) + ",_,\"par_inout\",_)") &&
 	str == "wrapper_call")
 	{
 		return ss.str();
 	}
-	else if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Next_entry) + ",_,\"par_in\",_)") ||
+	if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Next_entry) + ",_,\"par_in\",_)") ||
 	HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Next_entry) + ",_,\"par_out\",_)") ||
 	HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Next_entry) + ",_,\"par_inout\",_)"))
 	{
@@ -9138,8 +9119,6 @@ bool is_output(string str)
 	return str == "par_out" || str == "par_inout";
 }
 
-/* This is to write in Verilog the custom block call in the module body.
-   Custom functions are treated as ADA procedures with no auxiliary variables. */
 string write_custom_call_no_state(string Called_module_name, string HDL)
 {
 	stringstream ss;
@@ -9208,9 +9187,9 @@ string write_all_io_list_cus_block_real_ios(string Module_name, int Entry)
 	stringstream ss;
 	string Data;
 	int Next_entry;
-	if (!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Entry) + ",_,\"var\",_)") &&
-		!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Entry) + ",_,\"const\",_)") &&
-		!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Entry) + ",_,\"par_in\",_)"))
+	if (!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Entry) + ",_,\"par_in\",_)") &&
+		!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Entry) + ",_,\"par_out\",_)") &&
+		!HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Entry) + ",_,\"par_inout\",_)"))
 	{
 		return ss.str();
 	}
@@ -10390,11 +10369,11 @@ string write_local_conditionally(string Module, local_object Local, string Hdl, 
 	GeneralFact* ptr;
 	ptr = &Local;
 	Name = returnpar(HT.findandreturn(makeStringOf(ptr)), 4);
-	if (!HT.findfact("data_stmt(" + Package + "," + Name + ",_,_,\"const\",_)"))
+	if (HT.findfact("package_name(*)"))
 	{
-		if (HT.findfact("package_name(*)"))
+		Package = returnpar(HT.findandreturn("package_name(*)"), 1);
+		if (!HT.findfact("data_stmt(" + Package + "," + Name + ",_,_,\"const\",_)"))
 		{
-			Package = returnpar(HT.findandreturn("package_name(*)"), 1);
 			ss << write_local(Local, Hdl, Tool, "");
 		}
 	}
@@ -11998,7 +11977,7 @@ string write_signal_declaration(string Instance, int Type, int Size)
 				ss << "   SIGNAL " << Instance << " : std_logic_vector(" << Upper_bound << " DOWNTO 0);" << endl;
 			}
 		}
-		else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+		else if (!HT.findfact("type_def(" + to_string(Type) + ",*)"))
 		{
 			Size_ = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
 			if (Size_ > 1)
@@ -14408,7 +14387,7 @@ string resets_standard_call_ios_unopt(string Module_name, string HDL, int C_entr
 			if (HT.findfact("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"))
 			{
 				Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Function_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
-				if (custom_block(Called_module_name))
+				if (!custom_block(Called_module_name))
 				{
 					if (HT.findfact("hdl_style(\"vhdl\")"))
 					{
@@ -16296,8 +16275,9 @@ string write_param_list(string Module, vector<int> Param_list)
 				ss << " " << Object_name;
 			}
 		}
-		else if (HT.findfact("data_stmt(" + Module + "," + Object_name + "," + to_string(Param_list.front()) + ",_,_,_)"))
+		else if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Param_list.front()) + ",_,_,_)"))
 		{
+			Object_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Param_list.front()) + ",_,_,_)"), 2);
 			ss << " " << Object_name << ",";
 			Param_list.erase(Param_list.begin());
 			write_param_list(Module, Param_list);
@@ -19782,6 +19762,12 @@ string print_call_output_par_assignment_parcs_core(string Module_name, int Head_
 			}
 		}
 	}
+	else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"))
+	{
+		Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Head_op) + ",_,109,0,_,_,_)"), 6));
+		if (!HT.findfact("top_level_call(" + to_string(Par_entry) + "," + to_string(Call_entry) + "," + Module_name + ",_,_,_,_,_,_,_,\"par_in\")"))
+			*Next_entry = Par_entry + 1;
+	}
 	return ss.str();
 }
 
@@ -20285,7 +20271,7 @@ string write_parameter_assignment(string Module_name, string Called_module, int 
 	{
 		Formal_name = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 2);
 		Kind = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 5);
-		if (Kind != "par_out" || Kind != "par_inout")
+		if (Kind != "par_out" && Kind != "par_inout")
 		{
 			return ss.str();
 		}
@@ -21860,20 +21846,20 @@ string write_data_routing_unopt_cond(int Entry)
 						ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
 						ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
 					}
-					else if (!HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+				}
+				else if (!HT.findfact("signal_instance(_," + In1_instance + ",_,_,_,_,_)"))
+				{
+					HT.concat(Op_instance, "_in2", &In2_instance);
+					if (HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
 					{
-						HT.concat(Op_instance, "_in2", &In2_instance);
-						if (HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
-						{
-							In2_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 5));
-							In2_size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 6));
-							hdl_op_inputs_label(Op_name, &Op_announcement);
-							ss << endl;
-							ss << "-- now the " << Op_announcement << " --" << endl;
-							find_minimum_size_of_routed_input(In2_instance, 1, In2_size, &Min_size2);
-							ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
-							ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
-						}
+						In2_type = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 5));
+						In2_size = stoi(returnpar(HT.findandreturn("signal_instance(_," + In2_instance + ",_,_,_,_,_)"), 6));
+						hdl_op_inputs_label(Op_name, &Op_announcement);
+						ss << endl;
+						ss << "-- now the " << Op_announcement << " --" << endl;
+						find_minimum_size_of_routed_input(In2_instance, 1, In2_size, &Min_size2);
+						ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
+						ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
 					}
 				}
 			}
@@ -21922,7 +21908,6 @@ string write_data_routing_unopt_cond(int Entry)
 					ss << write_signal_inst_tail(In1_type, In1_instance, Operator, 1) << endl;
 					ss << write_data_instances_unopt(Entry, 1, "_in2", Op_size);
 					ss << write_signal_inst_tail(In2_type, In2_instance, Operator, 2);
-
 				}
 			}
 			else if (!HT.findfact("signal_instance(_," + In1_instance + ",_,_,_,_,_)"))
@@ -22036,7 +22021,7 @@ string write_data_instances_unopt(int Op_inst_entry, int Input_entry, string Suf
 	stringstream ss;
 	string Op_instance, Signal_inst_name;
 	int Next_in_entry, Out_size;
-	if (HT.findfact("op_instance("+to_string(Op_inst_entry)+",*)"))
+	if (HT.findfact("op_instance(" + to_string(Op_inst_entry) + ",*)"))
 	{
 		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Op_inst_entry) + ",*)"), 5);
 		HT.concat(Op_instance, Suffix, &Signal_inst_name);
@@ -22045,11 +22030,9 @@ string write_data_instances_unopt(int Op_inst_entry, int Input_entry, string Suf
 			return ss.str();
 		}
 	}
-	else
-	{
-		ss << write_data_instances_unopt_core(Op_inst_entry, Input_entry, Suffix, In_size, &Next_in_entry, &Out_size);
-		ss << write_data_instances_unopt(Op_inst_entry, Next_in_entry, Suffix, Out_size);
-	}
+	ss << write_data_instances_unopt_core(Op_inst_entry, Input_entry, Suffix, In_size, &Next_in_entry, &Out_size);
+	ss << write_data_instances_unopt(Op_inst_entry, Next_in_entry, Suffix, Out_size);
+
 	return ss.str();
 }
 
@@ -22964,7 +22947,7 @@ void find_last_schedule_state(string Module_name, string New_schedule, int* Last
 	{
 		*Last_parcs_state = 0;
 	}
-	else if (!HT.findfact("last_schedule_state(" + Module_name + "," + New_schedule + ",*)"))
+	else if (HT.findfact("last_schedule_state(" + Module_name + "," + New_schedule + ",*)"))
 	{
 		*Last_parcs_state = stoi(returnpar(HT.findandreturn("last_schedule_state(" + Module_name + "," + New_schedule + ",*)"), 3));
 	}
@@ -23447,21 +23430,57 @@ string  print_io_port_conditional(string Module, string Called_module_name, int 
 			{
 				return ss.str();
 			}
-			if (!HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")"))
-			{
-				if (Max_order > 1 && Order > Max_order)
-				{
-					HT.assertz("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")");
-					return ss.str();
-				}
-			}
 			if (HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
 			{
 				return ss.str();
 			}
-			if (!HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
+			else
 			{
-				if (Max_order > 1 && Order <= Max_order)
+				HT.concat(Called_module_name, "_", &IO_name1);
+				HT.concat(IO_name1, Parameter_name, &IO_name);
+				if (HT.findfact("local_object(" + Module + ",_,_," + IO_name + ",_,_,_,_,_)"))
+				{
+					return ss.str();
+				}
+				if (Max_order == 1)
+				{
+					if (!HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")"))
+					{
+						if (!HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
+						{
+							reverse_io_direction(Data_kind, &New_kind);
+							if (HT.findfact("hdl_io_pass(*)"))
+							{
+								Pass = stoi(returnpar(HT.findandreturn("hdl_io_pass(*)"), 1));
+								if (HT.findfact("local_object(" + Called_module_name + "," + to_string(Data_entry) + "," + New_kind + "," + IO_name + "," + to_string(Data_entry) + "," + Data_type + "," + Local_built + "," + to_string(Local_size) + "," + Data_value + ")"))
+								{
+									local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Called_module_name + "," + to_string(Data_entry) + "," + New_kind + "," + IO_name + "," + to_string(Data_entry) + "," + Data_type + "," + Local_built + "," + to_string(Local_size) + "," + Data_value + ")")));
+									Local = *ptr;
+									ss << write_io_port_conditional_with_pass(Pass, Local, HDL, "synergy");
+									HT.assertz("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")");
+								}
+							}
+						}
+					}
+				}
+				else if (Max_order > 1)
+				{
+					if (Order > Max_order)
+					{
+						if (!HT.findfact("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")"))
+						{
+							HT.assertz("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")");
+							return ss.str();
+						}
+					}
+				}
+			}
+		}
+		else if (Max_order > 1)
+		{
+			if (Order <= Max_order)
+			{
+				if (!HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
 				{
 					str_int(&Orderstr, Order);
 					HT.concat(Called_module_name, "_", &IO_name1);
@@ -23472,34 +23491,14 @@ string  print_io_port_conditional(string Module, string Called_module_name, int 
 					if (HT.findfact("hdl_io_pass(*)"))
 					{
 						Pass = stoi(returnpar(HT.findandreturn("hdl_io_pass(*)"), 1));
-						ss << write_io_port_conditional_with_pass(Pass, Local, HDL, "synergy");
-						Next_order = Order + 1;
-						ss << print_io_port_conditional(Module, Called_module_name, Called_module_entry, Data_entry, Next_order, Max_order, Data_kind,
-							   Parameter_name, Data_entry, Data_type, Local_built, Local_size, Data_value, HDL);
-					}
-				}
-			}
-			else
-			{
-				HT.concat(Called_module_name, "_", &IO_name1);
-				HT.concat(IO_name1, Parameter_name, &IO_name);
-				if (HT.findfact("local_object(" + Module + ",_,_," + IO_name + ",_,_,_,_,_)"))
-				{
-					return ss.str();
-				}
-				else
-				{
-					reverse_io_direction(Data_kind, &New_kind);
-					if (HT.findfact("hdl_io_pass(*)"))
-					{
-						Pass = stoi(returnpar(HT.findandreturn("hdl_io_pass(*)"), 1));
 						if (HT.findfact("local_object(" + Called_module_name + "," + to_string(Data_entry) + "," + New_kind + "," + IO_name + "," + to_string(Data_entry) + "," + Data_type + "," + Local_built + "," + to_string(Local_size) + "," + Data_value + ")"))
 						{
 							local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Called_module_name + "," + to_string(Data_entry) + "," + New_kind + "," + IO_name + "," + to_string(Data_entry) + "," + Data_type + "," + Local_built + "," + to_string(Local_size) + "," + Data_value + ")")));
 							Local = *ptr;
 							ss << write_io_port_conditional_with_pass(Pass, Local, HDL, "synergy");
-							HT.assertz("printed_formal_ios_of_called_module(" + Module + "," + to_string(Module_entry) + "," + to_string(Called_module_entry) + "," + Parameter_name + ")");
-
+							Next_order = Order + 1;
+							ss << print_io_port_conditional(Module, Called_module_name, Called_module_entry, Data_entry, Next_order, Max_order, Data_kind,
+								   Parameter_name, Data_entry, Data_type, Local_built, Local_size, Data_value, HDL);
 						}
 					}
 				}
@@ -23561,9 +23560,10 @@ string reset_call_ports(string Module_name, string HDL, int C_entry)
 		}
 		if (!HT.findfact("call_stmt(" + Module_name + "," + to_string(C_entry) + ",*)"))
 		{
-			ss << reset_call_ports_core(Module_name, "vhdl", C_entry, &Next_entry);
-			ss << reset_call_ports(Module_name, "vhdl", Next_entry);
+			return ss.str();
 		}
+		ss << reset_call_ports_core(Module_name, "vhdl", C_entry, &Next_entry);
+		ss << reset_call_ports(Module_name, "vhdl", Next_entry);
 	}
 	return ss.str();
 }
@@ -23589,51 +23589,27 @@ string reset_call_ports_core(string Module_name, string HDL, int C_entry, int* N
 				{
 					*Next_entry = C_entry + 1;
 				}
-				else if (HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"))
+				else if (!HT.findfact("call_ios_have_been_reset(" + Cmodule_name + ")") && !custom_block(Cmodule_name))
 				{
-					Function_max_calls = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"), 3));
-					Order1 = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"), 3));
-					if (!HT.findfact("max_op_order(" + Module_name + ",\"parcsif\",*)"))
+					if (HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"))
 					{
-						Order2 = stoi(returnpar(HT.findandreturn("max_op_order(" + Module_name + ",\"parcsif\",*)"), 3));
-						if (Order2 <= Order1)
+						Function_max_calls = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"), 3));
+						Order1 = stoi(returnpar(HT.findandreturn("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"), 3));
+						if (HT.findfact("max_op_order(" + Module_name + ",\"parcsif\",*)"))
 						{
-							if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",0)"))
+							Order2 = stoi(returnpar(HT.findandreturn("max_op_order(" + Module_name + ",\"parcsif\",*)"), 3));
+							if (Order2 <= Order1)
 							{
-								find_correct_max_call_order(Module_name, Called_mod_entry, Order1, &Function_max_calls_final);
-								finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
-								HT.assertz("call_ios_have_been_reset("+Cmodule_name+")");
-								*Next_entry = C_entry + 1;
+								if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",0)"))
+								{
+									find_correct_max_call_order(Module_name, Called_mod_entry, Order1, &Function_max_calls_final);
+									finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
+									HT.assertz("call_ios_have_been_reset(" + Cmodule_name + ")");
+									*Next_entry = C_entry + 1;
+								}
 							}
 						}
-					}
-					else if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + "," + to_string(Function_max_calls) + ")"))
-					{
-						if (Function_max_calls > 0)
-						{
-							find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
-							ss << finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
-							HT.assertz("call_ios_have_been_reset(" + Cmodule_name + ")");
-							*Next_entry = C_entry + 1;
-						}
-					}
-					else if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"))
-					{
-						Function_max_calls1 = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"), 4));
-						if (Function_max_calls1 < Function_max_calls)
-						{
-							if (Function_max_calls1 > 0)
-							{
-								find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
-								ss << finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
-								HT.assertz("call_ios_have_been_reset(" + Cmodule_name + ")");
-								*Next_entry = C_entry + 1;
-							}
-						}
-					}
-					else if (!HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"))
-					{
-						if (!HT.findfact("max_op_order(" + Module_name + ",\"parcsif\",*)"))
+						else if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + "," + to_string(Function_max_calls) + ")"))
 						{
 							if (Function_max_calls > 0)
 							{
@@ -23643,43 +23619,70 @@ string reset_call_ports_core(string Module_name, string HDL, int C_entry, int* N
 								*Next_entry = C_entry + 1;
 							}
 						}
-						else if (HT.findfact("max_op_order(" + Module_name + ",\"parcsif\",*)"))
+						else if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"))
 						{
-							Function_max_calls1 = stoi(returnpar(HT.findandreturn("max_op_order(" + Module_name + ",\"parcsif\",*)"), 3));
-							if (Function_max_calls == Function_max_calls1)
-							{
-								if (Function_max_calls > 0)
-								{
-									find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls1, &Function_max_calls_final);
-									finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
-									HT.assertz("call_ios_have_been_reset(Cmodule_name)");
-									*Next_entry = C_entry + 1;
-								}
-							}
-							else if (Function_max_calls > Function_max_calls1)
+							Function_max_calls1 = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"), 4));
+							if (Function_max_calls1 < Function_max_calls)
 							{
 								if (Function_max_calls1 > 0)
 								{
 									find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
-									finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
-									HT.assertz("call_ios_have_been_reset(Cmodule_name)");
+									ss << finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
+									HT.assertz("call_ios_have_been_reset(" + Cmodule_name + ")");
 									*Next_entry = C_entry + 1;
 								}
 							}
 						}
-					}
-				}
-				else if (!HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"))
-				{
-					if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"))
-					{
-						Function_max_calls = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"), 4));
-						if (Function_max_calls > 0)
+						else if (!HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"))
 						{
-							find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
-							finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
-							HT.assertz("call_ios_have_been_reset(Cmodule_name)");
-							*Next_entry = C_entry + 1;
+							if (!HT.findfact("max_op_order(" + Module_name + ",\"parcsif\",*)"))
+							{
+								if (Function_max_calls > 0)
+								{
+									find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
+									ss << finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
+									HT.assertz("call_ios_have_been_reset(" + Cmodule_name + ")");
+									*Next_entry = C_entry + 1;
+								}
+							}
+							else if (HT.findfact("max_op_order(" + Module_name + ",\"parcsif\",*)"))
+							{
+								Function_max_calls1 = stoi(returnpar(HT.findandreturn("max_op_order(" + Module_name + ",\"parcsif\",*)"), 3));
+								if (Function_max_calls == Function_max_calls1)
+								{
+									if (Function_max_calls > 0)
+									{
+										find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls1, &Function_max_calls_final);
+										finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
+										HT.assertz("call_ios_have_been_reset(Cmodule_name)");
+										*Next_entry = C_entry + 1;
+									}
+								}
+								else if (Function_max_calls > Function_max_calls1)
+								{
+									if (Function_max_calls1 > 0)
+									{
+										find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
+										finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
+										HT.assertz("call_ios_have_been_reset(Cmodule_name)");
+										*Next_entry = C_entry + 1;
+									}
+								}
+							}
+						}
+					}
+					else if (!HT.findfact("totalmax_call_order(" + Module_name + ",\"parcsif\",*)"))
+					{
+						if (HT.findfact("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"))
+						{
+							Function_max_calls = stoi(returnpar(HT.findandreturn("max_parallel_call_order(" + Module_name + ",\"parcsif\"," + to_string(Called_mod_entry) + ",*)"), 4));
+							if (Function_max_calls > 0)
+							{
+								find_correct_max_call_order(Module_name, Called_mod_entry, Function_max_calls, &Function_max_calls_final);
+								finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Called_mod_entry, Function_max_calls_final, 1);
+								HT.assertz("call_ios_have_been_reset(Cmodule_name)");
+								*Next_entry = C_entry + 1;
+							}
 						}
 					}
 				}
@@ -24122,7 +24125,7 @@ void does_it_target_ifthen(string Module, int Operation)
 					{
 						HT.assertz("targets_conditional_variable(" + Module + "," + to_string(Operation) + "," + to_string(IfthenOp) + "," + to_string(Targeted_conditional_variable) + ")");
 					}
-					else if (HT.findfact("it_includes_ifthen(" + Module + "," + to_string(IfthenOp) + "," + to_string(Targeted_conditional_variable) + ")"))
+					else if (!HT.findfact("it_includes_ifthen(" + Module + "," + to_string(IfthenOp) + "," + to_string(Targeted_conditional_variable) + ")"))
 					{
 						HT.assertz("it_includes_ifthen(" + Module + "," + to_string(IfthenOp) + "," + to_string(Targeted_conditional_variable) + ")");
 					}
@@ -24553,7 +24556,7 @@ string write_unc_next_state_transition(string Module, int int1, int Uncond_next_
 			New_schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
 			if (HT.findfact("hdl_style(\"c\")"))
 			{
-				if (HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(Uncond_next_state) + ",*)"))
+				if (!HT.findfact("state(" + Module + "," + New_schedule + "," + to_string(Uncond_next_state) + ",*)"))
 				{
 					return ss.str();
 				}
