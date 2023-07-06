@@ -931,7 +931,7 @@ void itf_found_message()
 	auto currentTimepoint = std::chrono::time_point_cast<std::chrono::milliseconds>(currentTime);
 	int hud = currentTimepoint.time_since_epoch().count() % 100;
 
-	fstream File("hdlmaker.log", ios::app);
+	ofstream File("hdlmaker.log", ios::app);
 	if (File.is_open())
 	{
 		File << endl;
@@ -948,7 +948,7 @@ void report_global_constraint()
 	if (HT.findfact("global_resource(*)"))
 	{
 		Global_constraint = returnpar(HT.findandreturn("global_resource(*)"), 1);
-		fstream File("hdlmaker.log", ios::app);
+		ofstream File("hdlmaker.log", ios::app);
 		if (File.is_open())
 		{
 			File << endl;
@@ -1777,25 +1777,18 @@ void store_package_name(int Entry, string Module)
 			HT.concat("vcom_", Module, &Vcomscript1);
 			HT.concat(Vcomscript1, ".bat", &Vcomscript_content);
 
-			fstream     File("Vcomscript", ios::out | ios::in | ios::trunc);
+			ofstream     File(Vcomscript_content);
 			if (File.is_open())
 			{
-				File << Vcomscript_content << endl;
 				File.close();
 			}
-			else
-				return;
-
 			HT.concat(Vcomscript1, ".log", &Logfile_content);
 
-			fstream     File2("Logfile", ios::out | ios::in | ios::trunc);
-			if (File.is_open())
+			ofstream     File2(Logfile_content);
+			if (File2.is_open())
 			{
-				File2 << Logfile_content << endl;
 				File2.close();
 			}
-			else
-				return;
 		}
 	}
 }
@@ -1998,7 +1991,7 @@ void write_custom_block(string Module_name, string hdlform, vector<local_object>
 		Tool = "synergy";
 		HT.concat(Module_name, ".vhd", &Fname);
 
-		fstream     File(Fname, ios::out | ios::in | ios::trunc);
+		ofstream     File(Fname);
 		if (File.is_open())
 		{
 			File << write_title(Module_name, Hdlform, Tool) << endl;
@@ -2028,8 +2021,8 @@ void write_custom_block(string Module_name, string hdlform, vector<local_object>
 				File << "      results_ready <= '1'; " << endl;
 				File << "     END PROCESS custom_behaviour_proc;" << endl;
 				File << "   END behaviour;" << endl;
+				File.close();
 			}
-			File.close();
 		}
 	}
 	else if (hdlform == "verilog")
@@ -2037,7 +2030,7 @@ void write_custom_block(string Module_name, string hdlform, vector<local_object>
 		Hdlform = "verilog";
 		Tool = "synergy";
 		HT.concat(Module_name, ".sv", &Fname);
-		fstream     File(Fname, ios::out | ios::in | ios::trunc);
+		ofstream     File(Fname);
 		if (File.is_open())
 		{
 			File << write_title(Module_name, Hdlform, Tool) << endl;
@@ -2052,8 +2045,8 @@ void write_custom_block(string Module_name, string hdlform, vector<local_object>
 			File << write_custom_call_no_state(Module_name, "verilog");
 			File << "    end " << endl;
 			File << " endmodule " << endl;
+			File.close();
 		}
-		File.close();
 	}
 }
 
@@ -9341,7 +9334,7 @@ void write_unoptimised_hdl(string Module_name, int int1, int int2, string HDL, s
 				HT.retractall("added_aux_call_signals(" + Module_name + ",*)");
 				HT.concat(Module_name, ".vhd", &Fname);
 
-				fstream     File(Fname, ios::out | ios::in | ios::trunc);
+				ofstream     File(Fname);
 				if (File.is_open())
 				{
 					File << write_title(Module_name, Hdlform, Tool) << endl;
@@ -9380,7 +9373,7 @@ void write_unoptimised_hdl(string Module_name, int int1, int int2, string HDL, s
 						HT.retractall("added_aux_call_signals(" + Module_name + ",*)");
 						HT.concat(Module_name, ".sv", &Fname);
 
-						fstream     File(Fname, ios::out | ios::in | ios::trunc);
+						ofstream     File(Fname);
 						if (File.is_open())
 						{
 							File << write_title(Module_name, Hdlform, Tool) << endl;
@@ -19521,8 +19514,8 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 				}
 			}
 		}
-		return ss.str();
 	}
+	return ss.str();
 }
 
 void read_current_depth(int* CurrentDepth)
@@ -23001,7 +22994,7 @@ void write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int 
 								HT.concat(Vcomscript1, ".bat", &Vcomscript);
 								HT.concat(Module_name, "_parcs.vhd", &Fname);
 
-								fstream File(Vcomscript, ios::app);
+								ofstream File(Vcomscript, ios::app);
 
 								if (File.is_open())
 								{
@@ -23014,7 +23007,7 @@ void write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int 
 									File.close();
 								}
 								
-								fstream     File2(Fname, ios::out | ios::in | ios::trunc);
+								ofstream     File2(Fname);
 								if (File.is_open())
 								{
 									File2.open(Fname, fstream::in);
@@ -23057,7 +23050,7 @@ void write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int 
 							HT.retractall("added_verilog_aux_call_outputs(" + Module_name + ",*)");
 							HT.retractall("output_filename(*)");
 							HT.concat(Module_name, "_parcs.sv", &Fname);
-							fstream     File3(Fname, ios::out | ios::in | ios::trunc);
+							ofstream     File3(Fname);
 							if (File3.is_open())
 							{
 								HT.assertz("output_filename("+Fname+")"); 
@@ -25603,7 +25596,7 @@ void write_parcs_c(string Module_name, int Local_list, int Last_parcs_state)
 				HT.retractall("local_ifthen_chain_end_operations_were_written(*)");
 				HT.concat(Module_name, "_parcs.c", &Fname);
 
-				fstream     File(Fname, ios::out | ios::in | ios::trunc);
+				ofstream     File(Fname);
 				if (File.is_open())
 				{
 					File << write_parcs_title(Module_name, Hdlform, Tool) << endl;
@@ -25645,10 +25638,11 @@ void write_parcs_c(string Module_name, int Local_list, int Last_parcs_state)
 					File.close();
 				}
 				HT.concat(Module_name, ".bat", &Batchfile);
-				fstream     File2(Batchfile, ios::out | ios::in | ios::trunc);
-				if (File.is_open())
+				ofstream     File2(Batchfile);
+				if (File2.is_open())
 				{
 					File2 << "gcc " << Module_name << "_parcs.c" << " -o " << Module_name << "_parcs.exe";
+					File2.close();
 				}
 			}
 		}
@@ -26753,7 +26747,7 @@ string write_record_field(string Module, string Top_name, string Index, string F
 string end_time_message()
 {
 	stringstream ss;
-	fstream File("hdlmaker.log", ios::app);
+	ofstream File("hdlmaker.log", ios::app);
 	if (File.is_open())
 	{
 		auto currentTime = std::chrono::system_clock::now();
