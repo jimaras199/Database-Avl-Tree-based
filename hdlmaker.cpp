@@ -123,8 +123,8 @@ string write_standard_call_ports(string Module, string Schedule, int Call_entry)
 string write_standard_ports_for_called_module(string Module, string Schedule, int Call_entry, int Called_module_entry);
 string write_polymorfic_IO_exression(string Module, string Schedule_name, int State, string Called_Module_name, string Signal_name, int Next_order, int Max_order, string First_space, string Condition_op_string, string Suffix_string, int InRealCount, int PruneLastString);
 string type_core_IO_expression(string Called_Module_name, int var2, string Signal_name, int var4, int Max_order, string var6, string Condition_op_string, string Suffix_string, int InRealCount, int* OutRealCount, int PruneLastString);
-string produce_real_same_calls_count(string First_space, int Called_module_entry, int State, string Signal_name, string Suffix_string, string Condition_op_string, int Same_order, int Same_total, int Next_order, int Total_order, int Max_order, int InRealCount, int* OutRealCount, int PruneLastString);
 string write_or_prune(int InRealCount, int Total_order, string Condition_op_string, int int1);
+string produce_real_same_calls_count(string First_space, int Called_module_entry, int State, string Signal_name, string Suffix_string, string Condition_op_string, int Same_order, int Same_total, int Next_order, int Total_order, int Max_order, int InRealCount, int* OutRealCount, int PruneLastString);
 string write_standard_verilog_call_decls(string Module, int Call_entry);
 string write_standard_verilog_decls_for_called_module(string Module, int Call_entry, int Called_module_entry);
 string write_verilog_call_ios(string Module, int Call_entry);
@@ -288,7 +288,7 @@ string write_formal_call_ports(string Module_name, int Call_entry, string HDL);
 string write_formal_ports_for_called_module(string Module, int Call_entry, int Called_module_entry, string HDL);
 string scan_and_print_formal_parameter_io(string Module, int Called_module_entry, int Data_entry, int Max_order, string HDL);
 string scan_and_print_formal_parameter_io_core(string Module, int Called_module_entry, int Data_entry, int Order, int Max_order, string HDL);
-string  print_io_port_conditional(string Module, string Called_module_name, int Called_module_entry, int Data_entry, int Order, int Max_order, string Data_kind, string Parameter_name, int Data_entry2, string Data_type, string Local_built, int Local_size, string Data_value, string HDL);
+string print_io_port_conditional(string Module, string Called_module_name, int Called_module_entry, int Data_entry, int Order, int Max_order, string Data_kind, string Parameter_name, int Data_entry2, string Data_type, string Local_built, int Local_size, string Data_value, string HDL);
 string write_io_port_conditional_with_pass(int Pass, local_object Local, string HDL, string Tool);
 string reset_call_ports(string Module_name, string HDL, int C_entry);
 string reset_call_ports_core(string Module_name, string HDL, int C_entry, int* Next_entry);
@@ -2164,7 +2164,7 @@ string write_global_package(string Module, string str1, string str2)
 	return ss.str();
 }
 
-string  print_global_constants(int DEntry, string HDL)
+string print_global_constants(int DEntry, string HDL)
 {
 	stringstream ss;
 	int Next_entry;
@@ -5316,7 +5316,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						pop_cond_end(PModule);
 						if (HT.concat(Next_intend, " ", Intend))
 						{
-							ss << Next_intend << "end;" << endl;
+							ss << *Next_intend << "end;" << endl;
 						}
 					}
 				}
@@ -12847,7 +12847,7 @@ string write_cus_block_variables_cond(string Module_name, int Module_entry, stri
 	return ss.str();
 }
 
-string  write_aux_conditional_variables(string Module_name, int Entry, string HDL)
+string write_aux_conditional_variables(string Module_name, int Entry, string HDL)
 {
 	stringstream ss;
 	int Next_entry;
@@ -16816,7 +16816,7 @@ string write_verilog_aggregate(string Module_name, int Cur_index, string Res_nam
 	return ss.str();
 }
 
-string  write_verilog_array_index(string Module_name, int Right_op)
+string write_verilog_array_index(string Module_name, int Right_op)
 {
 	stringstream ss;
 	string Right_name;
@@ -18389,7 +18389,7 @@ string write_record_field_target_assignment(string op, string Rd_name, string El
 	return ss.str();
 }
 
-string  print_special_triplet_op(string HDL, string Operator, string Rd_name, int Rd_width, string Left_name, int Left_width, string Right_name, int Right_width)
+string print_special_triplet_op(string HDL, string Operator, string Rd_name, int Rd_width, string Left_name, int Left_width, string Right_name, int Right_width)
 {
 	stringstream ss;
 	int Rd_up_limit, Left_up_limit, Right_up_limit;
@@ -19901,7 +19901,7 @@ string write_cus_block_call_input_var_assignments(string Module_name, string Cal
 	return ss.str();
 }
 
-string  write_cus_block_call_input_var_assignments_core(string Module_name, string Called_module_name, int Entry, vector<int> List, string WS, string HDL, int* Next_entry)
+string write_cus_block_call_input_var_assignments_core(string Module_name, string Called_module_name, int Entry, vector<int> List, string WS, string HDL, int* Next_entry)
 {
 	stringstream ss;
 	string Kind;
@@ -23421,7 +23421,7 @@ bool is_io_type(string str)
 	return str == "par_in" || str == "par_inout" || str == "par_out";
 }
 
-string  print_io_port_conditional(string Module, string Called_module_name, int Called_module_entry, int Data_entry, int Order, int Max_order, string Data_kind, string Parameter_name, int Data_entry2, string Data_type, string Local_built, int Local_size, string Data_value, string HDL)
+string print_io_port_conditional(string Module, string Called_module_name, int Called_module_entry, int Data_entry, int Order, int Max_order, string Data_kind, string Parameter_name, int Data_entry2, string Data_type, string Local_built, int Local_size, string Data_value, string HDL)
 {
 	stringstream ss;
 	string IO_name1, IO_name, New_kind, Orderstr, IO_name2, IO_name3;
