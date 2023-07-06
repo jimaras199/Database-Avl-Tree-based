@@ -9235,9 +9235,7 @@ string write_all_io_list_cus_block_real_ios(string Module_name, int Entry)
 
 void consult_memory_ports(string Memory_file_name)
 {
-	ifstream File;
-	File.open(Memory_file_name, fstream::in);
-	if (File.is_open())
+	if (filesystem::exists(Memory_file_name))
 	{
 		HT.consult(Memory_file_name, "options_dbase");
 	}
@@ -9245,9 +9243,7 @@ void consult_memory_ports(string Memory_file_name)
 
 void consult_cus_blocks(string Cus_blocks_file_name)
 {
-	ifstream File;
-	File.open(Cus_blocks_file_name, fstream::in);
-	if (File.is_open())
+	if (filesystem::exists(Cus_blocks_file_name))
 	{
 		HT.consult(Cus_blocks_file_name, "options_dbase");
 	}
@@ -9319,9 +9315,7 @@ void consult_permanent_conditionally(string Module)
 	string Permanent_DBA;
 	HT.concat(Module, "_permanent.DBA", &Permanent_DBA);
 
-	ifstream File;
-	File.open(Permanent_DBA, fstream::in);
-	if (File.is_open())
+	if (filesystem::exists(Permanent_DBA))
 	{
 		HT.consult(Permanent_DBA, "options_dbase");
 	}
@@ -9441,28 +9435,26 @@ string write_interface(string Module_name, string Schedule, int var3, string HDL
 					ss << "        done, busy : OUT std_logic" << endl;
 					ss << write_interface_tail(Module_name, "vhdl", "synergy");
 				}
-				else
+				else if (!filesystem::exists(CustomFile))
 				{
-					ifstream File;
-					File.open(CustomFile, fstream::in);
-					if (!File.is_open())
+					if (HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
 					{
-						if (HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
-						{
-							ss << write_ieee_packages("vhdl", "synergy");
-							ss << "  LIBRARY WORK; " << endl;
-							ss << "  USE WORK." << Global_package << ".ALL; " << endl << endl;
-							ss << "  ENTITY " << Module_name << " IS" << endl;
-							ss << write_interface_header("vhdl", "synergy");
-							ss << "        clock, reset, start, results_read : IN std_logic;" << endl;
-							HT.retractall("added_aux_call_ios(" + Module_name + ",_)");
-							ss << write_standard_call_ports(Module_name, Schedule, 1);
-							ss << write_io_ports(Module_name, 1, "vhdl", "synergy", "regular");
-							ss << "        done, busy : OUT std_logic" << endl;
-							ss << write_interface_tail(Module_name, "vhdl", "synergy");
-						}
+						ss << write_ieee_packages("vhdl", "synergy");
+						ss << "  LIBRARY WORK; " << endl;
+						ss << "  USE WORK." << Global_package << ".ALL; " << endl << endl;
+						ss << "  ENTITY " << Module_name << " IS" << endl;
+						ss << write_interface_header("vhdl", "synergy");
+						ss << "        clock, reset, start, results_read : IN std_logic;" << endl;
+						HT.retractall("added_aux_call_ios(" + Module_name + ",_)");
+						ss << write_standard_call_ports(Module_name, Schedule, 1);
+						ss << write_io_ports(Module_name, 1, "vhdl", "synergy", "regular");
+						ss << "        done, busy : OUT std_logic" << endl;
+						ss << write_interface_tail(Module_name, "vhdl", "synergy");
 					}
-					else if (HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
+				}
+				else if (filesystem::exists(CustomFile))
+				{
+					if (HT.findfact("call_stmt(" + Module_name + ",_,_,_)"))
 					{
 						ss << write_ieee_packages("vhdl", "synergy");
 						ss << "  LIBRARY WORK; " << endl;
