@@ -4356,9 +4356,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						}
 						else if (Right < 0)
 						{
-							if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"))
+							if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Right) + ",*)"))
 							{
-								Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)")), 1);
+								Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Right) + ",*)")), 1);
 								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 								{
 									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
@@ -4594,7 +4594,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 									if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
 									{
 										Rec_par_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Left) + ",*)")), 1);
-										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*),  "))
+										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
 										{
 											*Next_intend = Intend;
 											ss << Intend << ArrayName << "(CONV_INTEGER(" << Index << ")) := (";
@@ -4632,9 +4632,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								}
 								else if (Left < 0)
 								{
-									if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)"))
+									if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
 									{
-										Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)")), 3);
+										Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Left) + ",*)")), 3);
 										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
 										{
 											*Next_intend = Intend;
@@ -5076,7 +5076,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
 								{
 									Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
-									if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*),  "))
+									if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
 									{
 										*Next_intend = Intend;
 										ss << Intend << ArrayName << "[" << Index << "] = " << Source << ";" << endl;
@@ -5112,9 +5112,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								}
 								else if (Left < 0)
 								{
-									if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)"))
+									if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
 									{
-										Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)")), 3);
+										Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Left) + ",*)")), 3);
 										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
 										{
 											*Next_intend = Intend;
@@ -5420,9 +5420,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						}
 						else if (Right < 0)
 						{
-							if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)"))
+							if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Right) + ",*)"))
 							{
-								Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)")), 3);
+								Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Right) + ",*)")), 3);
 								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 								{
 									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
@@ -5637,7 +5637,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 									{
 										if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
 										{
-											Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Right) + ",*)")), 3);
+											Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Right) + ",*)")), 3);
 											*Next_intend = Intend;
 											ss << Intend << ArrayName << "[" << Index << "] = ";
 											ss << " {";
@@ -5648,9 +5648,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								}
 								else if (Left < 0)
 								{
-									if (HT.findfact("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)"))
+									if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
 									{
-										Rec_par_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + ", " + to_string(Left) + ",*)")), 1);
+										Rec_par_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Left) + ",*)")), 1);
 										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 										{
 											ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
