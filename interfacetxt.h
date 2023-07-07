@@ -13827,53 +13827,58 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					params.push_back(1);
 					ALine = subl.substr(0, subl.find(co, 0));
 					e = stoi(ALine);
-					pos += ALine.length() + 1;			// +1 to get ahead of the first bracket
+					pos += ALine.length();
 				}
 				else
 				{
 					params.push_back(0);
-					++++pos;
+					++pos;
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 				paramsV.resize(paramsV.size() + 1);
-				if ((subl.find(brcl, 0)) != 0)
+				if (subl.find(us, 0) != 0)
 				{
-					//vector
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
+					subl = inputline.substr(++pos, inputline.length() - pos);
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						//vector
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vq.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								vq.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
 						if (subl.find(us, 0) != 0)
 						{
-							paramsV[0].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, brpos);
 							vq.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
+							paramsV[0].push_back(1);
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							vq.push_back(0);
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vq.push_back(stoi(ALine));
-						paramsV[0].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						vq.push_back(0);
-						pos++;
-					}
+					else params.push_back(0);
 				}
 				else params.push_back(0);
 			}
@@ -13921,53 +13926,58 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				e = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 1);
-			//vector
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				//vector
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -14021,9 +14031,9 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 		}
 		else if (ALine == "cessor_kind")
 		{
-		vq.clear();
-		int				e{}, r{};
-		string			q{}, w{}, t{}, y{};
+			vq.clear();
+			int				e{}, r{};
+			string			q{}, w{}, t{}, y{};
 		if (inputline != ALine)
 		{
 			subl = inputline.substr(++pos, inputline.length() - pos);
@@ -14103,53 +14113,58 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				y = ALine;
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 1);
-			//vector
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				//vector
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -14425,53 +14440,59 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				w = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 1);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -14504,53 +14525,59 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				w = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 1);
-			//vector
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				//vector
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -14617,256 +14644,286 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(0);
 				++pos;
 			}
-			subl = inputline.substr(++++pos, inputline.length() - pos);
+			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 6);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector2
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector2
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector3
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector3
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[2].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							ve.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[2].push_back(0);
+							ve.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[2].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						ve.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[2].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[2].push_back(0);
 						ve.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					ve.push_back(stoi(ALine));
-					paramsV[2].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[2].push_back(0);
-					ve.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector4
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector4
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[3].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vr.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[3].push_back(0);
+							vr.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[3].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vr.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[3].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[3].push_back(0);
 						vr.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vr.push_back(stoi(ALine));
-					paramsV[3].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[3].push_back(0);
-					vr.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector5
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector5
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[4].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vt.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[4].push_back(0);
+							vt.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[4].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vt.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[4].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[4].push_back(0);
 						vt.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vt.push_back(stoi(ALine));
-					paramsV[4].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[4].push_back(0);
-					vt.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector6
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector6
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[5].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vy.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[5].push_back(0);
+							vy.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[5].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vy.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[5].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[5].push_back(0);
 						vy.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vy.push_back(stoi(ALine));
-					paramsV[5].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[5].push_back(0);
-					vy.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 			subl = inputline.substr(++++pos, inputline.length() - pos);
@@ -15076,179 +15133,201 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				r = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 4);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector2
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector2
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector3
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector3
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[2].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							ve.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[2].push_back(0);
+							ve.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[2].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						ve.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[2].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[2].push_back(0);
 						ve.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					ve.push_back(stoi(ALine));
-					paramsV[2].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[2].push_back(0);
-					ve.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector4
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector4
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[3].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vr.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[3].push_back(0);
+							vr.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[3].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vr.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[3].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[3].push_back(0);
 						vr.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vr.push_back(stoi(ALine));
-					paramsV[3].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[3].push_back(0);
-					vr.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -15599,53 +15678,59 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					params.push_back(1);
 					ALine = subl.substr(0, subl.find(co, 0));
 					q = ALine;
-					pos += ALine.length() + 1;
+					pos += ALine.length();
 				}
 				else
 				{
 					params.push_back(0);
-					++++pos;
+					++pos;
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 				paramsV.resize(paramsV.size() + 1);
-				if ((subl.find(brcl, 0)) != 0)
+				if (subl.find(us, 0) != 0)
 				{
-					//vector
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						//vector
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vq.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								vq.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
 						if (subl.find(us, 0) != 0)
 						{
-							paramsV[0].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, brpos);
 							vq.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
+							paramsV[0].push_back(1);
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							vq.push_back(0);
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vq.push_back(stoi(ALine));
-						paramsV[0].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						vq.push_back(0);
-						pos++;
-					}
+					else params.push_back(0);
 				}
 				else params.push_back(0);
 			}
@@ -17469,95 +17554,106 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				y = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 2);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector2
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector2
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -18142,7 +18238,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				e = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
@@ -18151,86 +18247,97 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 2);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector2
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector2
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -18725,127 +18832,132 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					params.push_back(1);
 					ALine = subl.substr(0, subl.find(co, 0));
 					q = ALine;
-					pos += ALine.length() + 1;
+					pos += ALine.length();
 				}
 				else
 				{
 					params.push_back(0);
-					++++pos;
+					++pos;
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 				paramsV.resize(paramsV.size() + 1);
-
-
-				if ((subl.find(brcl, 0)) != 0)
+				if (subl.find(us, 0) != 0)
 				{
-					//vector
-					params.push_back(1);
+					subl = inputline.substr(++pos, inputline.length() - pos);
 
-					//reserve till last nested_conditional_end
-					brpos = subl.find(brcl, 0);
-					tmpln = subl.substr(0, subl.rfind(co, subl.npos));
-					tmpln = tmpln.substr(0, tmpln.rfind(co, subl.npos));
-					brpos = tmpln.rfind(co, subl.npos);
-					brpos++;
-					//
 
-					while (subl.find(co, 0) < brpos)
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						//vector
+						params.push_back(1);
+
+						//reserve till last nested_conditional_end
+						brpos = subl.find(brcl, 0);
+						tmpln = subl.substr(0, subl.rfind(co, subl.npos));
+						tmpln = tmpln.substr(0, tmpln.rfind(co, subl.npos));
+						brpos = tmpln.rfind(co, subl.npos);
+						brpos++;
+						//
+
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								nce.q = ALine;
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								nce.q = "";
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								nce.w = stoi(ALine);
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								nce.w = 0;
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								nce.e = ALine;
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								nce.e = "";
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+							vnce.push_back(nce);
+						}
 						if (subl.find(us, 0) != 0)
 						{
 							paramsV[0].push_back(1);
 							ALine = subl.substr(0, subl.find(co, 0));
 							nce.q = ALine;
 							pos += ALine.length();
-							brpos -= ALine.length();
+							subl = inputline.substr(++pos, inputline.length() - pos);
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							nce.q = "";
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 						if (subl.find(us, 0) != 0)
 						{
 							paramsV[0].push_back(1);
 							ALine = subl.substr(0, subl.find(co, 0));
 							nce.w = stoi(ALine);
 							pos += ALine.length();
-							brpos -= ALine.length();
+							subl = inputline.substr(++pos, inputline.length() - pos);
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							nce.w = 0;
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 						if (subl.find(us, 0) != 0)
 						{
 							paramsV[0].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, subl.find(brcl, 0));
 							nce.e = ALine;
-							pos += ALine.length();
-							brpos -= ALine.length();
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							nce.e = "";
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 						vnce.push_back(nce);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
-						nce.q = ALine;
-						pos += ALine.length();
-						subl = inputline.substr(++pos, inputline.length() - pos);
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						nce.q = "";
-						pos++;
-					}
-					if (subl.find(us, 0) != 0)
-					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
-						nce.w = stoi(ALine);
-						pos += ALine.length();
-						subl = inputline.substr(++pos, inputline.length() - pos);
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						nce.w = 0;
-						pos++;
-					}
-					if (subl.find(us, 0) != 0)
-					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(brcl, 0));
-						nce.e = ALine;
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						nce.e = "";
-						pos++;
-					}
-					vnce.push_back(nce);
+					else params.push_back(0);
 				}
 				else params.push_back(0);
 			}
@@ -19079,98 +19191,108 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				w = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 2);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			//vector2
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				//vector2
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-
 		}
 		ptr = new op_guards(w, q, vq, vw);
 		}
@@ -19783,53 +19905,59 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					params.push_back(1);
 					ALine = subl.substr(0, subl.find(co, 0));
 					q = ALine;
-					pos += ALine.length() + 1;
+					pos += ALine.length();
 				}
 				else
 				{
 					params.push_back(0);
-					++++pos;
+					++pos;
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 				paramsV.resize(paramsV.size() + 1);
-				if ((subl.find(brcl, 0)) != 0)
+				if (subl.find(us, 0) != 0)
 				{
-					//vector
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						//vector
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vq.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								vq.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
 						if (subl.find(us, 0) != 0)
 						{
-							paramsV[0].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, brpos);
 							vq.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
+							paramsV[0].push_back(1);
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							vq.push_back(0);
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vq.push_back(stoi(ALine));
-						paramsV[0].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						vq.push_back(0);
-						pos++;
-					}
+					else params.push_back(0);
 				}
 				else params.push_back(0);
 			}
@@ -19908,53 +20036,59 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				w = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 1);
-			//vector
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				//vector
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -20249,7 +20383,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					params.push_back(1);
 					ALine = subl.substr(0, subl.find(co, 0));
 					w = stoi(ALine);
-					pos += ALine.length() + 1;
+					pos += ALine.length();
 				}
 				else
 				{
@@ -20258,6 +20392,142 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 				paramsV.resize(paramsV.size() + 2);
+				if (subl.find(us, 0) != 0)
+				{
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(brcl, 0)) != 0)
+					{
+						//vector
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vq.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								vq.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
+						if (subl.find(us, 0) != 0)
+						{
+							ALine = subl.substr(0, brpos);
+							vq.push_back(stoi(ALine));
+							paramsV[0].push_back(1);
+							pos += ALine.size();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+						}
+					}
+					else params.push_back(0);
+				}
+				else params.push_back(0);
+				subl = inputline.substr(++++pos, inputline.length() - pos);
+				if (subl.find(us, 0) != 0)
+				{
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(brcl, 0)) != 0)
+					{
+						//vector2
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[1].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vw.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[1].push_back(0);
+								vw.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
+						if (subl.find(us, 0) != 0)
+						{
+							ALine = subl.substr(0, brpos);
+							vw.push_back(stoi(ALine));
+							paramsV[1].push_back(1);
+							pos += ALine.size();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+						}
+					}
+					else params.push_back(0);
+				}
+				else params.push_back(0);
+			}
+			ptr = new raw_dependencies(q, w, vq, vw);
+		}
+		else if (ALine == "rec_stmt")
+		{
+		int				w{};
+		string			q{};
+		if (inputline != ALine)
+		{
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			if ((subl.find(us, 0)) != 0)
+			{
+				params.push_back(1);
+				ALine = subl.substr(0, subl.find(co, 0));
+				q = ALine;
+				pos += ALine.length();
+			}
+			else
+			{
+				params.push_back(0);
+				++pos;
+			}
+			subl = inputline.substr(++pos, inputline.length() - pos);
+
+			if ((subl.find(us, 0)) != 0)
+			{
+				params.push_back(1);
+				ALine = subl.substr(0, subl.find(co, 0));
+				w = stoi(ALine);
+				pos += ALine.length();
+			}
+			else
+			{
+				params.push_back(0);
+				++pos;
+			}
+			subl = inputline.substr(++pos, inputline.length() - pos);
+			paramsV.resize(paramsV.size() + 1);
+			if (subl.find(us, 0) != 0)
+			{
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
 				if ((subl.find(brcl, 0)) != 0)
 				{
 					//vector
@@ -20298,125 +20568,6 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					}
 				}
 				else params.push_back(0);
-				subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-				if ((subl.find(brcl, 0)) != 0)
-				{
-					//vector2
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
-					{
-						if (subl.find(us, 0) != 0)
-						{
-							paramsV[1].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
-							vw.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
-						}
-						else
-						{
-							paramsV[1].push_back(0);
-							vw.push_back(0);
-							pos++;
-							brpos--;
-						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
-					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vw.push_back(stoi(ALine));
-						paramsV[1].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[1].push_back(0);
-						vw.push_back(0);
-						pos++;
-					}
-				}
-				else params.push_back(0);
-			}
-			ptr = new raw_dependencies(q, w, vq, vw);
-		}
-		else if (ALine == "rec_stmt")
-		{
-		int				w{};
-		string			q{};
-		if (inputline != ALine)
-		{
-			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			if ((subl.find(us, 0)) != 0)
-			{
-				params.push_back(1);
-				ALine = subl.substr(0, subl.find(co, 0));
-				q = ALine;
-				pos += ALine.length();
-			}
-			else
-			{
-				params.push_back(0);
-				++pos;
-			}
-			subl = inputline.substr(++pos, inputline.length() - pos);
-
-			if ((subl.find(us, 0)) != 0)
-			{
-				params.push_back(1);
-				ALine = subl.substr(0, subl.find(co, 0));
-				w = stoi(ALine);
-				pos += ALine.length() + 1;
-			}
-			else
-			{
-				params.push_back(0);
-				++++pos;
-			}
-			subl = inputline.substr(++pos, inputline.length() - pos);
-			paramsV.resize(paramsV.size() + 1);
-			if ((subl.find(brcl, 0)) != 0)
-			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
-				{
-					if (subl.find(us, 0) != 0)
-					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
-						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						vq.push_back(0);
-						pos++;
-						brpos--;
-					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
-				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
 			}
 			else params.push_back(0);
 		}
@@ -20449,53 +20600,59 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				w = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 1);
-			//vector
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				//vector
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -20562,256 +20719,287 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(0);
 				++pos;
 			}
-			subl = inputline.substr(++++pos, inputline.length() - pos);
+			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 6);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector2
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector2
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector3
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector3
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[2].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							ve.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[2].push_back(0);
+							ve.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[2].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						ve.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[2].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[2].push_back(0);
 						ve.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					ve.push_back(stoi(ALine));
-					paramsV[2].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[2].push_back(0);
-					ve.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector4
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector4
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[3].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vr.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[3].push_back(0);
+							vr.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[3].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vr.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[3].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[3].push_back(0);
 						vr.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vr.push_back(stoi(ALine));
-					paramsV[3].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[3].push_back(0);
-					vr.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector5
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector5
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[4].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vt.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[4].push_back(0);
+							vt.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[4].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vt.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[4].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[4].push_back(0);
 						vt.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vt.push_back(stoi(ALine));
-					paramsV[4].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[4].push_back(0);
-					vt.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector6
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector6
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[5].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vy.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[5].push_back(0);
+							vy.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[5].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vy.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[5].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[5].push_back(0);
 						vy.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vy.push_back(stoi(ALine));
-					paramsV[5].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[5].push_back(0);
-					vy.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 			subl = inputline.substr(++++pos, inputline.length() - pos);
@@ -21583,95 +21771,106 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				y = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
 				params.push_back(0);
-				++++pos;
+				++pos;
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 2);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector2
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector2
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}
@@ -22904,96 +23103,107 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					params.push_back(1);
 					ALine = subl.substr(0, subl.find(co, 0));
 					w = stoi(ALine);
-					pos += ALine.length() + 1;
+					pos += ALine.length();
 				}
 				else
 				{
 					params.push_back(0);
-					++++pos;
+					++pos;
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 
 				paramsV.resize(paramsV.size() + 2);
-				if ((subl.find(brcl, 0)) != 0)
+				if (subl.find(us, 0) != 0)
 				{
-					//vector
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						//vector
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vq.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								vq.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
 						if (subl.find(us, 0) != 0)
 						{
-							paramsV[0].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, brpos);
 							vq.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
+							paramsV[0].push_back(1);
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							vq.push_back(0);
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vq.push_back(stoi(ALine));
-						paramsV[0].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						vq.push_back(0);
-						pos++;
-					}
+					else params.push_back(0);
 				}
 				else params.push_back(0);
-				subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-				//vector2
-				if ((subl.find(brcl, 0)) != 0)
+				subl = inputline.substr(++++pos, inputline.length() - pos);
+				if (subl.find(us, 0) != 0)
 				{
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					//vector2
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[1].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vw.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[1].push_back(0);
+								vw.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
 						if (subl.find(us, 0) != 0)
 						{
-							paramsV[1].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, brpos);
 							vw.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
+							paramsV[1].push_back(1);
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[1].push_back(0);
 							vw.push_back(0);
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vw.push_back(stoi(ALine));
-						paramsV[1].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[1].push_back(0);
-						vw.push_back(0);
-						pos++;
-					}
+					else params.push_back(0);
 				}
 				else params.push_back(0);
 			}
@@ -23062,7 +23272,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 					params.push_back(1);
 					ALine = subl.substr(0, subl.find(co, 0));
 					w = stoi(ALine);
-					pos += ALine.length() + 1;
+					pos += ALine.length();
 				}
 				else
 				{
@@ -23071,86 +23281,97 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				}
 				subl = inputline.substr(++pos, inputline.length() - pos);
 				paramsV.resize(paramsV.size() + 2);
-				if ((subl.find(brcl, 0)) != 0)
+				if (subl.find(us, 0) != 0)
 				{
-					//vector
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						//vector
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[0].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vq.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[0].push_back(0);
+								vq.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
 						if (subl.find(us, 0) != 0)
 						{
-							paramsV[0].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, brpos);
 							vq.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
+							paramsV[0].push_back(1);
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[0].push_back(0);
 							vq.push_back(0);
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vq.push_back(stoi(ALine));
-						paramsV[0].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[0].push_back(0);
-						vq.push_back(0);
-						pos++;
-					}
+					else params.push_back(0);
 				}
 				else params.push_back(0);
-				subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-				if ((subl.find(brcl, 0)) != 0)
+				subl = inputline.substr(++++pos, inputline.length() - pos);
+				if (subl.find(us, 0) != 0)
 				{
-					//vector2
-					params.push_back(1);
-					brpos = subl.find(brcl, 0);
-					while (subl.find(co, 0) < brpos)
+					subl = inputline.substr(++pos, inputline.length() - pos);
+
+					if ((subl.find(brcl, 0)) != 0)
 					{
+						//vector2
+						params.push_back(1);
+						brpos = subl.find(brcl, 0);
+						while (subl.find(co, 0) < brpos)
+						{
+							if (subl.find(us, 0) != 0)
+							{
+								paramsV[1].push_back(1);
+								ALine = subl.substr(0, subl.find(co, 0));
+								vw.push_back(stoi(ALine));
+								pos += ALine.length();
+								brpos -= ALine.length();
+							}
+							else
+							{
+								paramsV[1].push_back(0);
+								vw.push_back(0);
+								pos++;
+								brpos--;
+							}
+							brpos--;
+							subl = inputline.substr(++pos, inputline.length() - pos);
+						}
 						if (subl.find(us, 0) != 0)
 						{
-							paramsV[1].push_back(1);
-							ALine = subl.substr(0, subl.find(co, 0));
+							ALine = subl.substr(0, brpos);
 							vw.push_back(stoi(ALine));
-							pos += ALine.length();
-							brpos -= ALine.length();
+							paramsV[1].push_back(1);
+							pos += ALine.size();
 						}
 						else
 						{
 							paramsV[1].push_back(0);
 							vw.push_back(0);
 							pos++;
-							brpos--;
 						}
-						brpos--;
-						subl = inputline.substr(++pos, inputline.length() - pos);
 					}
-					if (subl.find(us, 0) != 0)
-					{
-						ALine = subl.substr(0, brpos);
-						vw.push_back(stoi(ALine));
-						paramsV[1].push_back(1);
-						pos += ALine.size();
-					}
-					else
-					{
-						paramsV[1].push_back(0);
-						vw.push_back(0);
-						pos++;
-					}
+					else params.push_back(0);
 				}
 				else params.push_back(0);
 			}
@@ -23273,7 +23494,7 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 				params.push_back(1);
 				ALine = subl.substr(0, subl.find(co, 0));
 				w = stoi(ALine);
-				pos += ALine.length() + 1;
+				pos += ALine.length();
 			}
 			else
 			{
@@ -23282,86 +23503,97 @@ factUnderInspection makeInstanceOfSpecFact(string inputline)
 			}
 			subl = inputline.substr(++pos, inputline.length() - pos);
 			paramsV.resize(paramsV.size() + 2);
-			if ((subl.find(brcl, 0)) != 0)
+			if (subl.find(us, 0) != 0)
 			{
-				//vector
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[0].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vq.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[0].push_back(0);
+							vq.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[0].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vq.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[0].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[0].push_back(0);
 						vq.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vq.push_back(stoi(ALine));
-					paramsV[0].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[0].push_back(0);
-					vq.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
-			subl = inputline.substr(++++++pos, inputline.length() - pos);
-
-			if ((subl.find(brcl, 0)) != 0)
+			subl = inputline.substr(++++pos, inputline.length() - pos);
+			if (subl.find(us, 0) != 0)
 			{
-				//vector2
-				params.push_back(1);
-				brpos = subl.find(brcl, 0);
-				while (subl.find(co, 0) < brpos)
+				subl = inputline.substr(++pos, inputline.length() - pos);
+
+				if ((subl.find(brcl, 0)) != 0)
 				{
+					//vector2
+					params.push_back(1);
+					brpos = subl.find(brcl, 0);
+					while (subl.find(co, 0) < brpos)
+					{
+						if (subl.find(us, 0) != 0)
+						{
+							paramsV[1].push_back(1);
+							ALine = subl.substr(0, subl.find(co, 0));
+							vw.push_back(stoi(ALine));
+							pos += ALine.length();
+							brpos -= ALine.length();
+						}
+						else
+						{
+							paramsV[1].push_back(0);
+							vw.push_back(0);
+							pos++;
+							brpos--;
+						}
+						brpos--;
+						subl = inputline.substr(++pos, inputline.length() - pos);
+					}
 					if (subl.find(us, 0) != 0)
 					{
-						paramsV[1].push_back(1);
-						ALine = subl.substr(0, subl.find(co, 0));
+						ALine = subl.substr(0, brpos);
 						vw.push_back(stoi(ALine));
-						pos += ALine.length();
-						brpos -= ALine.length();
+						paramsV[1].push_back(1);
+						pos += ALine.size();
 					}
 					else
 					{
 						paramsV[1].push_back(0);
 						vw.push_back(0);
 						pos++;
-						brpos--;
 					}
-					brpos--;
-					subl = inputline.substr(++pos, inputline.length() - pos);
 				}
-				if (subl.find(us, 0) != 0)
-				{
-					ALine = subl.substr(0, brpos);
-					vw.push_back(stoi(ALine));
-					paramsV[1].push_back(1);
-					pos += ALine.size();
-				}
-				else
-				{
-					paramsV[1].push_back(0);
-					vw.push_back(0);
-					pos++;
-				}
+				else params.push_back(0);
 			}
 			else params.push_back(0);
 		}

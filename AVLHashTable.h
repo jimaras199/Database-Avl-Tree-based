@@ -1059,66 +1059,23 @@ bool check4spec(string inputline)
 /// @return the target parameter otherwise ""
 string returnpar(string inputline, int pospar)
 {
+	//cases for conditional_incomplete and reentrant_triangle are no acounted
+
 	string ALine, subl;
 	size_t pos = 0, brpos = 0, index = 0;
 	ALine = inputline.substr(0, inputline.find(pa, 0));
-	pos += ALine.length();
-	subl = inputline.substr(++pos, inputline.length() - pos); // ++pos getting after the first  parenthesis
-	if (subl.find(co, 0) == subl.npos)
+	if (ALine == "nested_cond_fact")
 	{
-		if (subl.find(br, 0) == 0)
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		ALine = subl.substr(0, subl.rfind(pacl, 0));
-		if (pospar == 1)
-			return ALine;
-		if (subl.find(us, 0) == 0)
+		//if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + ",_,_])"))
+		//{
+		//	Top_target = stoi(returnpar(HT.findandreturn("nested_cond_fact(" + PModule + ",[" + PModule + ",_,_])"), 3));
+		//	Kind = returnpar(HT.findandreturn("nested_cond_fact(" + PModule + ",[" + PModule + ",_,_])"), 4);
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos); // ++pos getting after the first  parenthesis
+		
+		++index;
+		if ((subl.find(us, 0)) != 0)
 		{
-			++pos;
-			++index;
-		}
-	}
-	do
-	{
-		if (((subl.find(br, 0)) == 0))
-		{
-			brpos = subl.find(brcl, 0);
-			subl = inputline.substr(++pos, inputline.length() - pos);
-			while (subl.find(co, 0) < brpos)
-			{
-				++index;
-				if ((subl.find(us, 0)) != 0)
-				{
-					ALine = subl.substr(0, subl.find(co, 0));
-					if (pospar == index)
-						return ALine;
-					pos += ALine.length();
-				}
-				else
-				{
-					++pos;
-					++index;
-				}
-				subl = inputline.substr(++pos, inputline.length() - pos);
-				brpos = subl.find(brcl, 0);
-			}
-			if (subl.find(us, 0) != 0)
-			{
-				++index;
-				ALine = subl.substr(0, subl.find(brcl, 0));
-				if (pospar == index)
-					return ALine;
-				pos += ALine.size();
-			}
-			else
-			{
-				++pos;
-				++index;
-			}
-			subl = inputline.substr(++pos, inputline.length() - pos);
-		}
-		else if ((subl.find(us, 0)) != 0)
-		{
-			++index;
 			ALine = subl.substr(0, subl.find(co, 0));
 			if (pospar == index)
 				return ALine;
@@ -1127,21 +1084,70 @@ string returnpar(string inputline, int pospar)
 		else
 		{
 			++pos;
-			++index;
+		}
+		subl = inputline.substr(++++pos, inputline.length() - pos); //++++pos for passing the open bracket
+		++index;
+		if ((subl.find(us, 0)) != 0)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			if (pospar == index)
+				return ALine;
+			pos += ALine.length();
+		}
+		else
+		{
+			++pos;
 		}
 		subl = inputline.substr(++pos, inputline.length() - pos);
-	} while (subl.find(co, 0) != subl.npos);
-	if (subl.find(br, 0) == 0)
+		++index;
+		if ((subl.find(us, 0)) != 0)
+		{
+			ALine = subl.substr(0, subl.find(co, 0));
+			if (pospar == index)
+				return ALine;
+			pos += ALine.length();
+		}
+		else
+		{
+			++pos;
+		}
 		subl = inputline.substr(++pos, inputline.length() - pos);
-	ALine = subl.substr(0, subl.find(brcl, 0));
-	++index;
-	if (pospar == index)
+		++index;
+		if ((subl.find(us, 0)) != 0)
+		{
+			ALine = subl.substr(0, subl.find(brcl, 0));
+			if (pospar == index)
+				return ALine;
+			pos += ALine.length();
+		}		
+	}
+	else
 	{
-		if (ALine.length() > 2)
-			if (pacl == ALine[ALine.length() - 2])
-				if (pacl == ALine[ALine.length() - 1])
-					ALine.resize(ALine.size() - 1);
-		return ALine;
+		pos += ALine.length();
+		subl = inputline.substr(++pos, inputline.length() - pos); // ++pos getting after the first  parenthesis
+	
+		do
+		{
+			++index;
+			if ((subl.find(us, 0)) != 0)
+			{
+				ALine = subl.substr(0, subl.find(co, 0));
+				if (pospar == index)
+				{
+					if (ALine.length() > 2)
+						if (pacl == ALine[ALine.length() - 2])
+							if (pacl == ALine[ALine.length() - 1])
+								ALine.resize(ALine.size() - 1);
+					return ALine;
+				}
+				pos += ALine.length();
+			}
+			else
+			{
+				++pos;
+			}
+			subl = inputline.substr(++pos, inputline.length() - pos);
+		} while (index < pospar);
 	}
 	return "";
 }

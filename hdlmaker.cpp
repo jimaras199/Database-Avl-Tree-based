@@ -556,7 +556,7 @@ void str_int(string str, int* int1)
 //D:\VSprojects\repos\ITF_lib
 int main(int argc, char* argv[])
 {
-	int ch = 5;
+	int ch = 1;
 	switch (ch)
 	{
 	case 0:
@@ -579,277 +579,77 @@ int main(int argc, char* argv[])
 	break;
 	case 1:
 	{
-		HT.consult("examples.txt");
-		HT.save("save01.txt");
-		HT.consult("save01.txt");
-		HT.save("save02.txt");
-	}
-	break;
-	case 2:
-	{
-		vector<string>			AllLines;
-		string					ALine;
-		int						Treepos{};
-		ifstream File;
+		//makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])");  //nested_cond_fact
 
-		File.open("examplesInsOfSpFact_pos_par.txt", fstream::in);
+		//returnpar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])", 3);
+		//returnpar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])", 4);
 
-		if (File.is_open())
+		string ALine;
+		vector<string> AllLines;
+		//Repair 11
+		ifstream file("RepairExperiment11factsdoublepar.txt");
+		if (file.is_open())
 		{
-			while (getline(File, ALine))
+			while (getline(file, ALine))
 			{
 				AllLines.push_back(ALine);
 			}
-			File.close();
+			file.close();
 			AllLines.shrink_to_fit();
-			for (int i = 0; i < AllLines.size(); i++)
-			{
-				makeInstanceOfSpecFact(AllLines[i]);
-				cout << AllLines[i] << endl;
-			}
+
+			//RepairExperiment11factsvectors_.txt
+			//makeInstanceOfSpecFact(AllLines[0]);  //call_stmt
+			//makeInstanceOfSpecFact(AllLines[1]);  //calls_list
+			//makeInstanceOfSpecFact(AllLines[2]);  //cessor_kind
+			//makeInstanceOfSpecFact(AllLines[3]);  //compo_stmt
+			//makeInstanceOfSpecFact(AllLines[4]);  //composites_list
+			//makeInstanceOfSpecFact(AllLines[5]);  //conditional_incomplete
+			//makeInstanceOfSpecFact(AllLines[6]);  //conditional_operations
+			//makeInstanceOfSpecFact(AllLines[7]);  //end_if
+			//makeInstanceOfSpecFact(AllLines[8]);  //linear_incomplete_node
+			//makeInstanceOfSpecFact(AllLines[9]);  //mixed_incomplete_state_lists
+			//makeInstanceOfSpecFact(AllLines[10]); //nested_cond_fact
+			//makeInstanceOfSpecFact(AllLines[11]); //op_guards
+			//makeInstanceOfSpecFact(AllLines[12]); //possible_end_if
+			//makeInstanceOfSpecFact(AllLines[13]); //predecessors
+			//makeInstanceOfSpecFact(AllLines[14]); //raw_dependencies
+			//makeInstanceOfSpecFact(AllLines[15]); //rec_stmt
+			//makeInstanceOfSpecFact(AllLines[17]); //reentrant_triangle
+			//makeInstanceOfSpecFact(AllLines[16]); //record_aggregates_list
+			//makeInstanceOfSpecFact(AllLines[18]); //state
+			//makeInstanceOfSpecFact(AllLines[19]); //var_guards
+			//makeInstanceOfSpecFact(AllLines[20]); //war_dependencies
+			//makeInstanceOfSpecFact(AllLines[21]); //waw_dependencies
+
+			//RepairExperiment11factsvectorsfull.txt
+			//cout << returnpar(AllLines[0], 3) << endl;   //call_stmt
+			//cout << returnpar(AllLines[1], 3) << endl;  //calls_list
+			//cout << returnpar(AllLines[2], 6) << endl;  //cessor_kind
+			//cout << returnpar(AllLines[3], 2) << endl;  //compo_stmt
+			//cout << returnpar(AllLines[4], 2) << endl;  //composites_list
+			//cout << returnpar(AllLines[5], 4) << endl;  //conditional_operations
+			//cout << returnpar(AllLines[6], 1) << endl;  //end_if
+			//cout << returnpar(AllLines[7], 4) << endl;  //linear_incomplete_node
+			//cout << returnpar(AllLines[8], 3) << endl;  //mixed_incomplete_state_lists
+			//cout << returnpar(AllLines[9], 1) << endl; //nested_cond_fact
+			//cout << returnpar(AllLines[10], 2) << endl; //op_guards
+			//cout << returnpar(AllLines[11], 1) << endl; //possible_end_if
+			//cout << returnpar(AllLines[12], 2) << endl; //predecessors
+			//cout << returnpar(AllLines[13], 2) << endl; //raw_dependencies
+			//cout << returnpar(AllLines[14], 2) << endl; //rec_stmt
+			//cout << returnpar(AllLines[15], 2) << endl; //record_aggregates_list
+			//cout << returnpar(AllLines[16], 6) << endl; //state
+			//cout << returnpar(AllLines[17], 2) << endl; //var_guards
+			//cout << returnpar(AllLines[18], 2) << endl; //war_dependencies
+			//cout << returnpar(AllLines[19], 2) << endl; //waw_dependencies
+
+			//RepairExperiment11factsdoublepar.txt
+			//cout << returnpar(AllLines[0], 9) << endl;  //local_object
+			//cout << returnpar(AllLines[1], 6) << endl;  //data_stmt
+			//cout << returnpar(AllLines[2], 7) << endl;  //special_dt
+
 		}
-
-	}
-	break;
-	case 3:
-	{
-		vector<string>			AllLines;
-		string					ALine;
-		int						Treepos{};
-		ifstream File;
-
-		HT.consult("examples.txt");
-
-		File.open("examplesInsOfSpFact_pos_par.txt", fstream::in);
-
-		if (File.is_open())
-		{
-			while (getline(File, ALine))
-			{
-				AllLines.push_back(ALine);
-			}
-			File.close();
-			AllLines.shrink_to_fit();
-			for (int i = 0; i < AllLines.size(); i++)
-			{
-				HT.matchedToFList(AllLines[i]);
-				//cout << AllLines[i] << endl;
-			}
-		}
-
-	}
-	break;
-	case 4:
-	{
-		//string asd = "abcdefg";
-		//if (asd.substr(0, 3) == "abc")
-		//	cout << "ok" << endl;
-
-		//cout << returnpar("local_object(\"pythagoras_test\",1,\"constant\",\"s_base\",1,\"integer\",\"standard\",32,i(0))", 9);
-
-		//string str;
-		//if (HT.concat("asd", "fgh", "asdfgh"))
-		//	cout << "same" << endl;
-		//if (HT.concat(&str, "fgh", "asdfgh"))
-		//	cout << "same 1st*" << endl;
-		//if (HT.concat("asd", &str, "asdfgh"))
-		//	cout << "same 2nd*" << endl;
-		//HT.concat("asd", "fgh", &str);
-
-		//write_value("bol(1)", 1, "asd", "asdas", "jakfg");
-
-
-		//GeneralFact* GF;
-		//GF = makeInstanceOf("state_node(\"init_arrays\",1,dataflow([1],2))");
-		//makeStringOf(makeInstanceOf("dataflow([1],2)"));
-		//state_node* SN = dynamic_cast<state_node*>(GF);
-		//cout << typeid(*SN).name();
-		//cout << returnpar(makeStringOf(GF), 1);
-
-
-		//string Upper = "ZXCV";
-		//string Lower = "zxcv";
-		//if (upper_lower(Upper, Lower))
-		//	cout << "identical" << endl;
-		//else cout << "different" << endl;
-
-		//string Upper;
-		//string Lower = "mbbjdsfksd";
-		//upper_lower(&Upper, Lower);
-		//	cout << Upper << endl;
-		//
-		//upper_lower(Upper, &Lower);
-		//	cout << Lower << endl;
 		
-	}
-	break;
-	case 5:
-	{
-		//// (data_stmt) done: makeStringOf, makeInstanceOf, makefactstar, makeInstanceOfSpecFact, matchfactsSpec, matchfactsstar
-
-		//cout <<   makeStringOf(makeInstanceOf("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(0))"))					  << endl;
-		//cout << 		makeStringOf(makeInstanceOf("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",sym(\"s\"))"))			  << endl;
-		//cout << makeStringOf(makeInstanceOf("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))"))				  << endl;
-		//cout << makeStringOf(makeInstanceOf("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(\"std_logic\"))")) << endl;
-		//
-		//  makefactstar("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(0))");
-		//		  makefactstar("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",sym(\"s\"))");
-		//makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))");
-		//makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(\"std_logic\"))");
-		//  makefactstar("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(*))");
-		//		  makefactstar("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",sym(*))");
-		//makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(*))");
-		//makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(*))");
-		//  makefactstar("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",*)");
-		//		  makefactstar("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",*)");
-		//makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",*)");
-		//makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",*)");
-		//
-		//  makeInstanceOfSpecFact("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(0))");
-		//		makeInstanceOfSpecFact("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",sym(\"s\"))");
-		//makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))");
-		//makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(\"std_logic\"))");
-		//  makeInstanceOfSpecFact("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(_))");
-		//		makeInstanceOfSpecFact("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",sym(_))");
-		//makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(_))");
-		//makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(_))");
-		//  makeInstanceOfSpecFact("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",_)");
-		//		makeInstanceOfSpecFact("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",_)");
-		//makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",_)");
-		//makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",_)");
-		//
-		//factUnderInspection FUI{};
-		//FUI = makeInstanceOfSpecFact("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(_))");
-		//cout << matchfactsSpec(makeInstanceOf("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(0))"), &FUI) << endl;
-		//FUI = makeInstanceOfSpecFact("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",_)");
-		//cout << matchfactsSpec(makeInstanceOf("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",sym(\"s\"))"), &FUI) << endl;
-		//FUI = makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(0))");
-		//cout << matchfactsSpec(makeInstanceOf("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))"), &FUI) << endl;
-		//FUI = makeInstanceOfSpecFact("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))");
-		//cout << matchfactsSpec(makeInstanceOf("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(\"std_logic\"))"), &FUI) << endl;
-		//
-		//factstar FUI{};
-		//FUI = makefactstar("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(*))");
-		//cout << matchfactsstar(makeInstanceOf("data_stmt(\"pythagoras_test\",\"s_base\",1,2,\"const\",i(0))"), &FUI) << endl;
-		//FUI = makefactstar("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",*)");
-		//cout << matchfactsstar(makeInstanceOf("data_stmt(\"init_arrays\",\"s\",1,12,\"par_out\",sym(\"s\"))"), &FUI) << endl;
-		//FUI = makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(0))");
-		//cout << matchfactsstar(makeInstanceOf("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))"), &FUI) << endl;
-		//FUI = makefactstar("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bol(1))");
-		//cout << matchfactsstar(makeInstanceOf("data_stmt(\"int_to_bit_vector\",\"const1\",8,1,\"const\",bit_wire(\"std_logic\"))"), &FUI) << endl;
-
-		//// (special_dt) done: makeStringOf, makeInstanceOf, makefactstar, makeInstanceOfSpecFact, matchfactsSpec, matchfactsstar
-
-		//cout <<		 makeStringOf(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))")) << endl;
-		//cout << 			makeStringOf(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))")) << endl;
-		//cout <<		 makeStringOf(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))")) << endl;
-		//cout << makeStringOf(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))")) << endl;
-		//
-		//makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))");
-		//makefactstar("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))");
-		//makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))");
-		//makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))");
-		//
-		//makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(*))");
-		//makefactstar("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(*))");
-		//makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(*))");
-		//makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(*))");
-		//
-		//makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",*)");
-		//makefactstar("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",*)");
-		//makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",*)");
-		//makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",*)");
-		//
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))");
-		//
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(_))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(_))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(_))");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(_))");
-		//
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",_)");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",_)");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",_)");
-		//makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",_)");
-		//
-		//factUnderInspection FUI{};
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(_))");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))"), & FUI);
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",_)");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))"), & FUI);
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(0))");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))"), & FUI);
-		//FUI = makeInstanceOfSpecFact("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bol(1))");
-		//cout << matchfactsSpec(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))"), &FUI);
-		//
-		//factstar FUI{};
-		//FUI = makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(*))");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",i(0))"), &FUI);
-		//FUI = makefactstar("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",*)");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-6,\"temp_addr1\",32,\"std_logic\",\"var\",sym(\"node\"))"), &FUI);
-		//FUI = makefactstar("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(0))");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-5,\"porta_tg_S_base\",32,\"std_logic\",\"const\",bol(1))"), &FUI);
-		//FUI = makefactstar("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bol(1))");
-		//cout << matchfactsstar(makeInstanceOf("special_dt(\"init_arrays\",-4,\"porta_tg_mema_wr_en\",1,\"std_logic\",\"par_out\",bit_wire(\"std_logic\"))"), &FUI);
-
-		//// (nested_cond_fact) done: makeStringOf, makeInstanceOf, makefactstar, makeInstanceOfSpecFact, matchfactsSpec, matchfactsstar
-
-		//cout << makeStringOf(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])")) << endl;
-		//cout << makeStringOf(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",9,\"bzxc\"])")) << endl;
-		//
-		//makefactstar("nested_cond_fact(*)");
-		//makefactstar("nested_cond_fact(\"garlic\",*)");
-		//makefactstar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])");
-		//makefactstar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
-		//
-		//makeInstanceOfSpecFact("nested_cond_fact(_,[])");
-		//makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[])");
-		//makeInstanceOfSpecFact("nested_cond_fact(_,[\"asd\",8,\"zxc\"])");
-		//makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
-		//
-		//factUnderInspection FUI{};
-		//FUI = makeInstanceOfSpecFact("nested_cond_fact(_,[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
-		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
-		//FUI = makeInstanceOfSpecFact("nested_cond_fact(\"qe\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])");
-		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
-		//FUI = makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",128,\"bzxc\"])");
-		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
-		//FUI = makeInstanceOfSpecFact("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\"])");
-		//cout << matchfactsSpec(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), & FUI);
-		//
-		//factstar FUI{};
-		//FUI = makefactstar("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzdaxc\"])");
-		//cout << matchfactsstar(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), &FUI);
-		//FUI = makefactstar("nested_cond_fact(\"garlxic\",*)");
-		//cout << matchfactsstar(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), &FUI);
-		//FUI = makefactstar("nested_cond_fact(*)");
-		//cout << matchfactsstar(makeInstanceOf("nested_cond_fact(\"garlic\",[\"asd\",8,\"zxc\",\"basd\",8,\"bzxc\"])"), &FUI);
-
-		//// (ptr_file_has_been_on) done: makeStringOf, makeInstanceOf, makefactstar, makeInstanceOfSpecFact, matchfactsSpec, matchfactsstar
-
-		//cout <<   makeStringOf(makeInstanceOf("ptr_file_has_been_on(1)"))					  << endl;
-		//
-		//makefactstar("ptr_file_has_been_on(*)");
-		//makefactstar("ptr_file_has_been_on(1)");
-		//
-		//makeInstanceOfSpecFact("ptr_file_has_been_on(1)");
-		//makeInstanceOfSpecFact("ptr_file_has_been_on(_)");
-		//
-		//factUnderInspection FUI{};
-		//FUI = makeInstanceOfSpecFact("ptr_file_has_been_on(1)");
-		//cout << matchfactsSpec(makeInstanceOf("ptr_file_has_been_on(2)"), &FUI) << endl;
-		//FUI = makeInstanceOfSpecFact("ptr_file_has_been_on(_)");
-		//cout << matchfactsSpec(makeInstanceOf("ptr_file_has_been_on(1)"), &FUI) << endl;
-		//
-		//factstar FUI{};
-		//FUI = makefactstar("ptr_file_has_been_on(1)");
-		//cout << matchfactsstar(makeInstanceOf("ptr_file_has_been_on(2)"), &FUI) << endl;
-		//FUI = makefactstar("ptr_file_has_been_on(*)");
-		//cout << matchfactsstar(makeInstanceOf("ptr_file_has_been_on(1)"), &FUI) << endl;
-
 	}
 	break;
 	default:
