@@ -556,7 +556,7 @@ void str_int(string str, int* int1)
 //D:\VSprojects\repos\ITF_lib
 int main(int argc, char* argv[])
 {
-	int ch = 1;
+	int ch = 0;
 	switch (ch)
 	{
 	case 0:
@@ -742,6 +742,7 @@ void itf_found_message()
 		File.close();
 	}
 }
+
 void report_global_constraint()
 {
 	string Global_constraint;
@@ -758,7 +759,8 @@ void report_global_constraint()
 			File.close();
 		}
 	}
-	else return;
+	else 
+		return;
 }
 
 void assert_mp_conditionally(string Massively_parallel)
@@ -773,10 +775,10 @@ void assert_mp_conditionally(string Massively_parallel)
 void assert_hdl_conditionally(string Hdl)
 {
 	if (Hdl == "") HT.assertz("hdl_style(\"vhdl\")");
-	else if (Hdl != "" && Hdl != "verilog") HT.assertz("hdl_style(\"vhdl\")");
 	else if (Hdl == "vhdl") HT.assertz("hdl_style(\"vhdl\")");
 	else if (Hdl == "verilog") HT.assertz("hdl_style(\"verilog\")");
 	else if (Hdl == "c") HT.assertz("hdl_style(\"c\")");
+	else if (Hdl != "" && Hdl != "verilog") HT.assertz("hdl_style(\"vhdl\")");
 }
 
 /* (un)Sets the debug_mode(2) especially for the HDLMAKER */
@@ -832,11 +834,6 @@ void assert_global_constraint_conditionally0(string Command_line_args)
 				assert_mp_conditionally("");
 			}
 		}
-		else if (Hdl != "debug" && Hdl != "cac")
-		{
-			assert_hdl_conditionally(Hdl);
-			assert_global_constraint_conditionally1(Rest_of_command_line);
-		}
 		else if (Hdl == "debug")
 		{
 			set_debug("debug");
@@ -846,7 +843,7 @@ void assert_global_constraint_conditionally0(string Command_line_args)
 				assert_hdl_conditionally(Hdl1);
 				assert_global_constraint_conditionally1(Rest_of_command_line1);
 			}
-			if (Hdl1 == "debug")
+			else if (Hdl1 == "debug")
 			{
 				set_debug("debug");
 				if (Rest_of_command_line1 != "")
@@ -872,6 +869,11 @@ void assert_global_constraint_conditionally0(string Command_line_args)
 			set_cac("cac");
 			assert_hdl_conditionally("c");
 			HT.assertz("massively_parallel_style(1)");
+		}
+		else if (Hdl != "debug" && Hdl != "cac")
+		{
+			assert_hdl_conditionally(Hdl);
+			assert_global_constraint_conditionally1(Rest_of_command_line);
 		}
 	}
 }
@@ -908,7 +910,7 @@ void assert_global_constraint_conditionally2(string Command_line_args)
 	else
 	{
 		fronttoken(Command_line_args, &SyncAsyncReset, &Rest_cl_args);
-		if (!SyncAsyncReset.empty() && SyncAsyncReset.empty())
+		if (!SyncAsyncReset.empty() && Rest_cl_args.empty())
 			HT.assertz("resetstyle(" + SyncAsyncReset + ")");
 		else if (!SyncAsyncReset.empty() && !Rest_cl_args.empty())
 		{
@@ -1011,23 +1013,17 @@ void build_loop_cond(string name, int Entry)
 		Iterations, Assign_stmt, Start_val_data, Header_start, Condition_operator, Init_variable, Decrement_variable, Decrement_instruction,
 		Decrement_step, While_loop_entry, For_loop_entry;
 	string Kind;
-	if (HT.findfact("prog_stmt(" + name + "," + to_string(Entry) + ",_,_,_,_,_,_)"))
-	{
-		op = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,_,_,_,_,_)"), 4));
-		if (op != 110)
-			return;
-	}
 	if (HT.findfact("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"))
 	{
 		Target_statement = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
 		If_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
 		Condition_statement = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 7));
 		One_after_110 = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,110,_,_,_,_)"), 8));
+		if (Target_statement > Entry)
+			return;
 		if (!HT.findfact("prog_stmt(" + name + ",_,_,106,_,_," + to_string(One_after_110) + ",_)"))
 			return;
-		else if (Target_statement > Entry)
-			return;
-		else if (HT.findfact("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"))
+		if (HT.findfact("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"))
 		{
 			Condition = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_,_," + to_string(One_after_110) + ",_)"), 6));
 			Body_first = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(If_entry) + ",_,106,_," + to_string(Condition) + "," + to_string(One_after_110) + ",_)"), 8));
@@ -1073,24 +1069,7 @@ void build_loop_cond(string name, int Entry)
 					if (Condition_statement <= If_entry - 1)
 					{
 						Increment_instruction = Entry - 1;
-						if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"))
-						{
-							Inc_op = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"), 4));
-							Condition_statement1 = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"), 8));
-							if (Inc_op != 104)
-							{
-								if (Condition_statement1 <= Entry)
-								{
-									if (Condition_statement1 > If_entry)
-									{
-										Body_last = Increment_instruction;
-										End_of_loop = Entry;
-										add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
-									}
-								}
-							}
-						}
-						else if (HT.findfact("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"))
+						if (HT.findfact("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"))
 						{
 							Loop_comparison = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 2));
 							For_loop_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + ",_,_,_,_,_," + to_string(Condition) + "," + to_string(Body_first) + ")"), 5));
@@ -1108,6 +1087,136 @@ void build_loop_cond(string name, int Entry)
 									Body_last = Increment_instruction;
 									End_of_loop = Entry;
 									add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &While_loop_entry);
+								}
+							}
+						}
+						else if (HT.findfact("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"))
+						{
+							Inc_op = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"), 4));
+							Condition_statement1 = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Increment_instruction) + ",*)"), 8));
+							if (Inc_op != 104)
+							{
+								if (Condition_statement1 <= Entry)
+								{
+									if (Condition_statement1 > If_entry)
+									{
+										Body_last = Increment_instruction;
+										End_of_loop = Entry;
+										add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+									}
+								}
+							}
+						}
+					}
+					else if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"))
+					{
+						Decrement_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 5));
+						End_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 6));
+						Initiation_statement = Condition_statement - 1;
+						if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"))
+						{
+							Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
+							Init_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
+							Initiation_statement_b = Initiation_statement - 1;
+							if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"))
+							{
+								Init_constant_b = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"), 6));
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",  _,\"const\",i(_))"))
+								{
+									string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(_))"), 6);
+									string be = tmp.substr(0, tmp.find(pa, 0));
+									string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
+									af.resize(af.size() - 1);
+									Up_limit = stoi(af);
+									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",  _,\"const\",i(_))"))
+									{
+										string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",_,\"const\",i(_))"), 6);
+										string be = tmp.substr(0, tmp.find(pa, 0));
+										string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
+										af.resize(af.size() - 1);
+										Low_limit = stoi(af);
+										Decrement_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
+										{
+											Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
+											Iterations = (Up_limit - Low_limit + 1) / Decrement_step;
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
+											{
+												Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+												Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
+												Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
+											}
+										}
+									}
+								}
+							}
+							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_variable) + ",_,\"var\",sym(\"node\"))"))
+							{
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(_))"))
+								{
+									string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(_))"), 6);
+									string be = tmp.substr(0, tmp.find(pa, 0));
+									string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
+									af.resize(af.size() - 1);
+									Low_limit = stoi(af);
+									if (trace_back(name, Initiation_statement, Init_variable, &Up_limit))
+									{
+										Decrement_instruction = Entry - 1;
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
+										{
+											Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
+											Iterations = (Up_limit - Low_limit + 1);
+											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
+											{
+												Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
+												End_of_loop = Entry;
+												Header_start = Assign_stmt;
+												Body_last = Entry - 1;
+												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+												Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
+												Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
+											}
+										}
+									}
+								}
+							}
+							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(_))"))
+							{
+								string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(_))"), 6);
+								string be = tmp.substr(0, tmp.find(pa, 0));
+								string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
+								af.resize(af.size() - 1);
+								Up_limit = stoi(af);
+								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(_))"))
+								{
+									string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(_))"), 6);
+									string be = tmp.substr(0, tmp.find(pa, 0));
+									string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
+									af.resize(af.size() - 1);
+									Low_limit = stoi(af);
+									Decrement_instruction = Entry - 1;
+									if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
+									{
+										Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
+										Iterations = (Up_limit - Low_limit + 1) / Decrement_step;
+										trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
+										if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
+										{
+											Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
+											End_of_loop = Entry;
+											Header_start = Assign_stmt;
+											Body_last = Entry - 1;
+											add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
+											Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
+											Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
+										}
+									}
 								}
 							}
 						}
@@ -1160,7 +1269,7 @@ void build_loop_cond(string name, int Entry)
 									}
 								}
 							}
-							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"var\",\"sym(\"node\")\")"))
+							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"var\",sym(\"node\"))"))
 							{
 								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(_))"))
 								{
@@ -1325,122 +1434,15 @@ void build_loop_cond(string name, int Entry)
 							}
 						}
 					}
-					else if (HT.findfact("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"))
-					{
-						Decrement_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 5));
-						End_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Condition_statement) + ",_,16,_,_," + to_string(Condition) + "," + to_string(If_entry) + ")"), 6));
-						Initiation_statement = Condition_statement - 1;
-						if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"))
-						{
-							Init_constant = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
-							Init_variable = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement) + ",_,102,0,_," + to_string(Decrement_variable) + "," + to_string(Condition_statement) + ")"), 6));
-							Initiation_statement_b = Initiation_statement - 1;
-							if (HT.findfact("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"))
-							{
-								Init_constant_b = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Initiation_statement_b) + ",_,102,0,_," + to_string(End_val_data) + "," + to_string(Initiation_statement) + ")"), 6));
-								if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",  _,\"const\",i(_))"))
-								{
-									string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(_))"), 6);
-									string be = tmp.substr(0, tmp.find(pa, 0));
-									string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
-									af.resize(af.size() - 1);
-									Up_limit = stoi(af);
-									if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",  _,\"const\",i(_))"))
-									{
-										string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant_b) + ",_,\"const\",i(_))"), 6);
-										string be = tmp.substr(0, tmp.find(pa, 0));
-										string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
-										af.resize(af.size() - 1);
-										Low_limit = stoi(af);
-										Decrement_instruction = Entry - 1;
-										if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
-										{
-											Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
-											Iterations = (Up_limit - Low_limit + 1) / Decrement_step;
-											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
-											{
-												Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
-												End_of_loop = Entry;
-												Header_start = Assign_stmt;
-												Body_last = Entry - 1;
-												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-												Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
-												Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
-											}
-										}
-									}
-								}
-							}
-							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_variable) + ",_,\"var\",\"sym(\"node\")\")"))
-							{
-								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(_))"))
-								{
-									string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",2,\"const\",i(_))"), 6);
-									string be = tmp.substr(0, tmp.find(pa, 0));
-									string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
-									af.resize(af.size() - 1);
-									Low_limit = stoi(af);
-									if (trace_back(name, Initiation_statement, Init_variable, &Up_limit))
-									{
-										Decrement_instruction = Entry - 1;
-										if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
-										{
-											Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
-											Iterations = (Up_limit - Low_limit + 1);
-											trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-											if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
-											{
-												Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
-												End_of_loop = Entry;
-												Header_start = Assign_stmt;
-												Body_last = Entry - 1;
-												add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-												Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
-												Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
-											}
-										}
-									}
-								}
-							}
-							else if (HT.findfact("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(_))"))
-							{
-								string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(Init_constant) + ",_,\"const\",i(_))"), 6);
-								string be = tmp.substr(0, tmp.find(pa, 0));
-								string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
-								af.resize(af.size() - 1);
-								Up_limit = stoi(af);
-								if (HT.findfact("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(_))"))
-								{
-									string tmp = returnpar(HT.findandreturn("data_stmt(" + name + ",_," + to_string(End_val_data) + ",_,\"const\",i(_))"), 6);
-									string be = tmp.substr(0, tmp.find(pa, 0));
-									string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
-									af.resize(af.size() - 1);
-									Low_limit = stoi(af);
-									Decrement_instruction = Entry - 1;
-									if (HT.findfact("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"))
-									{
-										Decrement_step = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Decrement_instruction) + ",_,105," + to_string(Decrement_variable) + ",_," + to_string(Decrement_variable) + "," + to_string(Entry) + ")"), 6));
-										Iterations = (Up_limit - Low_limit + 1) / Decrement_step;
-										trace_previous_assign_op(name, Condition_statement, &Assign_stmt);
-										if (HT.findfact("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"))
-										{
-											Start_val_data = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Assign_stmt) + ",_,102,_,_," + to_string(Decrement_variable) + ",_)"), 6));
-											End_of_loop = Entry;
-											Header_start = Assign_stmt;
-											Body_last = Entry - 1;
-											add_for_loop(name, If_entry, Condition_statement, End_of_loop, Header_start,
-											Decrement_instruction, Decrement_variable, Start_val_data, End_val_data,
-											Decrement_step, Body_first, Body_last, Iterations, &For_loop_entry);
-										}
-									}
-								}
-							}
-						}
-					}
 				}
 			}
 		}
+	}
+	else if (HT.findfact("prog_stmt(" + name + "," + to_string(Entry) + ",_,_,_,_,_,_)"))
+	{
+		op = stoi(returnpar(HT.findandreturn("prog_stmt(" + name + "," + to_string(Entry) + ",_,_,_,_,_,_)"), 4));
+		if (op != 110)
+			return;
 	}
 }
 
@@ -1495,7 +1497,7 @@ bool trace_back(string Module, int Previous, int Variable, int* Result)
 		*Result = 0;
 		return true;
 	}
-	else if (HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",_,_,_,_," + to_string(Variable) + ",_)"))
+	if (HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",_,_,_,_," + to_string(Variable) + ",_)"))
 	{
 		int Operator, Left, Right;
 		Operator = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Previous) + ",_,_,_,_," + to_string(Variable) + ",_)"), 4));
@@ -1507,7 +1509,7 @@ bool trace_back(string Module, int Previous, int Variable, int* Result)
 			return true;
 		}
 	}
-	else if (HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",*)"))
+	if (HT.findfact("prog_stmt(" + Module + "," + to_string(Previous) + ",*)"))
 	{
 		int Target, Next_previous;
 		Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Previous) + ",*)"), 7));
@@ -1796,7 +1798,25 @@ void add_local_conditionally(string Module_name, vector<local_object> In_local_l
 		if (HT.findfact("hierarchy_part(1,_,0,_,_,_,_)"))
 		{
 			Top_package_module = returnpar(HT.findandreturn("hierarchy_part(1,_,0,_,_,_,_)"), 2);
-			if (Top_package_module != Module_name)
+			if (HT.findfact("local_object(" + Top_package_module + ",_,_," + Object_name + ",_,_,_,_,_)"))
+			{
+				if (Top_package_module != Module_name)
+				{
+					vector<local_object> Next_local_list;
+					Next_local_list = In_local_list;
+					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
+				}
+				else if (Top_package_module == Module_name)
+				{
+					vector<local_object> Next_local_list{};
+					local_object Local;
+					local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + "," + Kind + "," + Object_name + "," + to_string(OrderNo) + "," + Ltype + "," + Tkind + "," + to_string(Osize) + "," + Ovalue + ")")));
+					Local = *ptr;
+					append_local(In_local_list, Local, &Next_local_list);
+					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
+				}
+			}
+			else if (Top_package_module != Module_name)
 			{
 				if (!HT.findfact("local_object(" + Top_package_module + ",_,_," + Object_name + ",_,_,_,_,_)"))
 				{
@@ -1806,25 +1826,6 @@ void add_local_conditionally(string Module_name, vector<local_object> In_local_l
 					Local1 = *ptr;
 					append_local(In_local_list, Local1, &Next_local_list);
 					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
-				}
-			}
-			else if (HT.findfact("local_object(" + Top_package_module + ",_,_," + Object_name + ",_,_,_,_,_)"))
-			{
-				if (Top_package_module != Module_name)
-				{
-					vector<local_object> Next_local_list;
-					Next_local_list = In_local_list;
-					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
-				}
-				else if (Top_package_module != Module_name)
-				{
-					vector<local_object> Next_local_list{};
-					local_object Local;
-					local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(" + Module_name + "," + to_string(In_local_entry) + "," + Kind + "," + Object_name + "," + to_string(OrderNo) + "," + Ltype + "," + Tkind + "," + to_string(Osize) + "," + Ovalue + ")")));
-					Local = *ptr;
-					append_local(In_local_list, Local, &Next_local_list);
-					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
-					return;
 				}
 			}
 		}
@@ -2048,12 +2049,6 @@ string print_global_constant(int DEntry, string str)
 				ss << type_value(Package_name, DEntry, "vhdl");
 				ss << ";" << endl;
 			}
-			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,_,_)"))
-			{
-				Kind = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,_,_)"), 5);
-				if (Kind != "const")
-					return"";
-			}
 			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"))
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
@@ -2065,6 +2060,12 @@ string print_global_constant(int DEntry, string str)
 					ss << type_value(Package_name, DEntry, "vhdl");
 					ss << ", " << Type_size << "))" << ";" << endl;
 				}
+			}
+			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,_,_)"))
+			{
+				Kind = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,_,_)"), 5);
+				if (Kind != "const")
+					return"";
 			}
 		}
 	}
@@ -2081,12 +2082,6 @@ string print_global_constant(int DEntry, string str)
 				ss << type_value(Package_name, DEntry, "verilog");
 				ss << ";" << endl;
 			}
-			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"))
-			{
-				Kind = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"), 5);
-				if (Kind != "const")
-					ss << "";
-			}
 			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"))
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
@@ -2098,6 +2093,12 @@ string print_global_constant(int DEntry, string str)
 					ss << ";" << endl;
 				}
 			}
+			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"))
+			{
+				Kind = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,_,_)"), 5);
+				if (Kind != "const")
+					ss << "";
+			}
 		}
 	}
 	else if (str == "c")
@@ -2105,7 +2106,14 @@ string print_global_constant(int DEntry, string str)
 		if (HT.findfact("hierarchy_part(1,_,0,\"libpart\",_,_,_)"))
 		{
 			Package_name = returnpar(HT.findandreturn("hierarchy_part(1,_,0,\"libpart\",_,_,_)"), 2);
-			if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"))
+			if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"))
+			{
+				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"), 2);
+				ss << "const bool " << Const_name << " = ";
+				ss << type_value(Package_name, DEntry, "verilog");
+				ss << ";" << endl;
+			}
+			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"))
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
 				Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",_,\"const\",_)"), 4));
@@ -2127,13 +2135,6 @@ string print_global_constant(int DEntry, string str)
 				if (Kind != "const")
 					ss << "";
 			}
-			else if (HT.findfact("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"))
-			{
-				Const_name = returnpar(HT.findandreturn("data_stmt(" + Package_name + ",_," + to_string(DEntry) + ",1,\"const\",_)"), 2);
-				ss << "const bool " << Const_name << " = ";
-				ss << type_value(Package_name, DEntry, "verilog");
-				ss << ";" << endl;
-			}
 		}
 	}
 	return ss.str();
@@ -2154,7 +2155,7 @@ bool parent_type_is_integer(int Type, int* Par_Size)
 			}
 		}
 	}
-	else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+	if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
 	{
 		Parent = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 5));
 		if (Type != 2 && Parent != 0)
@@ -2175,9 +2176,9 @@ string type_value(string PModule, int Data_entry, string str)
 	{
 		if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,_,_)"))
 		{
-			ss << "";
+			return ss.str();
 		}
-		else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
+		if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"))
 		{
 			string Var_name;
 			Var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Data_entry) + ",_,\"var\",_)"), 2);
@@ -2330,32 +2331,18 @@ string print_array_type(int Entry, string str)
 	{
 		return ss.str();
 	}
-	else if (HT.findfact("hdl_style(\"vhdl\")"))
+	if (HT.findfact("hdl_style(\"vhdl\")"))
 	{
 		if (str == "vhdl")
 		{
-			if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
-			{
-				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 2);
-				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 8));
-				First_comp_type_entry = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 9));
-				ss << "   TYPE " << Type_name << " IS RECORD " << endl;
-				if (First_comp_type_entry > 1)
-				{
-					print_records_fields_declarations(First_comp_type_entry, Dimmension, First_comp_type_entry, "vhdl");
-					ss << "   END RECORD; " << endl << endl;
-
-				}
-			}
-			else if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",0,\"vectorarray_t\",_,_,_)"))
+			if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",0,\"vectorarray_t\",_,_,_)"))
 			{
 				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",0,\"vectorarray_t\",_,_,_)"), 2);
 				First_index = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",0,\"vectorarray_t\",_,_,_)"), 7));
 				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",0,\"vectorarray_t\",_,_,_)"), 8));
 				Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
 				Last_index = First_index + Dimmension - 1;
-				{
-					if (Comp_type > 1)
+				if (Comp_type > 1)
 					{
 						if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
 						{
@@ -2375,7 +2362,6 @@ string print_array_type(int Entry, string str)
 							}
 						}
 					}
-				}
 			}
 			else if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,2)"))
 			{
@@ -2404,6 +2390,19 @@ string print_array_type(int Entry, string str)
 					ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF boolean;" << endl << endl;
 				}
 			}
+			else if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
+			{
+				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 2);
+				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 8));
+				First_comp_type_entry = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 9));
+				ss << "   TYPE " << Type_name << " IS RECORD " << endl;
+				if (First_comp_type_entry > 1)
+				{
+					print_records_fields_declarations(First_comp_type_entry, Dimmension, First_comp_type_entry, "vhdl");
+					ss << "   END RECORD; " << endl << endl;
+
+				}
+			}
 			else if (HT.findfact("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"))
 			{
 				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 2);
@@ -2413,23 +2412,25 @@ string print_array_type(int Entry, string str)
 				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 8));
 				Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 9));
 				Last_index = First_index + Dimmension - 1;
-				if (Comp_type > 1)
+				if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"))
 				{
-					if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"))
+					Array_name = returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 2);
+					Array_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 3));
+					Comp_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 6));
+					Comp_dim = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 8));
+					if (Comp_kind != "single_t")
 					{
-						Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"), 3));
-						if (Comp_size > 1)
+						if (HT.findfact("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
 						{
-							Comp_msb = Comp_size - 1;
-							ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(" << Comp_msb << " DOWNTO 0);" << endl << endl;
-						}
-					}
-					else if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
-					{
-						Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",*)"), 3));
-						if (Comp_size == 1)
-						{
-							ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic;" << endl << endl;
+							Parent_Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 2));
+							if (Comp_dim > 0)
+							{
+								if (Comp_size > 1)
+								{
+									if (HT.concat(".", &Just_field_type_name, Type_name))
+										ss << "   TYPE " << Parent_Type_name << "_" << Just_field_type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(31 DOWNTO 0) ;" << endl << endl;
+								}
+							}
 						}
 					}
 				}
@@ -2460,29 +2461,26 @@ string print_array_type(int Entry, string str)
 						}
 					}
 				}
-				else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"))
+				else if (Comp_type > 1)
 				{
-					Array_name = returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 2);
-					Array_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 3));
-					Comp_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 6));
-					Comp_dim = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,_,_,_,2)"), 8));
-					if (Comp_kind != "single_t")
+					if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"))
 					{
-						if (HT.findfact("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
+						Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"), 3));
+						if (Comp_size > 1)
 						{
-							Parent_Type_name = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,\"record_t\",_,_,_)"), 2));
-							if (Comp_dim > 0)
-							{
-								if (Comp_size > 1)
-								{
-									if (HT.concat(".", &Just_field_type_name, Type_name))
-										ss << "   TYPE " << Parent_Type_name << "_" << Just_field_type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(31 DOWNTO 0) ;" << endl << endl;
-								}
-							}
+							Comp_msb = Comp_size - 1;
+							ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic_vector(" << Comp_msb << " DOWNTO 0);" << endl << endl;
+						}
+					}
+					else if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
+					{
+						Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Entry) + ",*)"), 3));
+						if (Comp_size == 1)
+						{
+							ss << "   TYPE " << Type_name << " IS ARRAY (" << First_index << " TO " << Last_index << ") OF std_logic;" << endl << endl;
 						}
 					}
 				}
-
 			}
 		}
 	}
@@ -2766,17 +2764,17 @@ string print_custom_function_header(int int1, string PModule, string VarSignal, 
 			{
 				if (custom_block(PModule))
 				{
-					if (HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,_,sym(" + PModule + "))"))
-					{
-						ss << endl << "   PROCEDURE " << PModule << "(" << endl;
-						ss << write_cus_function_header_params(PModule, 1, "variable", "vhdl");
-						ss << "                  ) " << EndStr << endl << endl;
-					}
-					else if (!HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",sym(" + PModule + "))"))
+					if (!HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",sym(" + PModule + "))"))
 					{
 						ss << endl << "   PROCEDURE " << PModule << "(" << endl;
 						ss << write_cus_function_header_params(PModule, 1, VarSignal, "vhdl");
 						ss << "                 ) " << EndStr << endl << endl;
+					}
+					else if (HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,_,sym(" + PModule + "))"))
+					{
+						ss << endl << "   PROCEDURE " << PModule << "(" << endl;
+						ss << write_cus_function_header_params(PModule, 1, "variable", "vhdl");
+						ss << "                  ) " << EndStr << endl << endl;
 					}
 					*int2 = 0;
 				}
@@ -2787,8 +2785,8 @@ string print_custom_function_header(int int1, string PModule, string VarSignal, 
 	{
 		if (!custom_block(PModule))
 		{
-			return ss.str();
 			*int2 = 0;
+			return ss.str();
 		}
 		else if (HT.findfact("hierarchy_part(_," + PModule + ",_,\"libpart\",_,_,_)"))
 		{
@@ -2876,25 +2874,19 @@ string write_cus_function_header_params(string PModule, int Entry, string VarSig
 	int Type, Next_entry;
 	if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"))
 	{
-		InOutType = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"), 5);
-		if (InOutType != "par_in" && InOutType != "par_inout" && InOutType != "par_out")
-			return ss.str();
-	}
-	if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"))
-		return ss.str();
-
-	if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"))
-	{
 		Data_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"), 2);
 		Type = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"), 4));
 		InOutType = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"), 5);
+		if (InOutType != "par_in" && InOutType != "par_inout" && InOutType != "par_out")
+			return ss.str();
 		ss << write_cus_function_header_param(Entry, PModule, Data_name, Type, InOutType, "variable", HDL);
 		language_separator(HDL, &Separator);
 		ss << write_separator_cond(Separator, PModule, Entry, HDL, Type);
 		Next_entry = Entry + 1;
 		ss << write_cus_function_header_params(PModule, Next_entry, VarSignal, HDL);
 	}
-
+	else if (!HT.findfact("data_stmt(" + PModule + ",_," + to_string(Entry) + ",_,_,_)"))
+		return ss.str();
 	return ss.str();
 }
 
@@ -2999,27 +2991,7 @@ string write_cus_function_header_param(int Entry, string PModule, string Data_na
 									ss << " [" << LSB << ":" << MSB << "] ";
 									ss << PModule << "_function ";
 								}
-							}
-						}
-					}
-				}
-			}
-			else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
-			{
-				Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
-				Kind = returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 6);
-				Dimensions = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 8));
-				if (Dimensions > 1)
-				{
-					if (Kind != "record_t")
-					{
-						if (Size > 1)
-						{
-							find_child_type(Type, &Child_type);
-							if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
-							{
-								Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",*)"), 3));
-								if (Child_size > 1)
+								else if (Child_size > 1)
 								{
 									Child_upper = Child_size - 1;
 									ss << "                         ";
@@ -3034,73 +3006,71 @@ string write_cus_function_header_param(int Entry, string PModule, string Data_na
 				}
 			}
 		}
-		else
+		else if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
 		{
-			if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+			Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+			Kind = returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 6);
+			Dimensions = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 8));
+			if (Size == 1)
 			{
-				Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
-				Kind = returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 6);
-				Dimensions = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 8));
-				if (Size == 1)
+				if (PModule != Data_name)
 				{
-					if (PModule != Data_name)
-					{
-						ss << "                         ";
-						ss << write_inout_type(InOutType, "verilog");
-						ss << "  ", Data_name;
-					}
+					ss << "                         ";
+					ss << write_inout_type(InOutType, "verilog");
+					ss << "  ", Data_name;
 				}
-				if (Dimensions == 0)
+			}
+			else if (Dimensions == 0)
+			{
+				if (Size > 1)
+				{
+					MSB = Size - 1;
+					ss << "                         ";
+					ss << write_inout_type(InOutType, "verilog");
+					ss << " [" << MSB << ":0] " << Data_name;
+				}
+			}
+			else if (Dimensions > 1)
+			{
+				if (Kind != "record_t")
 				{
 					if (Size > 1)
 					{
-						MSB = Size - 1;
-						ss << "                         ";
-						ss << write_inout_type(InOutType, "verilog");
-						ss << " [" << MSB << ":0] " << Data_name;
-					}
-				}
-				else if (Dimensions > 1)
-				{
-					if (Kind != "record_t")
-					{
-						if (Size > 1)
+						find_child_type(Type, &Child_type);
+						if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
 						{
-							find_child_type(Type, &Child_type);
-							if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
+							Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",*)"), 3));
+							if (Child_size > 1)
 							{
-								Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",*)"), 3));
-								if (Child_size > 1)
-								{
-									ss << "                         ";
-									ss << write_inout_type(InOutType, "verilog");
-									ss << print_verilog_array_decl(Type, Data_name, "");
-									ss << write_verilog_dimmension_component_recursively(Type);
-								}
-								else if (Child_size == 1)
-								{
-									ss << "                         ";
-									ss << write_inout_type(InOutType, "verilog");
-									ss << " ";
-									ss << print_verilog_array_decl(Type, Data_name, "");
-									ss << write_verilog_dimmension_component_recursively(Type);
-								}
+								ss << "                         ";
+								ss << write_inout_type(InOutType, "verilog");
+								ss << print_verilog_array_decl(Type, Data_name, "");
+								ss << write_verilog_dimmension_component_recursively(Type);
+							}
+							else if (Child_size == 1)
+							{
+								ss << "                         ";
+								ss << write_inout_type(InOutType, "verilog");
+								ss << " ";
+								ss << print_verilog_array_decl(Type, Data_name, "");
+								ss << write_verilog_dimmension_component_recursively(Type);
 							}
 						}
 					}
 				}
-				else if (Kind == "record_t")
+			}
+			else if (Kind == "record_t")
+			{
+				if (Size > 1)
 				{
-					if (Size > 1)
-					{
-						ss << "                         ";
-						ss << write_inout_type(InOutType, "verilog");
-						ss << print_verilog_array_decl(Type, Data_name, "");
-						ss << write_verilog_dimmension_component_recursively(Type);
-					}
+					ss << "                         ";
+					ss << write_inout_type(InOutType, "verilog");
+					ss << print_verilog_array_decl(Type, Data_name, "");
+					ss << write_verilog_dimmension_component_recursively(Type);
 				}
 			}
 		}
+		
 	}
 	if (str2 == "c" && PModule != Data_name)
 	{
@@ -3186,7 +3156,7 @@ string write_inout_type(string str1, string str2)
 		if (str1 == "par_inout")
 			ss << "INOUT";
 	}
-	if (str2 == "verilog")
+	else if (str2 == "verilog")
 	{
 		if (str1 == "par_in")
 			ss << "input";
@@ -3195,7 +3165,7 @@ string write_inout_type(string str1, string str2)
 		if (str1 == "par_inout")
 			ss << "inout";
 	}
-	if (str2 == "c")
+	else if (str2 == "c")
 	{
 		if (str1 == "par_in")
 			ss << "";
@@ -3267,7 +3237,7 @@ string write_cus_func_param_type(string PModule, string str, int int1, string Se
 			ss << Type_name;
 			ss << Separator;
 		}
-		else if (HT.findfact("type_def(" + to_string(int1) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+		else if (HT.findfact("type_def(" + to_string(int1) + ",_,_,_,_,\"record_t\",_,_,_)"))
 		{
 			Local_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(int1) + ",_,_,_,_,\"record_t\",_,_,_)"), 3));
 			ss << " ";
@@ -3359,11 +3329,10 @@ string write_size(int int1, string str1, string str2, string str3, int int2)
 					ss << " std_logic_vector(" << MSB_order << " DOWNTO 0)";
 			}
 		}
-		if (str2 == "verilog" && int1 != 1)
+		else if (str2 == "verilog" && int1 != 1)
 		{
 			MSB_order = int1 - 1;
 			ss << " [" << MSB_order << ":0]";
-
 		}
 	}
 
@@ -3413,7 +3382,7 @@ string write_verilog_dimmension_component_recursively(int Comp_type)
 						{
 							ss << " [" << Last_index << ":" << First_index << "] ";
 						}
-						if (Sec_comp_type > 1)
+						else if (Sec_comp_type > 1)
 						{
 							if (HT.findfact("type_def(" + to_string(Sec_comp_type) + ",_,_,_,_,\"single_t\",_,_,0)"))
 							{
@@ -3481,7 +3450,6 @@ string continue_verilog_dimmension_component(int Comp_type)
 					Last_index = First_index + Comp_dim - 1;
 					Sec_comp_type = 1;
 					ss << " [" << Last_index << ":" << First_index << "] ";
-
 				}
 			}
 		}
@@ -3534,6 +3502,15 @@ string print_verilog_array_decl(int Type_number, string Local_name, string Separ
 		}
 
 	}
+	else if (HT.findfact("type_def(" + to_string(Type_number) + ",_,_,_,_,_,_,_,1)"))
+	{
+		Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_number) + ",_,_,_,_,_,_,_,1)"), 3));
+		if (Size > 1)
+		{
+			Upper = Size - 1;
+			ss << " [" << Upper << ":0] " << Local_name << Separator;
+		}
+	}
 	else if (HT.findfact("type_def(" + to_string(Type_number) + ",*)"))
 	{
 		Child_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_number) + ",*)"), 9));
@@ -3544,15 +3521,6 @@ string print_verilog_array_decl(int Type_number, string Local_name, string Separ
 			{
 				ss << Separator;
 			}
-		}
-	}
-	else if (HT.findfact("type_def(" + to_string(Type_number) + ",_,_,_,_,_,_,_,1)"))
-	{
-		Size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_number) + ",_,_,_,_,_,_,_,1)"), 3));
-		if (Size > 1)
-		{
-			Upper = Size - 1;
-			ss << " [" << Upper << ":0] " << Local_name << Separator;
 		}
 	}
 	return ss.str();
@@ -3663,7 +3631,7 @@ string write_separator_cond(string Separator, string PModule, int Entry, string 
 		{
 			ss << endl;
 		}
-		if (Type == 1)
+		else if (Type == 1)
 		{
 			Next_entry = Entry + 1;
 			if (!HT.findfact("data_stmt(" + PModule + "," + PModule + "," + to_string(Entry) + ",_,\"par_out\",_)"))
@@ -3851,7 +3819,6 @@ string print_local_variables(string PModule, int Dentry, string HDL, int Excludi
 		ss << print_local_variable_cond_cond(PModule, Dentry, HDL, ExcludingEntry);
 		Next_entry = Dentry + 1;
 		ss << print_local_variables(PModule, Next_entry, HDL, ExcludingEntry);
-
 	}
 	return ss.str();
 }
@@ -3882,7 +3849,7 @@ string print_local_variable_cond(string PModule, int Dentry, string HDL)
 		HT.findfact("data_stmt(" + PModule + ",_," + to_string(Dentry) + ",_,\"par_out\",_)") ||
 		HT.findfact("data_stmt(" + PModule + ",_," + to_string(Dentry) + ",_,\"par_inout\",_)"))
 		return ss.str();
-	else if (HDL == "vhdl")
+	if (HDL == "vhdl")
 	{
 		if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Dentry) + ",_,\"var\",_)"))
 		{
@@ -3940,13 +3907,9 @@ string print_local_variable_cond(string PModule, int Dentry, string HDL)
 				First_index = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",*)"), 7));
 				Number_of_dimmensions = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",*)"), 8));
 				First_component = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",*)"), 9));
-				if (Size > 1)
+				if (Size == 1)
 				{
-					if (Number_of_dimmensions == 0)
-					{
-						MSB = Size - 1;
-						ss << "      reg [" << MSB << ":0] " << Dname << ";" << endl;
-					}
+					ss << "      reg " << Dname << ";" << endl;
 				}
 				else if (HT.findfact("type_def(" + to_string(First_component) + ",*)"))
 				{
@@ -3971,10 +3934,13 @@ string print_local_variable_cond(string PModule, int Dentry, string HDL)
 						}
 					}
 				}
-				else if (Size == 1)
+				else if (Size > 1)
 				{
-					ss << "      reg " << Dname << ";" << endl;
-
+					if (Number_of_dimmensions == 0)
+					{
+						MSB = Size - 1;
+						ss << "      reg [" << MSB << ":0] " << Dname << ";" << endl;
+					}
 				}
 			}
 		}
@@ -3990,7 +3956,6 @@ string print_local_variable_cond(string PModule, int Dentry, string HDL)
 			Valueaf = stoi(af);
 			ss << "      parameter " << Dname << " = ";
 			ss << write_constant_value(Type, Valuebe, Valueaf, "verilog");
-
 		}
 	}
 	else if (HDL == "c")
@@ -4012,32 +3977,10 @@ string print_local_variable_cond(string PModule, int Dentry, string HDL)
 				Kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",*)"), 6));
 				Number_of_dimmensions = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",*)"), 8));
 				First_component = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",*)"), 9));
-				if (Kind != "vectorarray_t")
+				if (Size == 1)
 				{
-					if (Kind != "record_t")
-					{
-						if (Size > 1)
-						{
-							if (Number_of_dimmensions == 0)
-							{
-								translate_type_in_c(Symbol, &Ctype_name);
-								ss << "      " << Ctype_name << " " << Dname << ";" << endl;
-							}
-						}
-					}
-					else
-					{
-						if (HT.findfact("type_def(" + to_string(First_component) + ",*)"))
-						{
-							if (Size > 1)
-							{
-								if (Number_of_dimmensions != 0)
-								{
-									ss << "      " << Symbol << " " << Dname << ";" << endl;
-								}
-							}
-						}
-					}
+					translate_type_in_c(Symbol, &Ctype_name);
+					ss << "      " << Ctype_name << " " << Dname << ";" << endl;
 				}
 				else if (Kind == "vectorarray_t")
 				{
@@ -4075,10 +4018,32 @@ string print_local_variable_cond(string PModule, int Dentry, string HDL)
 						}
 					}
 				}
-				else if (Size == 1)
+				else if (Kind != "vectorarray_t")
 				{
-					translate_type_in_c(Symbol, &Ctype_name);
-					ss << "      " << Ctype_name << " " << Dname << ";" << endl;
+					if (Kind != "record_t")
+					{
+						if (Size > 1)
+						{
+							if (Number_of_dimmensions == 0)
+							{
+								translate_type_in_c(Symbol, &Ctype_name);
+								ss << "      " << Ctype_name << " " << Dname << ";" << endl;
+							}
+						}
+					}
+					else
+					{
+						if (HT.findfact("type_def(" + to_string(First_component) + ",*)"))
+						{
+							if (Size > 1)
+							{
+								if (Number_of_dimmensions != 0)
+								{
+									ss << "      " << Symbol << " " << Dname << ";" << endl;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -4135,7 +4100,6 @@ string write_constant_type(int Type)
 			Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",_,_,_,_,\"record_t\",_,_,_)"), 2);
 			ss << " " << Type_name;
 		}
-
 	}
 	else if (HT.findfact("type_def(" + to_string(Type) + ",_,_,_,_,\"single_t\",_,_,_)"))
 	{
@@ -4199,7 +4163,7 @@ string write_constant_value(int Type, string be, int af, string HDL)
 			else
 				ss << " 1 ;" << endl;
 		}
-		if (be == "i")
+		else if (be == "i")
 		{
 			if (parent_type_is_integer(Type, 0))
 				ss << " " << af << " ;  /*-- integer constants -- */" << endl;
@@ -4235,7 +4199,104 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 	vector<int> Rec_list, Par_list, Rec_par_list;
 	if (Lang == "vhdl")
 	{
-		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
+		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"))
+		{
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 8));
+			if (False_target < var3)
+			{
+				if (HT.findfact("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"))
+				{
+					If_statement = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 3));
+					Condition_start = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 4));
+					Body_last = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 7));
+					if (var3 == Body_last + 1)
+					{
+						Condition_end = If_statement - 1;
+						if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+						{
+							pop_cond_end(PModule);
+							ss << print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "vhdl");
+						}
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
+		{
+			Cond_result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 6));
+			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 7));
+			if (HT.findfact("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 5));
+				Increment_variable = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 8));
+				Start_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 9));
+				End_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 10));
+				if (False_target == End_of_loop + 1)
+				{
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"))
+					{
+						Inc_var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"), 2);
+						push_cond_end(PModule, False_target, "END LOOP");
+						ss << Intend << "FOR " << Inc_var_name << " IN ";
+						ss << type_value(PModule, Start_d, "vhdl");
+						ss << " TO ";
+						ss << type_value(PModule, End_d, "vhdl");
+						ss << " LOOP " << endl;
+						HT.concat(Intend, " ", Next_intend);
+					}
+				}
+			}
+			else if (HT.findfact("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"))
+			{
+				End_of_loop = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"), 5));
+				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"))
+				{
+					Cond_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 2);
+					Cond_type = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 4));
+					if (HT.findfact("type_def(" + to_string(Cond_type) + ",*)"))
+					{
+						Cond_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Cond_type) + ",*)"), 3));
+						if (Cond_size == 1)
+						{
+							if (False_target == End_of_loop + 1)
+							{
+								push_cond_end(PModule, False_target, "END LOOP");
+								ss << Intend << "WHILE (" << Cond_name << "='1') LOOP " << endl;
+								HT.concat(Intend, " ", Next_intend);
+							}
+						}
+						else if (Cond_size > 1)
+						{
+							if (False_target == End_of_loop + 1)
+							{
+								push_cond_end(PModule, False_target, "END LOOP");
+								ss << Intend << "WHILE (" << Cond_name << "(0)='1') LOOP " << endl;
+								HT.concat(Intend, " ", Next_intend);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
+		{
+			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
+			if (Target < var3)
+			{
+				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+					{
+						pop_cond_end(PModule);
+						HT.concat(Next_intend, " ", Intend);
+						ss << *Next_intend << "END LOOP;" << endl;
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
 		{
 			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 4));
 			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 5));
@@ -4407,21 +4468,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					if (not_a_while_loop(PModule, var3))
 					{
 						Previous_of_result = Result - 1;
-						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
-						{
-							PRop = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"), 4));
-							if (PRop != 110)
-							{
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
-								{
-									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", Next_intend);
-									ss << Intend << "IF " << Rdata << " = '1' THEN " << endl;
-								}
-							}
-						}
-						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
+						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
 						{
 							Jumptoop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"), 7));
 							if (Jumptoop < Previous_of_result)
@@ -4445,6 +4492,20 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								}
 							}
 						}
+						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
+						{
+							PRop = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"), 4));
+							if (PRop != 110)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
+									HT.concat(Intend, " ", Next_intend);
+									ss << Intend << "IF " << Rdata << " = '1' THEN " << endl;
+								}
+							}
+						}
 					}
 				}
 			}
@@ -4456,27 +4517,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					{
 						if (not_a_while_loop(PModule, var3))
 						{
-							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
-							{
-								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
-								{
-									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
-									Ltype = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 4));
-									if (HT.findfact("type_def(" + to_string(Ltype) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
-									{
-										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
-										{
-											Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
-											*Next_intend = Intend;
-											ss << Intend;
-											ss << print_possible_return(PModule, ResData, ArrayName, " := ", "vhdl", 0);
-											ss << ArrayName << "(CONV_INTEGER(" << Index << "));" << endl;
-										}
-									}
-								}
-							}
-							else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,\"const\",i(_))"))
+							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,\"const\",i(_))"))
 							{
 								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,\"const\",i(_))"), 2);
 								string tmp = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,\"const\",i(_))"), 6);
@@ -4505,6 +4546,26 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 												ss << print_possible_return(PModule, ResData, RecName, " := ", "vhdl", 0);
 												ss << RecName << Child_type_name << ";" << endl;
 											}
+										}
+									}
+								}
+							}
+							else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+							{
+								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+									Ltype = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 4));
+									if (HT.findfact("type_def(" + to_string(Ltype) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+									{
+										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
+										{
+											Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
+											*Next_intend = Intend;
+											ss << Intend;
+											ss << print_possible_return(PModule, ResData, ArrayName, " := ", "vhdl", 0);
+											ss << ArrayName << "(CONV_INTEGER(" << Index << "));" << endl;
 										}
 									}
 								}
@@ -4551,20 +4612,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
 							{
 								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
-								{
-									Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
-									Type = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 4));
-									if (Type > 1)
-									{
-										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
-										{
-											*Next_intend = Intend;
-											ss << Intend << ArrayName << "(CONV_INTEGER(" << Index << ")) := " << Source << ";" << endl;
-										}
-									}
-								}
-								else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",1,\"const\",_)"))
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",1,\"const\",_)"))
 								{
 									Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",1,\"const\",_)"), 2);
 									if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
@@ -4586,6 +4634,19 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 											*Next_intend = Intend;
 											ss << Intend;
 											ss << "IF " << Source << "= '1' THEN " << ArrayName << "(CONV_INTEGER(" << Index << ")) := '1'; ELSE " << ArrayName << "(CONV_INTEGER(" << Index << ")) := '0'; END IF;" << endl;
+										}
+									}
+								}
+								else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								{
+									Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+									Type = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 4));
+									if (Type > 1)
+									{
+										if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
+										{
+											*Next_intend = Intend;
+											ss << Intend << ArrayName << "(CONV_INTEGER(" << Index << ")) := " << Source << ";" << endl;
 										}
 									}
 								}
@@ -4655,9 +4716,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 			{
 				if (Result > 0)
 				{
-					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 					{
-						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
 						if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
 						{
 							Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
@@ -4729,24 +4790,10 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 				*Next_intend = Intend;
 			}
 		}
-		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
-		{
-			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
-			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
-			if (Target < var3)
-			{
-				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
-				{
-					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
-					{
-						pop_cond_end(PModule);
-						HT.concat(Next_intend, " ", Intend);
-						ss << *Next_intend << "END LOOP;" << endl;
-					}
-				}
-			}
-		}
-		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
+	}
+	else if (Lang == "verilog")
+	{
+		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
 		{
 			Cond_result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 6));
 			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 7));
@@ -4762,12 +4809,14 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					{
 						Inc_var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"), 2);
 						push_cond_end(PModule, False_target, "END LOOP");
-						ss << Intend << "FOR " << Inc_var_name << " IN ";
-						ss << type_value(PModule, Start_d, "vhdl");
-						ss << " TO ";
-						ss << type_value(PModule, End_d, "vhdl");
-						ss << " LOOP " << endl;
-						HT.concat(Intend, " ", Next_intend);
+						ss << Intend << " for(" << Inc_var_name << "=";
+						ss << type_value(PModule, Start_d, "verilog");
+						ss << ";" << Inc_var_name << "<=";
+						ss << type_value(PModule, End_d, "verilog");
+						ss << ";" << Inc_var_name << "=" << Inc_var_name << "+1)" << endl;
+						HT.concat(Intend, " ", &Next_intend1);
+						ss << Next_intend1 << " begin" << endl;
+						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
 			}
@@ -4777,28 +4826,13 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"))
 				{
 					Cond_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 2);
-					Cond_type = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 4));
-					if (HT.findfact("type_def(" + to_string(Cond_type) + ",*)"))
+					if (False_target == End_of_loop + 1)
 					{
-						Cond_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Cond_type) + ",*)"), 3));
-						if (Cond_size == 1)
-						{
-							if (False_target == End_of_loop + 1)
-							{
-								push_cond_end(PModule, False_target, "END LOOP");
-								ss << Intend << "WHILE (" << Cond_name << "='1') LOOP " << endl;
-								HT.concat(Intend, " ", Next_intend);
-							}
-						}
-						else if (Cond_size > 1)
-						{
-							if (False_target == End_of_loop + 1)
-							{
-								push_cond_end(PModule, False_target, "END LOOP");
-								ss << Intend << "WHILE (" << Cond_name << "(0)='1') LOOP " << endl;
-								HT.concat(Intend, " ", Next_intend);
-							}
-						}
+						push_cond_end(PModule, False_target, "END LOOP");
+						ss << Intend << " while (" << Cond_name << ") " << endl;
+						HT.concat(Intend, " ", &Next_intend1);
+						ss << Next_intend1 << " begin" << endl;
+						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
 			}
@@ -4816,20 +4850,39 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					Body_last = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 7));
 					if (var3 == Body_last + 1)
 					{
-						Condition_end = If_statement - 1;
-						if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+						if (End_of_loop == Body_last + 1)
 						{
-							pop_cond_end(PModule);
-							ss << print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "vhdl");
+							Condition_end = If_statement - 1;
+							if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+							{
+								pop_cond_end(PModule);
+								print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "verilog");
+							}
 						}
 					}
 				}
 			}
 		}
-	}
-	if (Lang == "verilog")
-	{
-		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
+		{
+			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
+			if (Target < var3)
+			{
+				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+					{
+						pop_cond_end(PModule);
+						if (HT.concat(Next_intend, " ", Intend))
+						{
+							ss << *Next_intend << "end;" << endl;
+						}
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
 		{
 			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 4));
 			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 5));
@@ -4957,24 +5010,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					if (not_a_while_loop(PModule, var3))
 					{
 						Previous_of_result = Result - 1;
-						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
-						{
-							PRop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"), 2));
-							if (PRop != 110)
-							{
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
-								{
-									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", &Next_intend1);
-									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", &Next_intend2);
-									ss << Next_intend2 << "begin" << endl;
-									HT.concat(Next_intend2, " ", Next_intend);
-								}
-							}
-						}
-						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
+						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
 						{
 							Jumptoop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"), 7));
 							if (Jumptoop < Previous_of_result)
@@ -4996,6 +5032,23 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "ELSE");
+									HT.concat(Intend, " ", &Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", &Next_intend2);
+									ss << Next_intend2 << "begin" << endl;
+									HT.concat(Next_intend2, " ", Next_intend);
+								}
+							}
+						}
+						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
+						{
+							PRop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"), 2));
+							if (PRop != 110)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
 									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
 									HT.concat(Next_intend1, " ", &Next_intend2);
@@ -5097,12 +5150,12 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								Par_list = returnVec(makeInstanceOf(HT.findandreturn("compo_stmt(" + PModule + "," + to_string(Right) + ",*)")), 1);
 								if (Left > 0)
 								{
-									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",*)"))
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
 									{
-										Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",*)"), 2);
-										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+										Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
+										if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 										{
-											ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+											ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
 											*Next_intend = Intend;
 											ss << Intend << ArrayName << "";
 											ss << print_custom_array_index_parameters(PModule, Par_list, "verilog");
@@ -5135,9 +5188,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 			{
 				if (Result > 0)
 				{
-					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 					{
-						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
 						if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
 						{
 							Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
@@ -5210,26 +5263,10 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 				*Next_intend = Intend;
 			}
 		}
-		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
-		{
-			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
-			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
-			if (Target < var3)
-			{
-				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
-				{
-					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
-					{
-						pop_cond_end(PModule);
-						if (HT.concat(Next_intend, " ", Intend))
-						{
-							ss << *Next_intend << "end;" << endl;
-						}
-					}
-				}
-			}
-		}
-		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
+	}
+	else if (Lang == "c")
+	{
+		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
 		{
 			Cond_result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 6));
 			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 7));
@@ -5251,7 +5288,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						ss << type_value(PModule, End_d, "verilog");
 						ss << ";" << Inc_var_name << "=" << Inc_var_name << "+1)" << endl;
 						HT.concat(Intend, " ", &Next_intend1);
-						ss << Next_intend1 << " begin" << endl;
+						ss << Next_intend1 << " {" << endl;
 						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
@@ -5267,7 +5304,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 						push_cond_end(PModule, False_target, "END LOOP");
 						ss << Intend << " while (" << Cond_name << ") " << endl;
 						HT.concat(Intend, " ", &Next_intend1);
-						ss << Next_intend1 << " begin" << endl;
+						ss << Next_intend1 << " {" << endl;
 						HT.concat(Next_intend1, " ", Next_intend);
 					}
 				}
@@ -5284,25 +5321,49 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					If_statement = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 3));
 					Condition_start = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 4));
 					Body_last = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 7));
-					if (var3 == Body_last + 1)
+					if (Condition_start < If_statement)
 					{
-						if (End_of_loop == Body_last + 1)
+						if (var3 == Body_last + 1)
 						{
-							Condition_end = If_statement - 1;
-							if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+							if (End_of_loop == Body_last + 1)
 							{
-								pop_cond_end(PModule);
-								print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "verilog");
+								Condition_end = If_statement - 1;
+								if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+								{
+									pop_cond_end(PModule);
+									ss << print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "c");
+								}
 							}
+						}
+					}
+					else if (Condition_start == If_statement)
+					{
+						if (HT.concat(Next_intend, " ", Intend))
+							ss << write_end_of_loop(*Next_intend, Lang) << endl;
+					}
+				}
+			}
+		}
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
+		{
+			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
+			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
+			if (Target < var3)
+			{
+				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
+				{
+					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
+					{
+						pop_cond_end(PModule);
+						if (HT.concat(Next_intend, " ", Intend))
+						{
+							ss << *Next_intend << "}" << endl;
 						}
 					}
 				}
 			}
 		}
-	}
-	if (Lang == "c")
-	{
-		if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
+		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"))
 		{
 			Op = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 4));
 			Left = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",*)"), 5));
@@ -5315,23 +5376,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 				{
 					if (not_a_while_loop(PModule, var3))
 					{
-						if (HT.findfact("op_def(" + to_string(Op) + ",\"abs\",\"unop\",_,_,_,_)"))
-						{
-							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
-							{
-								Rdata = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2));
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
-								{
-									ResData = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
-									*Next_intend = Intend;
-									ss << Intend;
-									ss << print_possible_return(PModule, ResData, Rdata, " = ", "c", &DoIt);
-									ss << print_after_return2(DoIt, Rdata);
-									ss << ";" << endl;
-								}
-							}
-						}
-						else if (HT.findfact("op_def(" + to_string(Op) + ",\"not\",\"unop\",_,_,_,_)") || HT.findfact("op_def(" + to_string(Op) + ",\"abs\",\"unop\",_,_,_,_)"))
+						if (HT.findfact("op_def(" + to_string(Op) + ",\"not\",\"unop\",_,_,_,_)") || HT.findfact("op_def(" + to_string(Op) + ",\"abs\",\"unop\",_,_,_,_)"))
 						{
 							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
 							{
@@ -5488,24 +5533,7 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 					if (not_a_while_loop(PModule, var3))
 					{
 						Previous_of_result = Result - 1;
-						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
-						{
-							PRop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"), 4));
-							if (PRop != 110)
-							{
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
-								{
-									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-									push_cond_end(PModule, Result, "END IF");
-									HT.concat(Intend, " ", &Next_intend1);
-									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
-									HT.concat(Next_intend1, " ", &Next_intend2);
-									ss << Next_intend2 << "{" << endl;
-									HT.concat(Next_intend2, " ", Next_intend);
-								}
-							}
-						}
-						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
+						if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"))
 						{
 							Jumptoop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",_,110,_,_,_,_)"), 7));
 							if (Jumptoop < Previous_of_result)
@@ -5527,6 +5555,23 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
 									push_cond_end(PModule, Result, "ELSE");
+									HT.concat(Intend, " ", &Next_intend1);
+									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
+									HT.concat(Next_intend1, " ", &Next_intend2);
+									ss << Next_intend2 << "{" << endl;
+									HT.concat(Next_intend2, " ", Next_intend);
+								}
+							}
+						}
+						else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"))
+						{
+							PRop = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(Previous_of_result) + ",*)"), 4));
+							if (PRop != 110)
+							{
+								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
+								{
+									Rdata = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
+									push_cond_end(PModule, Result, "END IF");
 									HT.concat(Intend, " ", &Next_intend1);
 									ss << Next_intend1 << "if (" << Rdata << ") " << endl;
 									HT.concat(Next_intend1, " ", &Next_intend2);
@@ -5604,12 +5649,27 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 							if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"))
 							{
 								Index = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Right) + ",_,_,_)"), 2);
-								if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
+								if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
+								{
+									if (Left < 0)
+									{
+										if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
+										{
+											Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Right) + ",*)")), 3);
+											*Next_intend = Intend;
+											ss << Intend << ArrayName << "[" << Index << "] = ";
+											ss << " {";
+											ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
+											ss << "};" << endl;
+										}
+									}
+								}
+								else if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"))
 								{
 									Source = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Left) + ",_,_,_)"), 2);
-									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+									if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 									{
-										ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+										ArrayName = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
 										if (!HT.findfact("data_stmt(" + PModule + "," + PModule + ",_,_,\"par_out\",_)"))
 										{
 											*Next_intend = Intend;
@@ -5628,21 +5688,6 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 												*Next_intend = Intend;
 												ss << Intend << "(* " << ArrayName << ")[" << Index << "] = " << Source << ";" << endl;
 											}
-										}
-									}
-								}
-								else if (HT.findfact("data_stmt(" + PModule + "," + ArrayName + "," + to_string(Result) + ",*)"))
-								{
-									if (Left < 0)
-									{
-										if (HT.findfact("rec_stmt(" + PModule + "," + to_string(Left) + ",*)"))
-										{
-											Rec_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(" + PModule + "," + to_string(Right) + ",*)")), 3);
-											*Next_intend = Intend;
-											ss << Intend << ArrayName << "[" << Index << "] = ";
-											ss << " {";
-											ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
-											ss << "};" << endl;
 										}
 									}
 								}
@@ -5680,9 +5725,9 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 			{
 				if (Result > 0)
 				{
-					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"))
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"))
 					{
-						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",*)"), 2);
+						Res_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Result) + ",_,_,_)"), 2);
 						if (HT.findfact("call_stmt(" + PModule + "," + to_string(Right) + ",*)"))
 						{
 							Called_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + PModule + "," + to_string(Right) + ",*)"), 3));
@@ -5752,103 +5797,6 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 			else if (HT.findfact("for_loop(_," + PModule + ",_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_,_)"))
 			{
 				*Next_intend = Intend;
-			}
-		}
-		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"))
-		{
-			Target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 7));
-			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,_,_,_,_)"), 8));
-			if (Target < var3)
-			{
-				if (HT.findfact("for_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_,_,_,_,_,_,_,_)"))
-				{
-					if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
-					{
-						pop_cond_end(PModule);
-						if (HT.concat(Next_intend, " ", Intend))
-						{
-							ss << *Next_intend << "}" << endl;
-						}
-					}
-				}
-			}
-		}
-		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"))
-		{
-			Cond_result = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 6));
-			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,106,0,_,_,_)"), 7));
-			if (HT.findfact("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"))
-			{
-				End_of_loop = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 5));
-				Increment_variable = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 8));
-				Start_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 9));
-				End_d = stoi(returnpar(HT.findandreturn("for_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_,_,_,_,1,_,_,_)"), 10));
-				if (False_target == End_of_loop + 1)
-				{
-					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"))
-					{
-						Inc_var_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Increment_variable) + ",_,\"var\",sym(_))"), 2);
-						push_cond_end(PModule, False_target, "END LOOP");
-						ss << Intend << " for(" << Inc_var_name << "=";
-						ss << type_value(PModule, Start_d, "verilog");
-						ss << ";" << Inc_var_name << "<=";
-						ss << type_value(PModule, End_d, "verilog");
-						ss << ";" << Inc_var_name << "=" << Inc_var_name << "+1)" << endl;
-						HT.concat(Intend, " ", &Next_intend1);
-						ss << Next_intend1 << " {" << endl;
-						HT.concat(Next_intend1, " ", Next_intend);
-					}
-				}
-			}
-			else if (HT.findfact("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"))
-			{
-				End_of_loop = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + "," + to_string(var3) + ",_,_,_,_)"), 5));
-				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"))
-				{
-					Cond_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Cond_result) + ",_,_,_)"), 2);
-					if (False_target == End_of_loop + 1)
-					{
-						push_cond_end(PModule, False_target, "END LOOP");
-						ss << Intend << " while (" << Cond_name << ") " << endl;
-						HT.concat(Intend, " ", &Next_intend1);
-						ss << Next_intend1 << " {" << endl;
-						HT.concat(Next_intend1, " ", Next_intend);
-					}
-				}
-			}
-		}
-		else if (HT.findfact("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"))
-		{
-			False_target = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 7));
-			Next_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + PModule + "," + to_string(var3) + ",_,110,0,_,_,_)"), 8));
-			if (False_target < var3)
-			{
-				if (HT.findfact("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"))
-				{
-					If_statement = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 3));
-					Condition_start = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 4));
-					Body_last = stoi(returnpar(HT.findandreturn("while_loop(_," + PModule + ",_,_," + to_string(var3) + ",_,_)"), 7));
-					if (Condition_start < If_statement)
-					{
-						if (var3 == Body_last + 1)
-						{
-							if (End_of_loop == Body_last + 1)
-							{
-								Condition_end = If_statement - 1;
-								if (HT.findfact("nested_cond_fact(" + PModule + ",[" + PModule + "," + to_string(Next_entry) + ",\"END LOOP\"])"))
-								{
-									pop_cond_end(PModule);
-									print_while_loop_tail_cond(PModule, Condition_start, Condition_end, var3, Intend, Next_intend, "c");
-								}
-							}
-						}
-					}
-					else if (Condition_start == If_statement)
-					{
-						if (HT.concat(Next_intend, " ", Intend))
-							ss << write_end_of_loop(*Next_intend, Lang) << endl;
-					}
-				}
 			}
 		}
 	}
@@ -6026,7 +5974,25 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 				if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",*)"))
 				{
 					Res_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Res_name + ",*)"), 4));
-					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
+					if (HT.findfact("type_def(" + to_string(Res_type) + ",_,1,_,_,_,_,_,_)"))
+					{
+						if (HT.findfact("data_stmt(" + Module_name + "," + Right_name + ",*)"))
+						{
+							Right_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Right_name + ",*)"), 4));
+							if (HT.findfact("type_def(" + to_string(Right_type) + ",*)"))
+							{
+								Right_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Right_type) + ",*)"), 3));
+								ss << print_possible_return(Module_name, Res_name, Right_name, Assignment_string, "vhdl", 0);
+								ss << "conv_std_logic_vector(CONV_INTEGER(";
+								ss << Left_name << ") ";
+								ss << write_mod_rem_operator("vhdl", Op_string);
+								ss << " CONV_INTEGER(";
+								ss << Right_name;
+								ss << "), ", Right_size, ") (0);";
+							}
+						}
+					}
+					else if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
 					{
 						Res_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Res_type) + ",*)"), 3));
 						if (Res_type > 1 && Res_size > 1)
@@ -6047,24 +6013,6 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 									ss << Right_name;
 									ss << "), " << Right_size << ") (" << Res_upper << " downto 0);";
 								}
-							}
-						}
-					}
-					else if (HT.findfact("type_def(" + to_string(Res_type) + ",_,1,_,_,_,_,_,_)"))
-					{
-						if (HT.findfact("data_stmt(" + Module_name + "," + Right_name + ",*)"))
-						{
-							Right_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Right_name + ",*)"), 4));
-							if (HT.findfact("type_def(" + to_string(Right_type) + ",*)"))
-							{
-								Right_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Right_type) + ",*)"), 3));
-								ss << print_possible_return(Module_name, Res_name, Right_name, Assignment_string, "vhdl", 0);
-								ss << "conv_std_logic_vector(CONV_INTEGER(";
-								ss << Left_name << ") ";
-								ss << write_mod_rem_operator("vhdl", Op_string);
-								ss << " CONV_INTEGER(";
-								ss << Right_name;
-								ss << "), ", Right_size, ") (0);";
 							}
 						}
 					}
@@ -6124,36 +6072,36 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 			if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",_,_,\"par_out\",_)"))
 			{
 				Res_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Res_name + ",_,_,\"par_out\",_)"), 4));
-				if (!HT.findfact("print_C_main_body(*)"))
-				{
-					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
-					{
-						ss << "*" << Res_name << Assignment_string << Left_name << " / " << Right_name << ";";
-					}
-				}
-				else if (HT.findfact("print_C_main_body(1)"))
+				if (HT.findfact("print_C_main_body(1)"))
 				{
 					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
 					{
 						ss << Res_name << Assignment_string << Left_name << " / " << Right_name << ";";
+					}
+				}
+				else if (!HT.findfact("print_C_main_body(*)"))
+				{
+					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
+					{
+						ss << "*" << Res_name << Assignment_string << Left_name << " / " << Right_name << ";";
 					}
 				}
 			}
 			else if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",_,_,\"par_inout\",_)"))
 			{
 				Res_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Res_name + ",_,_,\"par_inout\",_)"), 4));
-				if (!HT.findfact("print_C_main_body(*)"))
-				{
-					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
-					{
-						ss << "*" << Res_name << Assignment_string << Left_name << " / " << Right_name << ";";
-					}
-				}
 				if (HT.findfact("print_C_main_body(1)"))
 				{
 					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
 					{
 						ss << Res_name << Assignment_string << Left_name << " / " << Right_name << ";";
+					}
+				}
+				else if (!HT.findfact("print_C_main_body(*)"))
+				{
+					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
+					{
+						ss << "*" << Res_name << Assignment_string << Left_name << " / " << Right_name << ";";
 					}
 				}
 			}
@@ -6260,7 +6208,13 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 			{
 				Res_type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Res_name + ",*)"), 4));
 				Res_kind = returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Res_name + ",*)"), 5);
-				if (Res_kind != "par_out" && Res_kind != "par_inout")
+				if (HT.findfact("type_def(" + to_string(Res_type) + ",_,1,_,_,_,_,_,_)"))
+				{
+					ss << Res_name << Assignment_string << Left_name << " ";
+					ss << write_mod_rem_operator(Hdl, Op_string);
+					ss << " " << Right_name << ";";
+				}
+				else if (Res_kind != "par_out" && Res_kind != "par_inout")
 				{
 					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
 					{
@@ -6272,12 +6226,6 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 							ss << " " << Right_name << ";";
 						}
 					}
-				}
-				else if (HT.findfact("type_def(" + to_string(Res_type) + ",_,1,_,_,_,_,_,_)"))
-				{
-					ss << Res_name << Assignment_string << Left_name << " ";
-					ss << write_mod_rem_operator(Hdl, Op_string);
-					ss << " " << Right_name << ";";
 				}
 			}
 		}
@@ -6391,28 +6339,7 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 	stringstream ss;
 	int ResType;
 	string Kind, TypeKind;
-	if (HDL != "c")
-	{
-		if (PModule != ResData)
-		{
-			if (!HT.findfact("mem_port(_,_," + PModule + "," + PModule + ",_,_,_,_,_,_,_,_,_)"))
-			{
-				ss << ResData << Assignment_string;
-				*int1 = 1;
-			}
-		}
-		else if (PModule == ResData)
-		{
-			if (!HT.findfact("mem_port(_,_," + ResData + "," + ResData + ",_,_,_,_,_,_,_,_,_)"))
-			{
-				ss << ResData << "_function " << Assignment_string << " ";
-				*int1 = 1;
-			}
-			else
-				*int1 = 1;
-		}
-	}
-	else if (HDL == "c")
+	if (HDL == "c")
 	{
 		if (PModule != ResData)
 		{
@@ -6434,22 +6361,6 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 					}
 					*int1 = 1;
 				}
-				else if (!HT.findfact("print_C_main_body(*)"))
-				{
-					if (HT.findfact("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_out\",_)"))
-					{
-						ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_out\",_)"), 4));
-						if (parent_type_is_integer(ResType, 0))
-							ss << "*" << ResData << Assignment_string << " (long long int) ";
-					}
-					else if (HT.findfact("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_inout\",_)"))
-					{
-						ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_inout\",_)"), 4));
-						if (parent_type_is_integer(ResType, 0))
-							ss << "*" << ResData << Assignment_string << " (long long int) ";
-					}
-					*int1 = 1;
-				}
 				else if (HT.findfact("data_stmt(" + PModule + "," + ResData + ",*)"))
 				{
 					ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + ResData + ",*)"), 4));
@@ -6468,6 +6379,22 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 					}
 					*int1 = 1;
 				}
+				else if (!HT.findfact("print_C_main_body(*)"))
+				{
+					if (HT.findfact("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_out\",_)"))
+					{
+						ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_out\",_)"), 4));
+						if (parent_type_is_integer(ResType, 0))
+							ss << "*" << ResData << Assignment_string << " (long long int) ";
+					}
+					else if (HT.findfact("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_inout\",_)"))
+					{
+						ResType = stoi(returnpar(HT.findandreturn("data_stmt(" + PModule + "," + ResData + ",_,_,\"par_inout\",_)"), 4));
+						if (parent_type_is_integer(ResType, 0))
+							ss << "*" << ResData << Assignment_string << " (long long int) ";
+					}
+					*int1 = 1;
+				}
 			}
 		}
 		else if (PModule == ResData)
@@ -6482,27 +6409,42 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 						ss << "return &" << RightData;
 						*int1 = 1;
 					}
-					if (HT.findfact("type_def(" + to_string(ResType) + ",*)"))
+					else if (HT.findfact("type_def(" + to_string(ResType) + ",*)"))
 					{
 						TypeKind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(ResType) + ",*)"), 4));
-						if (TypeKind == "vectorarray_t")
+						if (TypeKind != "vectorarray_t")
 						{
 							ss << "return " << RightData;
 							*int1 = 1;
 						}
 					}
-
 				}
 			}
 			else
 				*int1 = 1;
 		}
 	}
-	else
+	else if (HDL != "c")
 	{
 		if (PModule != ResData)
 		{
-			if (HT.findfact("mem_port(_,_," + PModule + "," + PModule + ",_,_,_,_,_,_,_,_,_)"))
+			if (!HT.findfact("mem_port(_,_," + PModule + "," + PModule + ",_,_,_,_,_,_,_,_,_)"))
+			{
+				ss << ResData << Assignment_string;
+				*int1 = 1;
+			}
+			else if (HT.findfact("mem_port(_,_," + PModule + "," + PModule + ",_,_,_,_,_,_,_,_,_)"))
+				*int1 = 1;
+
+		}
+		else if (PModule == ResData)
+		{
+			if (!HT.findfact("mem_port(_,_," + ResData + "," + ResData + ",_,_,_,_,_,_,_,_,_)"))
+			{
+				ss << ResData << "_function " << Assignment_string << " ";
+				*int1 = 1;
+			}
+			else
 				*int1 = 1;
 		}
 	}
@@ -6563,6 +6505,23 @@ string print_custom_record_index_parameter(string PModule, int Parameter, string
 			}
 		}
 	}
+	else if (Kind == "constants")
+	{
+		if (HT.findfact("hdl_style(*)"))
+		{
+			HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
+			if (HDL != "c")
+			{
+				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+				{
+					Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+					Kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 5);
+					if (Kind != "const")
+						ss << "     var" << Par_name << " := " << Par_name << ";" << endl;
+				}
+			}
+		}
+	}
 	else if (Kind != "constants")
 	{
 		if (Kind != "function")
@@ -6610,15 +6569,7 @@ string print_custom_record_index_parameter(string PModule, int Parameter, string
 			else if (HT.findfact("hdl_style(*)"))
 			{
 				HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
-				if (HDL != "vhdl")
-				{
-					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
-					{
-						Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
-						ss << Par_name;
-					}
-				}
-				else if (HDL == "vhdl")
+				if (HDL == "vhdl")
 				{
 					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
 					{
@@ -6630,22 +6581,13 @@ string print_custom_record_index_parameter(string PModule, int Parameter, string
 							ss << "var" << Par_name;
 					}
 				}
-			}
-		}
-	}
-	else if (Kind == "constants")
-	{
-		if (HT.findfact("hdl_style(*)"))
-		{
-			HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
-			if (HDL != "c")
-			{
-				if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+				else if (HDL != "vhdl")
 				{
-					Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
-					Kind = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 5);
-					if (Kind != "const")
-						ss << "     var" << Par_name << " := " << Par_name << ";" << endl;
+					if (HT.findfact("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"))
+					{
+						Par_name = returnpar(HT.findandreturn("data_stmt(" + PModule + ",_," + to_string(Parameter) + ",_,_,_)"), 2);
+						ss << Par_name;
+					}
 				}
 			}
 		}
@@ -6978,9 +6920,11 @@ string print_custom_function_cond(string Module, string Module1, int Entry, stri
 	else if (HT.findfact("checkstyle(*)"))
 	{
 		Check = returnpar(HT.findandreturn("checkstyle(*)"), 1);
-		if (Check != "checkhierarchy" || !HT.findfact("checkstyle(*)"))
+		if (Check != "checkhierarchy")
 			ss << print_custom_function(1, Module, Module1, HDL);
 	}
+	else if (!HT.findfact("checkstyle(*)"))
+		ss << print_custom_function(1, Module, Module1, HDL);
 	return ss.str();
 }
 
@@ -7241,7 +7185,6 @@ string write_io_ports_core_cond(local_object Local, string HDL, string Tool, str
 	{
 		ss << write_io_port(Local, HDL, Tool) << endl;
 	}
-
 	return ss.str();
 }
 
@@ -7568,61 +7511,7 @@ string write_io_port(local_object Local, string HDL, string tool)
 		int Type_number, First_comp_type, Comp_size, Numb_of_dim, Child_type, Child_size, Child_upper;
 		if (var3 == "par_in")
 		{
-			if (Local_type != "bool")
-			{
-				if (Local_type != "userarray" && Local_type != "userrecord")
-				{
-					if (HT.findfact("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"))
-					{
-						Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 1));
-						Numb_of_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 8));
-						if (HT.findfact("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"))
-						{
-							Replacement_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2);
-							if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
-							{
-								find_child_type(Type_number, &Child_type);
-								if (HT.findfact("type_def(" + to_string(Child_type) + ",_,1,_,_,_,_,_,_)"))
-								{
-									ss << "   input ";
-									ss << write_verilog_dimmension_component_recursively(Type_number);
-									ss << " " << Local_name << " ; " << endl;
-								}
-								else if (HT.findfact("type_def(" + to_string(Child_type) + ",_,_,_,_,_,_,_,_)"))
-								{
-									Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",_,_,_,_,_,_,_,_)"), 3));
-									if (Child_size > 1)
-									{
-										Child_upper = Child_size - 1;
-										ss << "   input ";
-										ss << " [" << Child_upper << ":0] " << Local_name << " ";
-										ss << write_verilog_dimmension_component_recursively(Type_number);
-										ss << " ; " << endl;
-										ss << write_verilog_array_index_registers(Module, Local_name, Type_number, Numb_of_dim, Numb_of_dim, 1);
-									}
-								}
-							}
-						}
-					}
-					else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
-					{
-						Type_kind = returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 6);
-						if (Type_kind != "vectorarray_t")
-						{
-							ss << "   input ";
-							ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
-							ss << " " << Local_name << " ; " << endl;
-						}
-					}
-				}
-				else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
-				{
-					Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 3));
-					if (Type_size == 1)
-						ss << "   input " << Local_name << " ;" << endl;
-				}
-			}
-			else if (Local_type == "std_logic")
+			if (Local_type == "std_logic")
 			{
 				ss << "   input ";
 				ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
@@ -7758,110 +7647,64 @@ string write_io_port(local_object Local, string HDL, string tool)
 					}
 				}
 			}
-		}
-		else if (var3 == "par_out")
-		{
-			if (Local_type != "bool")
+			else if (Local_type != "bool")
 			{
-				if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
+				if (Local_type != "userarray" && Local_type != "userrecord")
+				{
+					if (HT.findfact("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"))
+					{
+						Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 1));
+						Numb_of_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 8));
+						if (HT.findfact("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"))
+						{
+							Replacement_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2);
+							if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
+							{
+								find_child_type(Type_number, &Child_type);
+								if (HT.findfact("type_def(" + to_string(Child_type) + ",_,1,_,_,_,_,_,_)"))
+								{
+									ss << "   input ";
+									ss << write_verilog_dimmension_component_recursively(Type_number);
+									ss << " " << Local_name << " ; " << endl;
+								}
+								else if (HT.findfact("type_def(" + to_string(Child_type) + ",_,_,_,_,_,_,_,_)"))
+								{
+									Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",_,_,_,_,_,_,_,_)"), 3));
+									if (Child_size > 1)
+									{
+										Child_upper = Child_size - 1;
+										ss << "   input ";
+										ss << " [" << Child_upper << ":0] " << Local_name << " ";
+										ss << write_verilog_dimmension_component_recursively(Type_number);
+										ss << " ; " << endl;
+										ss << write_verilog_array_index_registers(Module, Local_name, Type_number, Numb_of_dim, Numb_of_dim, 1);
+									}
+								}
+							}
+						}
+					}
+					else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
+					{
+						Type_kind = returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 6);
+						if (Type_kind != "vectorarray_t")
+						{
+							ss << "   input ";
+							ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
+							ss << " " << Local_name << " ; " << endl;
+						}
+					}
+				}
+				else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
 				{
 					Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 3));
 					if (Type_size == 1)
-					{
-						ss << "   output " << Local_name << " ;" << endl;
-						ss << "   reg    " << Local_name << " ;" << endl;
-					}
-				}
-				else if (var7 != "userarray")
-				{
-					if (var7 != "userrecord")
-					{
-						if (HT.findfact("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,1)"))
-						{
-							Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,1)"), 1));
-							ss << "   output ";
-							ss << write_verilog_dimmension_component_recursively(Type_number);
-							ss << Local_name << " ;" << endl;
-							ss << "      reg ";
-							ss << write_verilog_dimmension_component_recursively(Type_number);
-							ss << Local_name << " ;" << endl;
-						}
-						else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"))
-						{
-							Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 1));
-							Numb_of_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 8));
-							First_comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 9));
-							if (First_comp_type <= 10)
-							{
-								if (First_comp_type > 1)
-								{
-									if (HT.findfact("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"))
-									{
-										Replacement_name = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2));
-										if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
-										{
-											ss << "   output ";
-											find_child_type(Type_number, &Child_type);
-											if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
-											{
-												Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",*)"), 3));
-												Child_upper = Child_size - 1;
-												ss << " [" << Child_upper << ":0] " << Local_name << " ";
-												ss << write_verilog_dimmension_component_recursively(Type_number);
-												ss << " ; " << endl;
-												ss << "   reg ";
-												ss << " [" << Child_upper << ":0] " << Local_name << " ";
-												ss << write_verilog_dimmension_component_recursively(Type_number);
-												ss << " ; " << endl;
-												ss << write_verilog_array_index_registers(Module, Local_name, Type_number, Numb_of_dim, 0, 1);
-											}
-										}
-									}
-								}
-							}
-							else if (HT.findfact("type_def(" + to_string(First_comp_type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
-							{
-								if (HT.findfact("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"))
-								{
-									Replacement_name = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2));
-									if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
-									{
-										ss << "   output ";
-										find_child_type(Type_number, &Child_type);
-										if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
-										{
-											Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",*)"), 3));
-											Child_upper = Child_size - 1;
-											ss << " [" << Child_upper << ":0] " << Local_name << " ";
-											ss << write_verilog_dimmension_component_recursively(Type_number);
-											ss << " ; " << endl;
-											ss << "   reg ";
-											ss << " [" << Child_upper << ":0] " << Local_name << " ";
-											ss << write_verilog_dimmension_component_recursively(Type_number);
-											ss << " ; " << endl;
-											ss << write_verilog_array_index_registers(Module, Local_name, Type_number, Numb_of_dim, Numb_of_dim, 1);
-										}
-									}
-								}
-							}
-						}
-						else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
-						{
-							Type_kind = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 6));
-							if (Type_kind != "vectorarray_t")
-							{
-								ss << "   output ";
-								ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
-								ss << " " << Local_name << " ; " << endl;
-								ss << "   reg    ";
-								ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
-								ss << " " << Local_name << " ; " << endl;
-							}
-						}
-					}
+						ss << "   input " << Local_name << " ;" << endl;
 				}
 			}
-			else if (Local_type == "bool")
+		}
+		else if (var3 == "par_out")
+		{
+			if (Local_type == "bool")
 			{
 				ss << "   output " << Local_name << " ;" << endl;
 				ss << "   reg    " << Local_name << " ;" << endl;
@@ -8104,17 +7947,14 @@ string write_io_port(local_object Local, string HDL, string tool)
 					}
 				}
 			}
-		}
-		else if (var3 == "par_inout")
-		{
-			if (Local_type != "bool")
+			else if (Local_type != "bool")
 			{
 				if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
 				{
 					Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 3));
 					if (Type_size == 1)
 					{
-						ss << "   inout " << Local_name << " ;" << endl;
+						ss << "   output " << Local_name << " ;" << endl;
 						ss << "   reg    " << Local_name << " ;" << endl;
 					}
 				}
@@ -8125,7 +7965,7 @@ string write_io_port(local_object Local, string HDL, string tool)
 						if (HT.findfact("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,1)"))
 						{
 							Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,1)"), 1));
-							ss << "   inout ";
+							ss << "   output ";
 							ss << write_verilog_dimmension_component_recursively(Type_number);
 							ss << Local_name << " ;" << endl;
 							ss << "      reg ";
@@ -8146,7 +7986,7 @@ string write_io_port(local_object Local, string HDL, string tool)
 										Replacement_name = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2));
 										if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
 										{
-											ss << "   inout ";
+											ss << "   output ";
 											find_child_type(Type_number, &Child_type);
 											if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
 											{
@@ -8172,7 +8012,7 @@ string write_io_port(local_object Local, string HDL, string tool)
 									Replacement_name = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2));
 									if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
 									{
-										ss << "   inout ";
+										ss << "   output ";
 										find_child_type(Type_number, &Child_type);
 										if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
 										{
@@ -8196,7 +8036,7 @@ string write_io_port(local_object Local, string HDL, string tool)
 							Type_kind = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 6));
 							if (Type_kind != "vectorarray_t")
 							{
-								ss << "   inout ";
+								ss << "   output ";
 								ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
 								ss << " " << Local_name << " ; " << endl;
 								ss << "   reg    ";
@@ -8207,7 +8047,10 @@ string write_io_port(local_object Local, string HDL, string tool)
 					}
 				}
 			}
-			else if (Local_type == "bool")
+		}
+		else if (var3 == "par_inout")
+		{
+			if (Local_type == "bool")
 			{
 				ss << "   inout " << Local_name << " ;" << endl;
 				ss << "   reg    " << Local_name << " ;" << endl;
@@ -8445,6 +8288,106 @@ string write_io_port(local_object Local, string HDL, string tool)
 							ss << " [" << Upper_bound << ":0] " << Local_name;
 							ss << write_verilog_dimmension_component_recursively(Type_number);
 							ss << " ; " << endl;
+						}
+					}
+				}
+			}
+			else if (Local_type != "bool")
+			{
+				if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
+				{
+					Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 3));
+					if (Type_size == 1)
+					{
+						ss << "   inout " << Local_name << " ;" << endl;
+						ss << "   reg    " << Local_name << " ;" << endl;
+					}
+				}
+				else if (var7 != "userarray")
+				{
+					if (var7 != "userrecord")
+					{
+						if (HT.findfact("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,1)"))
+						{
+							Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,1)"), 1));
+							ss << "   inout ";
+							ss << write_verilog_dimmension_component_recursively(Type_number);
+							ss << Local_name << " ;" << endl;
+							ss << "      reg ";
+							ss << write_verilog_dimmension_component_recursively(Type_number);
+							ss << Local_name << " ;" << endl;
+						}
+						else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"))
+						{
+							Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 1));
+							Numb_of_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 8));
+							First_comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,\"vectorarray_t\",_,_,_)"), 9));
+							if (First_comp_type <= 10)
+							{
+								if (First_comp_type > 1)
+								{
+									if (HT.findfact("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"))
+									{
+										Replacement_name = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2));
+										if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
+										{
+											ss << "   inout ";
+											find_child_type(Type_number, &Child_type);
+											if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
+											{
+												Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",*)"), 3));
+												Child_upper = Child_size - 1;
+												ss << " [" << Child_upper << ":0] " << Local_name << " ";
+												ss << write_verilog_dimmension_component_recursively(Type_number);
+												ss << " ; " << endl;
+												ss << "   reg ";
+												ss << " [" << Child_upper << ":0] " << Local_name << " ";
+												ss << write_verilog_dimmension_component_recursively(Type_number);
+												ss << " ; " << endl;
+												ss << write_verilog_array_index_registers(Module, Local_name, Type_number, Numb_of_dim, 0, 1);
+											}
+										}
+									}
+								}
+							}
+							else if (HT.findfact("type_def(" + to_string(First_comp_type) + ",_,_,_,_,\"vectorarray_t\",_,_,_)"))
+							{
+								if (HT.findfact("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"))
+								{
+									Replacement_name = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(var5) + "," + to_string(Type_number) + ",_,_)"), 2));
+									if (!HT.findfact("mem_port(_,_," + Module + "," + Replacement_name + ",_,_,_,_,_,_,_,_,_)"))
+									{
+										ss << "   inout ";
+										find_child_type(Type_number, &Child_type);
+										if (HT.findfact("type_def(" + to_string(Child_type) + ",*)"))
+										{
+											Child_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Child_type) + ",*)"), 3));
+											Child_upper = Child_size - 1;
+											ss << " [" << Child_upper << ":0] " << Local_name << " ";
+											ss << write_verilog_dimmension_component_recursively(Type_number);
+											ss << " ; " << endl;
+											ss << "   reg ";
+											ss << " [" << Child_upper << ":0] " << Local_name << " ";
+											ss << write_verilog_dimmension_component_recursively(Type_number);
+											ss << " ; " << endl;
+											ss << write_verilog_array_index_registers(Module, Local_name, Type_number, Numb_of_dim, Numb_of_dim, 1);
+										}
+									}
+								}
+							}
+						}
+						else if (HT.findfact("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"))
+						{
+							Type_kind = stoi(returnpar(HT.findandreturn("type_def(_," + Local_type + ",_,_,_,_,_,_,_)"), 6));
+							if (Type_kind != "vectorarray_t")
+							{
+								ss << "   inout ";
+								ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
+								ss << " " << Local_name << " ; " << endl;
+								ss << "   reg    ";
+								ss << write_size(Local_size, "std_logic", "verilog", "synergy", 1);
+								ss << " " << Local_name << " ; " << endl;
+							}
 						}
 					}
 				}
@@ -9270,7 +9213,7 @@ void write_unoptimised_hdl(string Module_name, int int1, int int2, string HDL, s
 				}
 			}
 		}
-		if (HDL == "verilog")
+		else if (HDL == "verilog")
 		{
 			if (!HT.findfact("cac_mode(*)"))
 			{
@@ -10354,11 +10297,6 @@ string write_local(local_object Local, string HDL, string Tool, string Suffix)
 						ss << "   SIGNAL " << Local_name << " : ";
 						ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
 					}
-					else if (HT.findfact("type_def(_," + Type_name + ",_,_,2,_,_,_,_)"))
-					{
-						ss << "   SIGNAL " << Local_name << " : ";
-						ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
-					}
 					else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",_,_,2)"))
 					{
 						Parent_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"single_t\",_,_,2)"), 5));
@@ -10368,6 +10306,11 @@ string write_local(local_object Local, string HDL, string Tool, string Suffix)
 							ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
 
 						}
+					}
+					else if (HT.findfact("type_def(_," + Type_name + ",_,_,2,_,_,_,_)"))
+					{
+						ss << "   SIGNAL " << Local_name << " : ";
+						ss << write_size(Local_size, "std_logic", "vhdl", "synergy", 0) << endl;
 					}
 					else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
 					{
@@ -10637,170 +10580,7 @@ string write_local(local_object Local, string HDL, string Tool, string Suffix)
 	{
 		if (HDL == "c")
 		{
-			if (var3 != "constant")
-			{
-				if (var7 == "standard")
-				{
-					if (Type_name == "std_logic")
-					{
-						if (be == "sym")
-						{
-							ss << "     long long int " << Local_name << ";" << endl;
-
-						}
-					}
-					else if (Type_name == "bool")
-					{
-						ss << "     long long int " << Local_name << ";" << endl;
-
-					}
-					else if (Local_value == "bit_wire(\"std_logic\")")
-					{
-						if (Local_size <= 32)
-						{
-							ss << "     long long int ";
-							ss << " " << Local_name << ";" << endl;
-						}
-						else
-						{
-							ss << "     long long int ";
-							ss << " " << Local_name << ";" << endl;
-						}
-					}
-					else if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",_,_,_,_,2)"))
-					{
-						Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",_,_,_,_,2)"), 1));
-						Parent_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",_,_,_,_,2)"), 5));
-						if (HT.findfact("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,_,_,_,_)"))
-						{
-							Parent_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,_,_,_,_)"), 3));
-							Parent_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,_,_,_,_)"), 6));
-							if (Parent_size >= Local_size)
-							{
-								if (Parent_kind != "single_t")
-								{
-									if (Parent_type < Type_number)
-									{
-										ss << "     long long int " << Local_name << " ;" << endl;
-									}
-								}
-							}
-						}
-					}
-					else if (Local_size == 1)
-					{
-						if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
-						{
-							Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 3));
-							if (Type_size == 1)
-							{
-								ss << "     int " << Local_name << " ";
-								ss << " ;" << endl;
-							}
-						}
-					}
-					else if (Type_name != "integer")
-					{
-						if (HT.findfact("type_def(_," + Type_name + ",_,_,2,_,_,_,_)"))
-						{
-							Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,2,_,_,_,_)"), 3));
-							if (Type_size > 1)
-							{
-								ss << "     int " << Local_name << " ";
-								ss << " ;" << endl;
-							}
-						}
-						else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
-						{
-							Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 3));
-							if (Local_size != Type_size)
-							{
-								if (Type_size > 1)
-								{
-									ss << "     long long int " << Local_name << " ;" << endl;
-								}
-							}
-							else
-							{
-								if (Type_size > 1)
-								{
-									ss << "     " << Type_name << " " << Local_name << " ";
-									ss << " ;" << endl;
-								}
-							}
-						}
-					}
-					else if (Type_name == "integer")
-					{
-						if (Local_size > 1)
-						{
-							ss << "     int " << Local_name << " ";
-							ss << " ;" << endl;
-						}
-					}
-				}
-				else if (var7 == "userarray")
-				{
-					if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,2)"))
-					{
-						Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,2)"), 3));
-						log2n(Type_size, 1, 1, 0);
-						ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
-						ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
-						ss << "     long long int " << Local_name << "_i ;" << endl;
-					}
-					else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
-					{
-						Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 3));
-						First_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 7));
-						Num_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 8));
-						Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 9));
-						if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,2)"))
-						{
-							Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,2)"), 3));
-							if (Comp_size > 1)
-							{
-								log2n(Type_size, 1, 1, 0); // for what? line: 15362
-								ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
-								ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
-								ss << "     long long int " << Local_name << "_i ;" << endl;
-							}
-						}
-						else if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
-						{
-							Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",*)"), 3));
-							Comp_kind = returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",*)"), 6);
-							if (Comp_size == 1)
-							{
-								Last_dim = Num_dim - 1;
-								if (Last_dim > First_dim)
-								{
-									ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
-									ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
-									ss << "     long long int " << Local_name << "_i ;" << endl;
-								}
-							}
-							if (Comp_kind != "single_t")
-							{
-								if (Comp_size > 1)
-								{
-									ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
-									ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
-									ss << "     long long int " << Local_name << "_i ;" << endl;
-								}
-							}
-						}
-					}
-				}
-				else if (var7 == "userrecord")
-				{
-					if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",_,_,\"record_t\",0,_,_)"))
-					{
-						ss << "     " << Type_name << "  " << Local_name << " ;" << endl;
-					}
-				}
-			}
-			else if (var3 == "par_out")
+			if (var3 == "par_out")
 			{
 				if (be == "i")
 					if (Type_name != "std_logic")
@@ -10862,6 +10642,169 @@ string write_local(local_object Local, string HDL, string Tool, string Suffix)
 						ss << "    const long long int ";
 						ss << Local_name << " = " << af;
 						ss << " ;" << endl;
+					}
+				}
+			}
+			else if (var3 != "constant")
+			{
+				if (var7 == "standard")
+				{
+					if (Type_name == "std_logic")
+					{
+						if (be == "sym")
+						{
+							ss << "     long long int " << Local_name << ";" << endl;
+
+						}
+					}
+					else if (Type_name == "bool")
+					{
+						ss << "     long long int " << Local_name << ";" << endl;
+
+					}
+					else if (Local_value == "bit_wire(\"std_logic\")")
+					{
+						if (Local_size <= 32)
+						{
+							ss << "     long long int ";
+							ss << " " << Local_name << ";" << endl;
+						}
+						else
+						{
+							ss << "     long long int ";
+							ss << " " << Local_name << ";" << endl;
+						}
+					}
+					else if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",_,_,_,_,2)"))
+					{
+						Type_number = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",_,_,_,_,2)"), 1));
+						Parent_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + "," + to_string(Local_size) + ",\"user\",_,_,_,_,2)"), 5));
+						if (HT.findfact("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,_,_,_,_)"))
+						{
+							Parent_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,_,_,_,_)"), 3));
+							Parent_kind = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Parent_type) + ",_,_,\"user\",_,_,_,_,_)"), 6));
+							if (Parent_size >= Local_size)
+							{
+								if (Parent_kind != "single_t")
+								{
+									if (Parent_type < Type_number)
+									{
+										ss << "     long long int " << Local_name << " ;" << endl;
+									}
+								}
+							}
+						}
+					}
+					else if (Local_size == 1)
+					{
+						if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
+						{
+							Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 3));
+							if (Type_size == 1)
+							{
+								ss << "     int " << Local_name << " ";
+								ss << " ;" << endl;
+							}
+						}
+					}
+					else if (Type_name == "integer")
+					{
+						if (Local_size > 1)
+						{
+							ss << "     int " << Local_name << " ";
+							ss << " ;" << endl;
+						}
+					}
+					else if (Type_name != "integer")
+					{
+						if (HT.findfact("type_def(_," + Type_name + ",_,_,2,_,_,_,_)"))
+						{
+							Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,2,_,_,_,_)"), 3));
+							if (Type_size > 1)
+							{
+								ss << "     int " << Local_name << " ";
+								ss << " ;" << endl;
+							}
+						}
+						else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
+						{
+							Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 3));
+							if (Local_size != Type_size)
+							{
+								if (Type_size > 1)
+								{
+									ss << "     long long int " << Local_name << " ;" << endl;
+								}
+							}
+							else
+							{
+								if (Type_size > 1)
+								{
+									ss << "     " << Type_name << " " << Local_name << " ";
+									ss << " ;" << endl;
+								}
+							}
+						}
+					}
+				}
+				else if (var7 == "userarray")
+				{
+					if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,2)"))
+					{
+						Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,2)"), 3));
+						log2n(Type_size, 1, 1, 0);
+						ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
+						ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
+						ss << "     long long int " << Local_name << "_i ;" << endl;
+					}
+					else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"))
+					{
+						Type_size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 3));
+						First_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 7));
+						Num_dim = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 8));
+						Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,_,_,_,_)"), 9));
+						if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,2)"))
+						{
+							Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,2)"), 3));
+							if (Comp_size > 1)
+							{
+								log2n(Type_size, 1, 1, 0); // for what? line: 15362
+								ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
+								ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
+								ss << "     long long int " << Local_name << "_i ;" << endl;
+							}
+						}
+						else if (HT.findfact("type_def(" + to_string(Comp_type) + ",*)"))
+						{
+							Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",*)"), 3));
+							Comp_kind = returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",*)"), 6);
+							if (Comp_size == 1)
+							{
+								Last_dim = Num_dim - 1;
+								if (Last_dim > First_dim)
+								{
+									ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
+									ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
+									ss << "     long long int " << Local_name << "_i ;" << endl;
+								}
+							}
+							if (Comp_kind != "single_t")
+							{
+								if (Comp_size > 1)
+								{
+									ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
+									ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
+									ss << "     long long int " << Local_name << "_i ;" << endl;
+								}
+							}
+						}
+					}
+				}
+				else if (var7 == "userrecord")
+				{
+					if (HT.findfact("type_def(_," + Type_name + "," + to_string(Local_size) + ",_,_,\"record_t\",0,_,_)"))
+					{
+						ss << "     " << Type_name << "  " << Local_name << " ;" << endl;
 					}
 				}
 			}
@@ -11020,7 +10963,7 @@ string write_standard_signals_for_called_module(string New_schedule, string Modu
 		if (custom_block(Called_module_name))
 			return ss.str();
 	}
-	if (New_schedule == "specials")
+	else if (New_schedule == "specials")
 	{
 		if (!HT.findfact("added_aux_call_signals(" + Module + "," + to_string(Called_module_entry) + ")"))
 		{
@@ -11789,7 +11732,16 @@ string declare_output_signal(string Output_instance, int Size)
 	{
 		if (HT.findfact("current_hdl_style(\"vhdl\")"))
 		{
-			if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,_)"))
+			if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,0)"))
+			{
+				Type = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_instance + ",_,0)"), 5));
+				if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+				{
+					Size_ = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+					ss << write_signal_declaration(Output_instance, 0, Size_);
+				}
+			}
+			else if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,_)"))
 			{
 				Type = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_instance + ",_,_)"), 5));
 				Size_ = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_instance + ",_,_)"), 6));
@@ -11805,7 +11757,10 @@ string declare_output_signal(string Output_instance, int Size)
 					}
 				}
 			}
-			else if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,0)"))
+		}
+		else if (HT.findfact("current_hdl_style(\"verilog\")"))
+		{
+			if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,0)"))
 			{
 				Type = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_instance + ",_,0)"), 5));
 				if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
@@ -11814,10 +11769,7 @@ string declare_output_signal(string Output_instance, int Size)
 					ss << write_signal_declaration(Output_instance, 0, Size_);
 				}
 			}
-		}
-		else if (HT.findfact("current_hdl_style(\"verilog\")"))
-		{
-			if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,_)"))
+			else if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,_)"))
 			{
 				Type = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_instance + ",_,_)"), 5));
 				Size_ = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_instance + ",_,_)"), 6));
@@ -11831,15 +11783,6 @@ string declare_output_signal(string Output_instance, int Size)
 					{
 						ss << write_signal_declaration(Output_instance, 0, Size);
 					}
-				}
-			}
-			else if (HT.findfact("output_instance(_,_,_," + Output_instance + ",_,0)"))
-			{
-				Type = stoi(returnpar(HT.findandreturn("output_instance(_,_,_," + Output_instance + ",_,0)"), 5));
-				if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
-				{
-					Size_ = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
-					ss << write_signal_declaration(Output_instance, 0, Size_);
 				}
 			}
 		}
@@ -12473,7 +12416,7 @@ string write_call_assignment(string Module, int Call_entry, string New_schedule)
 								HT.assertz("added_aux_call_ios1(" + Module + "," + to_string(Call_entry) + "," + to_string(Called_module_entry) + ")");
 							}
 						}
-						else if (!HT.findfact("max_parallel_call_order(" + Module + ",_," + to_string(Called_module_entry) + ",*)"))
+						else if (!HT.findfact("max_parallel_call_order(" + Module + ",_," + to_string(Called_module_entry) + ",_)"))
 						{
 							ss << "      " << Called_module_name << "_start <= " << Called_module_name << "_start_int;" << endl;
 							ss << "      " << Called_module_name << "_results_read <= " << Called_module_name << "_results_read_int;" << endl;
@@ -12792,7 +12735,7 @@ string write_aux_conditional_variable(string Module_name, int Entry, string HDL)
 					{
 						return ss.str();
 					}
-					else if (HT.findfact("data_stmt(" + Module_name + ",*)"))
+					if (HT.findfact("data_stmt(" + Module_name + ",*)"))
 					{
 						DName = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",*)"), 2);
 						Ctype = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + ",*)"), 4));
@@ -13492,6 +13435,12 @@ string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 								Comp_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 9));
 								if (Comp_type > 1)
 								{
+									if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,1,_,_,\"single_t\",_,_,_)"))
+									{
+										Lastd = Firstd + Dimmension - 1;
+										ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+										ss << "       " << Local_name_app << " <= 0;" << endl;
+									}
 									if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"))
 									{
 										Comp_type_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,_)"), 3));
@@ -13502,12 +13451,6 @@ string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 											ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
 											ss << "        " << Local_name_app << "[" << Local_name << "_i] <= 0;" << endl;
 										}
-									}
-									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,1,_,_,\"single_t\",_,_,_)"))
-									{
-										Lastd = Firstd + Dimmension - 1;
-										ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
-										ss << "       " << Local_name_app << " <= 0;" << endl;
 									}
 									else if (HT.findfact("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"record_t\",_,_,_)"))
 									{
@@ -13584,6 +13527,11 @@ string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 									ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
 									ss << "       " << Local_name_app << " <= 1'b0;" << endl;
 								}
+								else if (HT.findfact("type_def(1," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
+								{
+									ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
+									ss << "       " << Local_name_app << " <= 1'b0;" << endl;
+								}
 								else if (HT.findfact("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
 								{
 									Inh_type = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,_,_,\"single_t\",0,_,_)"), 9));
@@ -13592,11 +13540,6 @@ string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 										ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
 										ss << "       " << Local_name_app << " <= 1'b0;" << endl;
 									}
-								}
-								else if (HT.findfact("type_def(1," + Type_name + ",_,_,_,\"single_t\",0,_,_)"))
-								{
-									ss << write_depending_on_kind(Local_name, Local_kind, &Local_name_app);
-									ss << "       " << Local_name_app << " <= 1'b0;" << endl;
 								}
 							}
 							else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"record_t\",0,_,_)"))
@@ -13688,7 +13631,22 @@ string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 							}
 							else if (Local_size > 1)
 							{
-								if (Type_name == "std_logic")
+								if (be == "bit_wire" && af == "std_logic")
+								{
+									if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"))
+									{
+										Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 3));
+										Type_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 6);
+										if (Type_kind != "single_t")
+										{
+											if (Size != Local_size)
+											{
+												ss << "       " << Local_name << " = 0;" << endl;
+											}
+										}
+									}
+								}
+								else if (Type_name == "std_logic")
 								{
 									ss << "       " << Local_name << " = 0;" << endl;
 								}
@@ -13723,21 +13681,6 @@ string reset_local(string Schedule, local_object Local, string HDL, string Tool)
 										if (HT.findfact("type_def(" + to_string(ParentType) + ",_,_,\"user\",_,\"record_t\",_,_,_)"))
 										{
 											if (TypeEntry > ParentType)
-											{
-												ss << "       " << Local_name << " = 0;" << endl;
-											}
-										}
-									}
-								}
-								else if (be == "bit_wire" && af == "std_logic")
-								{
-									if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"))
-									{
-										Size = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 3));
-										Type_kind = returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",_,_,_,_,_)"), 6);
-										if (Type_kind != "single_t")
-										{
-											if (Size != Local_size)
 											{
 												ss << "       " << Local_name << " = 0;" << endl;
 											}
@@ -13861,7 +13804,6 @@ string reset_record_field(string Kind, int Field_number, int Number_of_fields, i
 	return ss.str();
 }
 
-// has 2 times first the VHDL case with exact identical clauses
 string reset_record_field_core(string Kind, int Field_number, int Number_of_fields, int Current_comp_type, string HDL, int* Next_field_number, int* Next_comp_type)
 {
 	stringstream ss;
@@ -14203,7 +14145,7 @@ string write_array_end_loop_core(int Dimension_depth, int* Next_dimension_depth)
 		if (Dimension_depth > 1)
 			*Next_dimension_depth = Dimension_depth - 1;
 	}
-	if (HT.findfact("hdl_style(\"c\")"))
+	else if (HT.findfact("hdl_style(\"c\")"))
 	{
 		if (Dimension_depth > 1)
 		{
@@ -15232,7 +15174,7 @@ string output_operation(string Module_name, int Operation, string HDL, string To
 							}
 						}
 					}
-					if (Op_numb != 103 && Op_numb != 104 && Op_numb != 105 && Op_numb != 106 && Op_numb != 107 && Op_numb != 108 && Op_numb != 110)
+					else if (Op_numb != 103 && Op_numb != 104 && Op_numb != 105 && Op_numb != 106 && Op_numb != 107 && Op_numb != 108 && Op_numb != 110)
 					{
 						if (HT.findfact("op_def(" + to_string(Op_numb) + ",_,\"binop\",_,_,_,_)"))
 						{
@@ -16334,7 +16276,16 @@ string print_array_index_parameter(string Module_name, int Right_op)
 	string Right_name, Kind, Ivalue, HDL;
 	if (HT.findfact("hdl_style(\"vhdl\")"))
 	{
-		if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"))
+		if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"))
+		{
+			string tmp = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"), 6);
+			string be = tmp.substr(0, tmp.find(pa, 0));
+			string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
+			af.resize(af.size() - 1);
+			Ivalue = af;
+			ss << "(" << Ivalue << ")";
+		}
+		else if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"))
 		{
 			Right_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"), 2);
 			Kind = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"), 5);
@@ -16346,22 +16297,22 @@ string print_array_index_parameter(string Module_name, int Right_op)
 				}
 			}
 		}
-		else if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"))
-		{
-			string tmp = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"), 6);
-			string be = tmp.substr(0, tmp.find(pa, 0));
-			string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
-			af.resize(af.size() - 1);
-			Ivalue = af;
-			ss << "(" << Ivalue << ")";
-		}
 	}
 	else if (HT.findfact("hdl_style(*)"))
 	{
 		HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
 		if (HDL != "vhdl")
 		{
-			if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"))
+			if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"))
+			{
+				string tmp = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"), 6);
+				string be = tmp.substr(0, tmp.find(pa, 0));
+				string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
+				af.resize(af.size() - 1);
+				Ivalue = af;
+				ss << "[" << Ivalue << "]";
+			}
+			else if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"))
 			{
 				Right_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"), 2);
 				Kind = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,_,_)"), 5);
@@ -16372,15 +16323,6 @@ string print_array_index_parameter(string Module_name, int Right_op)
 						ss << "[" << Right_name << "]";
 					}
 				}
-			}
-			else if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"))
-			{
-				string tmp = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(Right_op) + ",_,\"const\",i(_))"), 6);
-				string be = tmp.substr(0, tmp.find(pa, 0));
-				string af = tmp.substr(be.length() + 1, tmp.find(pacl, 0));
-				af.resize(af.size() - 1);
-				Ivalue = af;
-				ss << "[" << Ivalue << "]";
 			}
 		}
 	}
@@ -16709,25 +16651,7 @@ string write_verilog_aggregate(string Module_name, int Cur_index, string Res_nam
 	int Next_index;
 	if (!List.empty())
 	{
-		if (HT.findfact("data_stmt(_,_," + to_string(List.front()) + ",_,_,_)"))
-		{
-			Object_name = returnpar(HT.findandreturn("data_stmt(_,_," + to_string(List.front()) + ",_,_,_)"), 2);
-			if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",_,_,\"par_inout\",_)"))
-			{
-				ss << "             ";
-				ss << Res_name << "_regout[" << Cur_index << "] <= " << Object_name << ";" << endl;
-			}
-			else if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",*)"))
-			{
-				Kind = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Res_name + ",*)"), 5));
-				if (Kind != "par_inout")
-				{
-					ss << "             ";
-					ss << Res_name << "[" << Cur_index << "] <= " << Object_name << ";" << endl;
-				}
-			}
-		}
-		else if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(List.front()) + ",_,_,_)"))
+		if (HT.findfact("data_stmt(" + Module_name + ",_," + to_string(List.front()) + ",_,_,_)"))
 		{
 			Object_name = returnpar(HT.findandreturn("data_stmt(" + Module_name + ",_," + to_string(List.front()) + ",_,_,_)"), 2);
 			if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",_,_,\"par_inout\",_)"))
@@ -16748,6 +16672,24 @@ string write_verilog_aggregate(string Module_name, int Cur_index, string Res_nam
 					Next_index = Cur_index + 1;
 					List.erase(List.begin());
 					ss << write_verilog_aggregate(Module_name, Next_index, Res_name, List);
+				}
+			}
+		}
+		else if (HT.findfact("data_stmt(_,_," + to_string(List.front()) + ",_,_,_)"))
+		{
+			Object_name = returnpar(HT.findandreturn("data_stmt(_,_," + to_string(List.front()) + ",_,_,_)"), 2);
+			if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",_,_,\"par_inout\",_)"))
+			{
+				ss << "             ";
+				ss << Res_name << "_regout[" << Cur_index << "] <= " << Object_name << ";" << endl;
+			}
+			else if (HT.findfact("data_stmt(" + Module_name + "," + Res_name + ",*)"))
+			{
+				Kind = stoi(returnpar(HT.findandreturn("data_stmt(" + Module_name + "," + Res_name + ",*)"), 5));
+				if (Kind != "par_inout")
+				{
+					ss << "             ";
+					ss << Res_name << "[" << Cur_index << "] <= " << Object_name << ";" << endl;
 				}
 			}
 		}
@@ -16938,7 +16880,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 												}
 											}
 										}
-										if (HT.findfact("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"))
+										else if (HT.findfact("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"))
 										{
 											Ndata_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"), 7));
 											if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Ndata_entry) + ",_,_,_)"))
@@ -17095,7 +17037,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 															}
 														}
 													}
-													if (Base == 0)
+													else if (Base == 0)
 													{
 														if (Rd_width <= S1d_width)
 														{
@@ -17114,7 +17056,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 												}
 											}
 										}
-										if (HT.findfact("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"))
+										else if (HT.findfact("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"))
 										{
 											Ndata_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"), 7));
 											if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Ndata_entry) + ",_,_,_)"))
@@ -17566,6 +17508,27 @@ string output_special_operation(string Module, int Operation, string HDL, string
 					}
 				}
 			}
+			else if (Operator == "**")
+			{
+				if (get_data_name(Module, Result, &Rd_name, &Rd_width))
+				{
+					if (Rd_width > 1)
+					{
+						if (get_data_name(Module, Left_op, &S1d_name, 0))
+						{
+							if (Right_op != 0)
+							{
+								if (get_data_name(Module, Right_op, &S2d_name, 0))
+								{
+									ss << Rd_name << " = pow(" << S1d_name << ", " << S2d_name << ");";
+									ss << write_special_comment(HDL) << endl;
+									ss << "         printf(" << '"' << Rd_name << " = pow(" << S1d_name << " , " << S2d_name << ") = %d" << '\\' << "n" << '"' << ", " << Rd_name << "); " << endl;
+								}
+							}
+						}
+					}
+				}
+			}
 			else if (Operator != "<=")
 			{
 				if (Operator != "**")
@@ -17584,27 +17547,6 @@ string output_special_operation(string Module, int Operation, string HDL, string
 										ss << write_special_comment(HDL) << endl;
 										ss << "         printf(" << '"' << Rd_name << " = " << S1d_name << " " << Operator << " " << S2d_name << " = %d" << '\\' << "n" << '"' << ", " << Rd_name << "); " << endl;
 									}
-								}
-							}
-						}
-					}
-				}
-			}
-			else if (Operator == "**")
-			{
-				if (get_data_name(Module, Result, &Rd_name, &Rd_width))
-				{
-					if (Rd_width > 1)
-					{
-						if (get_data_name(Module, Left_op, &S1d_name, 0))
-						{
-							if (Right_op != 0)
-							{
-								if (get_data_name(Module, Right_op, &S2d_name, 0))
-								{
-									ss << Rd_name << " = pow(" << S1d_name << ", " << S2d_name << ");";
-									ss << write_special_comment(HDL) << endl;
-									ss << "         printf(" << '"' << Rd_name << " = pow(" << S1d_name << " , " << S2d_name << ") = %d" << '\\' << "n" << '"' << ", " << Rd_name << "); " << endl;
 								}
 							}
 						}
@@ -17992,7 +17934,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 										if (HT.findfact("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"))
 										{
 											Ndata_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module + "," + to_string(Noperation) + ",_,108,_,_,_,_)"), 7));
-											if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Ndata_entry) + ",*)"))
+											if (HT.findfact("data_stmt(" + Module + ",_," + to_string(Ndata_entry) + ",_,_,_)"))
 											{
 												Ndata_name = returnpar(HT.findandreturn("data_stmt(" + Module + ",_," + to_string(Ndata_entry) + ",_,_,_)"), 2);
 												if (HT.findfact("mem_port(_,_," + Module + "," + Ndata_name + ",_,_,_,_,_,_,_,_,_)"))
@@ -18656,6 +18598,7 @@ string write_output_state_assignment(string Module_name, int State, int Op)
 														Signal_inst_name = returnpar(HT.findandreturn("output_instance(_," + State_name + "," + Res_name + ",_,_,_)"), 4);
 														Signal_type = stoi(returnpar(HT.findandreturn("output_instance(_," + State_name + "," + Res_name + ",_,_,_)"), 5));
 														ss << Res_name << " <= " << Signal_inst_name << "; " << endl;
+														return ss.str();
 													}
 												}
 											}
@@ -18912,13 +18855,13 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 					return ss.str();
 			}
 		}
-		if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",*)"))
+		else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",*)"))
 		{
 			Op_type = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",*)"), 4));
 			if (Op_type != 109)
 				return ss.str();
 		}
-		if (HDL == "vhdl")
+		else if (HDL == "vhdl")
 		{
 			if (int1 == 1)
 			{
@@ -18947,8 +18890,6 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 
 											if (Total_order > 1)
 											{
-
-
 												make_order_string(Same_order, Same_order, &Ordercus);
 												find_correct_order(Module_name, Call_entry, &MaxOrder);
 												if (MaxOrder > 1)
@@ -19000,7 +18941,28 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 				}
 				else if (HT.findfact("hdl_style(\"vhdl\")"))
 				{
-					if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
+					if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"))
+					{
+						Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"), 6));
+						if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+						{
+							Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+							Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
+							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+							{
+								Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+								if (custom_block(Called_module_name))
+								{
+									ss << WS;
+									ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
+									ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
+									ss << write_block_call(Called_module_name, 2, WS) << endl;
+									ss << write_cus_block_call_output_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS);
+								}
+							}
+						}
+					}
+					else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
 					{
 						Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 6));
 						Res_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 7));
@@ -19106,6 +19068,7 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 												ss << WS << "           ELSE " << endl;
 												ss << WS << "            state <= state_" << State << ";" << endl;
 												ss << WS << "           END IF; " << endl;
+												return ss.str();
 											}
 										}
 										find_correct_order(Module_name, Call_entry, &MaxOrder);
@@ -19147,27 +19110,6 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 											ss << WS << "           END IF; " << endl;
 										}
 									}
-								}
-							}
-						}
-					}
-					else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"))
-					{
-						Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"), 6));
-						if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
-						{
-							Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
-							Actual_params = returnVec(makeInstanceOf(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)")), 1);
-							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
-							{
-								Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
-								if (custom_block(Called_module_name))
-								{
-									ss << WS;
-									ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
-									ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
-									ss << write_block_call(Called_module_name, 2, WS) << endl;
-									ss << write_cus_block_call_output_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS);
 								}
 							}
 						}
@@ -19267,7 +19209,25 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 				}
 				else if (HT.findfact("hdl_style(\"verilog\")"))
 				{
-					if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
+					if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"))
+					{
+						Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"), 6));
+						if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
+						{
+							Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
+							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
+							{
+								Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
+								if (custom_block(Called_module_name))
+								{
+									ss << WS;
+									ss << " //------ this is a call to custom block : " << Called_module_name << " -----" << endl;
+									ss << write_custom_call_actuals(Module_name, Call_entry, "verilog") << endl;
+								}
+							}
+						}
+					}
+					else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"))
 					{
 						Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 6));
 						Res_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,_,_)"), 7));
@@ -19395,24 +19355,6 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 											}
 										}
 									}
-								}
-							}
-						}
-					}
-					else if (HT.findfact("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"))
-					{
-						Call_entry = stoi(returnpar(HT.findandreturn("prog_stmt(" + Module_name + "," + to_string(Operation) + ",_,109,0,_,0,_)"), 6));
-						if (HT.findfact("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"))
-						{
-							Called_module_entry = stoi(returnpar(HT.findandreturn("call_stmt(" + Module_name + "," + to_string(Call_entry) + ",*)"), 3));
-							if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"))
-							{
-								Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",_,_,\"libpart\"," + to_string(Called_module_entry) + ",_,_)"), 2);
-								if (custom_block(Called_module_name))
-								{
-									ss << WS;
-									ss << " //------ this is a call to custom block : " << Called_module_name << " -----" << endl;
-									ss << write_custom_call_actuals(Module_name, Call_entry, "verilog") << endl;
 								}
 							}
 						}
@@ -19802,7 +19744,7 @@ string write_next_state_conditionally(string WS, int CurrentDepth, int Next_stat
 			ss << WS << "              END IF;" << endl;
 		}
 	}
-	if (HT.findfact("hdl_style(\"verilog\")"))
+	else if (HT.findfact("hdl_style(\"verilog\")"))
 	{
 		if (CurrentDepth == 1)
 		{
@@ -20276,7 +20218,7 @@ string write_actual_or_formal_parameter(string Module, string Called_module, int
 			ss << Object_name << ", ";
 		}
 	}
-	if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"))
+	else if (HT.findfact("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"))
 	{
 		Object_name = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 2);
 		Object_kind = returnpar(HT.findandreturn("data_stmt(" + Called_module + ",_," + to_string(Formal) + ",_,_,_)"), 5);
@@ -20458,7 +20400,6 @@ string print_call_input_par_assignment_core(string Module_name, int Head_op, int
 			}
 		}
 	}
-
 	return ss.str();
 }
 
@@ -20907,7 +20848,6 @@ string write_op_instance_unopt(int Entry)
 										ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
 											Instance_name << "_in1) mod CONV_INTEGER(" << Instance_name << "_in2), " <<
 											Rsize << ")  ;" << endl;
-
 									}
 								}
 							}
@@ -20937,7 +20877,6 @@ string write_op_instance_unopt(int Entry)
 										ss << "                          conv_std_logic_vector(CONV_INTEGER(" <<
 											Instance_name << "_in1) mod CONV_INTEGER(" << Instance_name << "_in2), " <<
 											Rsize << ") ;" << endl;
-
 									}
 								}
 							}
@@ -21095,7 +21034,7 @@ string write_op_instance_unopt(int Entry)
 								}
 							}
 						}
-						if (Type == 0)
+						else if (Type == 0)
 						{
 							if (Size > 1)
 							{
@@ -21206,13 +21145,11 @@ string write_op_instance_unopt(int Entry)
 				{
 					ss << write_initial_gap_for_instances();
 					ss << "  " << Instance_name << "_out = " << Instance_name << "_in1 % " << Instance_name << "_in2;" << endl;
-
 				}
 				else if (HT.findfact("op_def(" + to_string(Operator) + ",\"rem\",*)"))
 				{
 					ss << write_initial_gap_for_instances();
 					ss << Instance_name << "_out = " << Instance_name << "_in1 - (" << Instance_name << "_in1 / " << Instance_name << "_in2) ;" << endl;
-
 				}
 			}
 			else if (Operator == 0)
@@ -21409,7 +21346,6 @@ string write_op_instance_unopt(int Entry)
 			ss << Instance_name << "_out ";
 			ss << write_continuous_assignment();
 			ss << " " << "not" << " " << Instance_name << "_in2;" << endl;
-
 		}
 	}
 	return ss.str();
@@ -21539,7 +21475,7 @@ string write_division_signal_op_unopt(string str, int Op_size, string Op_instanc
 			}
 		}
 	}
-	if (HT.findfact("hdl_style(\"verilog\")"))
+	else if (HT.findfact("hdl_style(\"verilog\")"))
 	{
 		if (Input_entry == 1)
 		{
@@ -21740,7 +21676,16 @@ string write_data_routing_unopt_cond(int Entry)
 	stringstream ss;
 	string OpSymbol, Op_instance, In1_instance, In2_instance, Op_name, Op_announcement;
 	int Operator, Op_size, In1_type, In1_size, In2_type, In2_size, Min_size2;
-	if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
+	if (HT.findfact("op_instance(" + to_string(Entry) + ",\"minus\",*)"))
+	{
+		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",\"minus\",*)"), 5);
+		HT.concat(Op_instance, "_in2", &In2_instance);
+		if (!HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
+		{
+			return ss.str();
+		}
+	}
+	else if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
 	{
 		OpSymbol = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 2);
 		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 5);
@@ -21753,18 +21698,9 @@ string write_data_routing_unopt_cond(int Entry)
 			}
 		}
 	}
-	if (HT.findfact("op_instance(" + to_string(Entry) + ",\"minus\",*)"))
+	else if (HT.findfact("hdl_style(\"vhdl\")"))
 	{
-		Op_instance = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",\"minus\",*)"), 5);
-		HT.concat(Op_instance, "_in2", &In2_instance);
-		if (!HT.findfact("signal_instance(_," + In2_instance + ",_,_,_,_,_)"))
-		{
-			return ss.str();
-		}
-	}
-	if (HT.findfact("hdl_style(\"vhdl\")"))
-	{
-		if (HT.findfact("op_instance("+to_string(Entry)+",*)"))
+		if (HT.findfact("op_instance(" + to_string(Entry) + ",*)"))
 		{
 			Op_name = returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 2);
 			Operator = stoi(returnpar(HT.findandreturn("op_instance(" + to_string(Entry) + ",*)"), 3));
@@ -22069,28 +22005,7 @@ string write_data_instance_unopt(int Operator, int Input_entry, string Signal_in
 					Module = returnpar(HT.findandreturn("current_module(*)"), 1);
 					if (Input_name != "constant")
 					{
-						if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",*)"))
-						{
-							Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 4));
-							Kind = returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 5);
-							if (Kind != "const")
-							{
-								if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
-								{
-									TSize = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
-									max_(Op_size, Signal_size, &Size1);
-									max_(Size1, TSize, &Size);
-									ss << "  routing_" << Signal_inst_name << ":" << endl;
-									ss << "   WITH state SELECT " << endl;
-									ss << "   " << Signal_inst_name << " <= ";
-									ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
-									ss << " WHEN " << State_name << "," << endl;
-									ss << "                      ";
-
-								}
-							}
-						}
-						else if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",_,_,\"const\",_)"))
+						if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",_,_,\"const\",_)"))
 						{
 							Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",_,_,\"const\",_)"), 4));
 							if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
@@ -22113,6 +22028,26 @@ string write_data_instance_unopt(int Operator, int Input_entry, string Signal_in
 									ss << "   WITH state SELECT " << endl;
 									ss << "   " << Signal_inst_name << " <= ";
 									ss << write_input_name_conditionally(Operator, Input_name, Value, Op_size);
+									ss << " WHEN " << State_name << "," << endl;
+									ss << "                      ";
+								}
+							}
+						}
+						else if (HT.findfact("data_stmt(" + Module + "," + Input_name + ",*)"))
+						{
+							Type = stoi(returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 4));
+							Kind = returnpar(HT.findandreturn("data_stmt(" + Module + "," + Input_name + ",*)"), 5);
+							if (Kind != "const")
+							{
+								if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
+								{
+									TSize = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type) + ",*)"), 3));
+									max_(Op_size, Signal_size, &Size1);
+									max_(Size1, TSize, &Size);
+									ss << "  routing_" << Signal_inst_name << ":" << endl;
+									ss << "   WITH state SELECT " << endl;
+									ss << "   " << Signal_inst_name << " <= ";
+									ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
 									ss << " WHEN " << State_name << "," << endl;
 									ss << "                      ";
 								}
@@ -22212,7 +22147,7 @@ string write_data_instance_unopt(int Operator, int Input_entry, string Signal_in
 							}
 						}
 					}
-					if (Input_name == "constant")
+					else if (Input_name == "constant")
 					{
 						max_(Op_size, Signal_size, &Size);
 						ss << write_input_name_conditionally(Operator, Input_name, Value, Size);
@@ -22480,7 +22415,7 @@ string write_signal_inst_tail(int Signal_type, string In_instance, int Operator_
 									}
 								}
 							}
-							if (HT.findfact("op_def(" + to_string(Operator_entry) + ",*)"))
+							else if (HT.findfact("op_def(" + to_string(Operator_entry) + ",*)"))
 							{
 								Op_symbol = returnpar(HT.findandreturn("op_def(" + to_string(Operator_entry) + ",*)"), 2);
 								if (Op_symbol != "=")
@@ -22707,7 +22642,6 @@ string write_aux_verilog_calls_declarations(string Module, int In_call_entry)
 		ss << write_aux_verilog_task_output_declarations(Module, Called_module_entry, Parameters);
 		Next_call_entry = In_call_entry + 1;
 		ss << write_aux_verilog_calls_declarations(Module, Next_call_entry);
-
 	}
 	return ss.str();
 }
@@ -23262,7 +23196,7 @@ string write_formal_ports_for_called_module(string Module, int Call_entry, int C
 		{
 			return ss.str();
 		}
-		else if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
+		if (HT.findfact("hierarchy_part(" + to_string(Called_module_entry) + ",*)"))
 		{
 			Called_module_name = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_module_entry) + ",*)"), 2);
 			if (HT.findfact("max_parallel_call_order(" + Module + ",\"parcsif\"," + to_string(Called_module_entry) + ",*)"))
@@ -23336,7 +23270,7 @@ string scan_and_print_formal_parameter_io_core(string Module, int Called_module_
 				{
 					return ss.str();
 				}
-				else if (!HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
+				if (!HT.findfact("mem_port(_,_," + Called_module_name + "," + Parameter_name + ",_,_,_,_,_,_,_,_,_)"))
 				{
 					if (is_io_type(Data_kind))
 					{
@@ -23649,7 +23583,6 @@ string finds_par_and_resets_formal_ios(string Module_name, string HDL, int C_ent
 			iterates_and_resets_formal_ios(Module_name, "vhdl", C_entry, Function_entry, Function_max_calls, Function_index, 1);
 			Next_index = Function_index + 1;
 			ss << finds_par_and_resets_formal_ios(Module_name, "vhdl", C_entry, Function_entry, Function_max_calls, Next_index);
-
 		}
 	}
 	return ss.str();
@@ -23847,7 +23780,6 @@ void iterates_and_resets_formal_ios_core(string Module_name, string HDL, int C_e
 				*Next_par = Par_entry + 1;
 			}
 		}
-
 	}
 }
 
@@ -23986,7 +23918,7 @@ string write_opted_state(string Module, string New_schedule, int State_entry, st
 			}
 		}
 	}
-	if (Tool == "gnu")
+	else if (Tool == "gnu")
 	{
 		if (HDL == "c")
 		{
@@ -24336,7 +24268,6 @@ string print_targeted_conditional_variable_assignment(string WS, string Module, 
 							HT.concat(TargetName, "_", &TargetName1);
 							HT.concat(TargetName1, "conditional_variable", &TargetName2);
 							ss << WS << TargetName2 << " := " << RightName << ";" << endl;
-
 						}
 					}
 				}
@@ -24389,7 +24320,7 @@ string print_targeted_conditional_variable_assignment(string WS, string Module, 
 				}
 			}
 		}
-		if (HT.findfact("hdl_style(*)"))
+		else if (HT.findfact("hdl_style(*)"))
 		{
 			HDL = returnpar(HT.findandreturn("hdl_style(*)"), 1);
 			if (HDL != "vhdl")
@@ -24637,6 +24568,8 @@ string write_unconditional_next_state(string Module, int Uncond_next_state, int 
 {
 	stringstream ss;
 	string HDL, Schedule;
+	if (Uncond_next_state == 0)
+		return ss.str();
 	if (HT.findfact("hdl_style(\"vhdl\")"))
 	{
 		if (Uncond_next_state != 0)
@@ -24671,25 +24604,22 @@ string write_unconditional_next_state(string Module, int Uncond_next_state, int 
 	}
 	else if (HT.findfact("hdl_style(\"c\")"))
 	{
-		if (HDL != "c")
+		if (HT.findfact("new_schedule(*)"))
 		{
-			if (HT.findfact("new_schedule(*)"))
+			Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+			if (HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
 			{
-				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
-				if (HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
-				{
-					ss << "         state = " << New_next_state << ";" << endl;
-				}
-				else if (!HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
-				{
-					ss << "         printf(" << '"' << " last state %d" << '\\' << 'n' << " does not really exist " << '"' << ',' << New_next_state << ");" << endl;
-					ss << "         printf(" << '"' << " writing the design's outputs and synchronizing with the outside world..." << '\\' << 'n' << '"' << ");" << endl;
-					ss << "         printf(" << '"' << " you will move to state 0" << '\\' << 'n' << '"' << ");" << endl;
-					ss << "         run_clock_cycles = run_clock_cycles + 1;" << endl;
-					ss << "          Stop = 1;" << endl;
-					ss << "         state = 0; " << endl;
-					ss << "         break;" << endl;
-				}
+				ss << "         state = " << New_next_state << ";" << endl;
+			}
+			else if (!HT.findfact("state(" + Module + "," + Schedule + "," + to_string(New_next_state) + ",*)"))
+			{
+				ss << "         printf(" << '"' << " last state %d" << '\\' << 'n' << " does not really exist " << '"' << ',' << New_next_state << ");" << endl;
+				ss << "         printf(" << '"' << " writing the design's outputs and synchronizing with the outside world..." << '\\' << 'n' << '"' << ");" << endl;
+				ss << "         printf(" << '"' << " you will move to state 0" << '\\' << 'n' << '"' << ");" << endl;
+				ss << "         run_clock_cycles = run_clock_cycles + 1;" << endl;
+				ss << "          Stop = 1;" << endl;
+				ss << "         state = 0; " << endl;
+				ss << "         break;" << endl;
 			}
 		}
 	}
@@ -24811,7 +24741,7 @@ string write_conditional_next_states(string WS, string Module, int int1, int Con
 				}
 			}
 		}
-		if (Contains_call == 0)
+		else if (Contains_call == 0)
 		{
 			if (HT.findfact("new_schedule(*)"))
 			{
@@ -25488,7 +25418,7 @@ void set_ifthen_chain_end_operations_written_fact(int Value)
 	{
 		HT.assertz("local_ifthen_chain_end_operations_were_written(" + to_string(Value) + ")");
 	}
-	if (HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
+	else if (HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
 	{
 		if (HT.findfact("local_ifthen_chain_end_operations_were_written(*)"))
 		{
@@ -25525,7 +25455,7 @@ void write_parcs_c(string Module_name, int Local_list, int Last_parcs_state)
 	{
 		return;
 	}
-	else if (Last_parcs_state > 0)
+	if (Last_parcs_state > 0)
 	{
 		if (HT.findfact("massively_parallel_style(1)"))
 		{
@@ -25652,7 +25582,6 @@ string set_input(local_object Local, string HDL, string Tool)
 								ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
 								ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
 								ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
-
 							}
 						}
 					}
@@ -25721,7 +25650,6 @@ string set_input(local_object Local, string HDL, string Tool)
 								ss << "       printf(" << '"' << " give me the value of input " << Local_name << " " << '"' << ");" << endl;
 								ss << "       scanf(" << '"' << "%lld" << '"' << ", &" << Local_name << ");" << endl;
 								ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
-
 							}
 						}
 					}
@@ -25794,7 +25722,7 @@ string set_input(local_object Local, string HDL, string Tool)
 					ss << "       printf(" << '"' << Local_name << " = %d" << '\\' << "n" << '"' << ", " << Local_name << ");" << endl;
 				}
 			}
-			if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"))
+			else if (HT.findfact("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"))
 			{
 				Type_entry = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 1));
 				Firstd = stoi(returnpar(HT.findandreturn("type_def(_," + Type_name + ",_,\"user\",0,\"vectorarray_t\",_,_,_)"), 7));
@@ -25844,7 +25772,6 @@ string set_input(local_object Local, string HDL, string Tool)
 						ss << write_array_comp_set_value(Local_name, Last_comp_type, Dimension_depth);
 						Dimension_depth_minus_one = Dimension_depth - 1;
 						ss << write_array_end_loop(Dimension_depth_minus_one);
-
 					}
 				}
 			}
@@ -26025,7 +25952,7 @@ string write_record_set_aggregate(int In_dim, int Number_of_dims, int In_comp, s
 				ss << Type_name << ");";
 			}
 		}
-		if (In_dim < Number_of_dims - 1)
+		else if (In_dim < Number_of_dims - 1)
 		{
 			if (HT.findfact("type_def(" + to_string(In_comp) + ",_,_,_,_,\"single_t\",_,_,_)"))
 			{
