@@ -1041,7 +1041,8 @@ void build_loop_cond(string name, int Entry)
 						Condition_statement = If_entry;
 						Body_last = Entry - 1;
 						End_of_loop = Entry;
-						add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+						int ignored;
+						add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &ignored);
 						return;
 					}
 					if (Previous_target == Condition)
@@ -1049,7 +1050,8 @@ void build_loop_cond(string name, int Entry)
 						Condition_statement = Previous_target;
 						Body_last = Entry - 1;
 						End_of_loop = Entry;
-						add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+						int ignored;
+						add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &ignored);
 						return;
 					}
 				}
@@ -1058,7 +1060,8 @@ void build_loop_cond(string name, int Entry)
 					Condition_statement = Previous_statement;
 					Body_last = Entry - 1;
 					End_of_loop = Entry;
-					add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+					int ignored;
+					add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &ignored);
 					return;
 				}
 			}
@@ -1083,7 +1086,8 @@ void build_loop_cond(string name, int Entry)
 							{
 								Body_last = Increment_instruction;
 								End_of_loop = Entry;
-								add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);								
+								int ignored;
+								add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &ignored);
 								return;
 							}
 							else
@@ -1110,7 +1114,8 @@ void build_loop_cond(string name, int Entry)
 									{
 										Body_last = Increment_instruction;
 										End_of_loop = Entry;
-										add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, 0);
+										int ignored;
+										add_while_loop(name, If_entry, Condition_statement, End_of_loop, Body_first, Body_last, &ignored);
 										return;
 									}
 								}
@@ -1312,7 +1317,8 @@ void build_loop_cond(string name, int Entry)
 											}
 										}
 									}
-									if (!trace_back(name, Initiation_statement, End_val_data, 0))
+									int ignored;
+									if (!trace_back(name, Initiation_statement, End_val_data, &ignored))
 									{
 										Increment_instruction = Entry - 1;
 										if (HT.findfact("prog_stmt(\"" + name + "\"," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
@@ -1331,7 +1337,8 @@ void build_loop_cond(string name, int Entry)
 								}
 								if (HT.findfact("data_stmt(\"" + name + "\",_," + to_string(Init_variable) + ",_,\"var\",_)"))
 								{
-									if (!trace_back(name, Initiation_statement, End_val_data, 0))
+									int ignored;
+									if (!trace_back(name, Initiation_statement, End_val_data, &ignored))
 									{
 										Increment_instruction = Entry - 1;
 										if (HT.findfact("prog_stmt(\"" + name + "\"," + to_string(Increment_instruction) + ",_,104," + to_string(Increment_variable) + ",_," + to_string(Increment_variable) + "," + to_string(Entry) + ")"))
@@ -1737,7 +1744,8 @@ void generate_hdl_2(string Hdlform, string tool, string Module_name, int Level)
 				Last_local_entry0 = last_from_global_declarations(makeInstanceOf(HT.findandreturn("global_declarations(*)")));
 				Local_list0 = return_vec_lo(makeInstanceOf(HT.findandreturn("global_declarations(*)")));
 				Next_local_entry = Last_local_entry0 + 1;
-				get_and_append_local(Module_name, Local_list0, Next_local_entry, &Local_list1, 0);
+				int ignored;
+				get_and_append_local(Module_name, Local_list0, Next_local_entry, &Local_list1, &ignored);
 				write_custom_block(Module_name, Hdlform, Local_list1);
 				return;
 			}
@@ -2140,7 +2148,8 @@ string print_global_constant(int DEntry, string str)
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(\"" + Package_name + "\",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
 				Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(\"" + Package_name + "\",_," + to_string(DEntry) + ",_,\"const\",_)"), 4));
-				if (parent_type_is_integer(Type_entry, 0))
+				int ignored;
+				if (parent_type_is_integer(Type_entry, &ignored))
 				{
 					ss << "   parameter " << Const_name << " = ";
 					ss << type_value(Package_name, DEntry, "verilog");
@@ -2173,7 +2182,8 @@ string print_global_constant(int DEntry, string str)
 			{
 				Const_name = returnpar(HT.findandreturn("data_stmt(\"" + Package_name + "\",_," + to_string(DEntry) + ",_,\"const\",_)"), 2);
 				Type_entry = stoi(returnpar(HT.findandreturn("data_stmt(\"" + Package_name + "\",_," + to_string(DEntry) + ",_,\"const\",_)"), 4));
-				if (parent_type_is_integer(Type_entry, 0))
+				int ignored;
+				if (parent_type_is_integer(Type_entry, &ignored))
 				{
 					if (HT.findfact("type_def("+to_string(Type_entry)+",_,_,_,_,\"single_t\",_,_,_)"))
 					{
@@ -2781,7 +2791,8 @@ string print_custom_function_headers(string Module, int Entry, string EndSt)
 				{
 					PModule = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Entry) + ",_,_,\"libpart\",_,_,_)"), 2);
 					print_custom_function_cond_core(Module, PModule, Entry, &DFC);
-					ss << print_custom_function_header(DFC, PModule, "variable", EndSt, "vhdl", 0);
+					int ignored;
+					ss << print_custom_function_header(DFC, PModule, "variable", EndSt, "vhdl", &ignored);
 					Next_entry = Entry + 1;
 					ss << print_custom_function_headers(Module, Next_entry, EndSt);
 				}
@@ -2918,7 +2929,8 @@ string print_custom_function_header(int int1, string PModule, string VarSignal, 
 			{
 				PModuleDataEntry = stoi(returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",\"" + PModule + "\",_,_,_,sym(\"" + PModule + "\"))"), 3));
 				Func_type_entry = stoi(returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",\"" + PModule + "\",_,_,_,sym(\"" + PModule + "\"))"), 4));
-				if (parent_type_is_integer(Func_type_entry, 0))
+				int ignored;
+				if (parent_type_is_integer(Func_type_entry, &ignored))
 				{
 					ss << endl << "  long long int " << PModule << "(" << endl;
 					ss << write_cus_function_header_params(PModule, 1, "variable", "c");
@@ -3424,7 +3436,8 @@ string write_cus_func_param_type(string PModule, string str, int int1, string Se
 			return ss.str();
 		}
 	}
-	if (!parent_type_is_integer(int1, 0))
+	int ignored;
+	if (!parent_type_is_integer(int1, &ignored))
 	{
 		if (HT.findfact("type_def(" + to_string(int1) + ",*)"))
 		{
@@ -3796,7 +3809,8 @@ string write_separator_cond(string Separator, string PModule, int Entry, string 
 				}
 			}
 		}
-		if (!parent_type_is_integer(Type, 0))
+		int ignored;
+		if (!parent_type_is_integer(Type, &ignored))
 		{
 			Next_entry = Entry + 1;
 			if (HT.findfact("data_stmt(\"" + PModule + "\",_," + to_string(Next_entry) + ",_,_,_)"))
@@ -3814,7 +3828,7 @@ string write_separator_cond(string Separator, string PModule, int Entry, string 
 				}
 			}
 		}
-		if (parent_type_is_integer(Type, 0))
+		if (parent_type_is_integer(Type, &ignored))
 		{
 			Next_entry = Entry + 1;
 			if (HT.findfact("data_stmt(\"" + PModule + "\",_," + to_string(Next_entry) + ",_,_,_)"))
@@ -3912,7 +3926,8 @@ string print_custom_function(int int1, string Module, string PModule, string HDL
 		{
 			if (custom_block(PModule))
 			{
-				ss << print_custom_function_header(1, PModule, "variable", "IS", "vhdl", 0);
+				int ignored;
+				ss << print_custom_function_header(1, PModule, "variable", "IS", "vhdl", &ignored);
 				ss << print_local_variables(PModule, 1, "vhdl", 0);
 				ss << "    BEGIN" << endl;
 				Intend0 = "     ";
@@ -3925,7 +3940,8 @@ string print_custom_function(int int1, string Module, string PModule, string HDL
 		{
 			if (custom_block(PModule))
 			{
-				ss << print_custom_function_header(1, PModule, "variable", ";", "verilog", 0);
+				int ignored;
+				ss << print_custom_function_header(1, PModule, "variable", ";", "verilog", &ignored);
 				ss << "    begin:" << PModule << "_task_block" << endl;
 				ss << print_local_variables(PModule, 1, "verilog", 0);
 				Intend0 = "     ";
@@ -3956,7 +3972,8 @@ string print_custom_function(int int1, string Module, string PModule, string HDL
 					Func_type_kind = returnpar(HT.findandreturn("type_def(" + to_string(Func_type_entry) + ",*)"), 6);
 					if (Func_type_kind != "vectorarray_t")
 					{
-						ss << print_custom_function_header(1, PModule, "variable", ";", "c", 0);
+						int ignored;
+						ss << print_custom_function_header(1, PModule, "variable", ";", "c", &ignored);
 						ss << "    {" << endl;
 						ss << print_local_variables(PModule, 1, "c", 0);
 						Intend0 = "     ";
@@ -3968,7 +3985,8 @@ string print_custom_function(int int1, string Module, string PModule, string HDL
 			}
 			if (!HT.findfact("data_stmt(\"" + PModule + "\",\"" + PModule + "\",*)"))
 			{
-				ss << print_custom_function_header(1, PModule, "variable", ";", "c", 0);
+				int ignored;
+				ss << print_custom_function_header(1, PModule, "variable", ";", "c", &ignored);
 				ss << print_local_variables(PModule, 1, "c", 0);
 				Intend0 = "     ";
 				ss << print_custom_body("", PModule, 1, Intend0, "c");
@@ -4312,7 +4330,8 @@ string write_constant_type(int Type)
 			return ss.str();
 		}
 	}
-	if (!parent_type_is_integer(Type, 0))
+	int ignored;
+	if (!parent_type_is_integer(Type, &ignored))
 	{
 		if (HT.findfact("type_def(" + to_string(Type) + ",*)"))
 		{
@@ -4377,7 +4396,8 @@ string write_constant_value(int Type, string be, int af, string HDL)
 		}
 		else if (be == "i")
 		{
-			if (parent_type_is_integer(Type, 0))
+			int ignored;
+			if (parent_type_is_integer(Type, &ignored))
 				ss << " " << af << " ;  /*-- integer constants -- */" << endl;
 		}
 	}
@@ -4553,7 +4573,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 									ResData = returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Result) + ",_,_,_)"), 2);
 									*Next_intend = Intend;
 									ss << Intend;
-									ss << print_possible_return(PModule, ResData, Rdata, " := ", "vhdl", 0);
+									int ignored;
+									ss << print_possible_return(PModule, ResData, Rdata, " := ", "vhdl", &ignored);
 									ss << OpString << " " << Rdata << ";" << endl;
 									return ss.str();
 								}
@@ -4631,7 +4652,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 								{
 									*Next_intend = Intend;
 									ss << Intend;
-									ss << print_possible_return(PModule, ResData, Rdata, " := ", "vhdl", 0);
+									int ignored;
+									ss << print_possible_return(PModule, ResData, Rdata, " := ", "vhdl", &ignored);
 									ss << Rdata << ";" << endl;
 									return ss.str();
 								}
@@ -4650,7 +4672,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 										Ldata = returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Left) + ",_,_,_)"), 2);
 										*Next_intend = Intend;
 										ss << Intend;
-										ss << print_possible_return(PModule, ResData, Ldata, " := ", "vhdl", 0);
+										int ignored;
+										ss << print_possible_return(PModule, ResData, Ldata, " := ", "vhdl", &ignored);
 										ss << " (";
 										ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
 										ss << ");" << endl;
@@ -4775,7 +4798,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 												Ctype = Rtype;
 												*Next_intend = Intend;
 												ss << Intend;
-												ss << print_possible_return(PModule, ResData, RecName, " := ", "vhdl", 0);
+												int ignored;
+												ss << print_possible_return(PModule, ResData, RecName, " := ", "vhdl", &ignored);
 												ss << RecName << Child_type_name << ";" << endl;
 												return ss.str();
 											}
@@ -4797,7 +4821,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 											Rdata = returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Result) + ",_,_,_)"), 2);
 											*Next_intend = Intend;
 											ss << Intend;
-											ss << print_possible_return(PModule, ResData, ArrayName, " := ", "vhdl", 0);
+											int ignored;
+											ss << print_possible_return(PModule, ResData, ArrayName, " := ", "vhdl", &ignored);
 											ss << ArrayName << "(CONV_INTEGER(" << Index << "));" << endl;
 											return ss.str();
 										}
@@ -4824,7 +4849,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 										Resdata = returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Result) + ",_,_,_)"), 2);
 										*Next_intend = Intend;
 										ss << Intend;
-										ss << print_possible_return(PModule, ResData, ArrayName, " := ", "vhdl", 0);
+										int ignored;
+										ss << print_possible_return(PModule, ResData, ArrayName, " := ", "vhdl", &ignored);
 										ss << ArrayName;
 										ss << print_custom_array_index_parameters(PModule, Par_list, "vhdl");
 										ss << ";" << endl;
@@ -5159,7 +5185,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 
 									*Next_intend = Intend;
 									ss << Intend;
-									ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", 0);
+									int ignored;
+									ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", &ignored);
 									ss << OpString << " " << Rdata << ";" << endl;
 									return ss.str();
 								}
@@ -5207,7 +5234,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 									ResData = stoi(returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Result) + ",_,_,_)"), 2));
 									*Next_intend = Intend;
 									ss << Intend;
-									ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", 0);
+									int ignored;
+									ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", &ignored);
 									ss << Rdata << ";" << endl;
 									return ss.str();
 								}
@@ -5225,7 +5253,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 									{
 										Rdata = returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Right) + ",_,_,_)"), 2);
 										*Next_intend = Intend;
-										ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", 0);
+										int ignored;
+										ss << print_possible_return(PModule, ResData, Rdata, " = ", "verilog", &ignored);
 										ss << " (";
 										ss << print_custom_record_index_parameters("", PModule, Rec_list, "record");
 										ss << ");" << endl;
@@ -5344,7 +5373,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 										Resdata = returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Result) + ",_,_,_)"), 2);
 										*Next_intend = Intend;
 										ss << Intend;
-										ss << print_possible_return(PModule, ResData, ArrayName, " := ", "verilog", 0);
+										int ignored;
+										ss << print_possible_return(PModule, ResData, ArrayName, " := ", "verilog", &ignored);
 										ss << ArrayName << "[" << Index << "];" << endl;
 										return ss.str();
 									}
@@ -5370,7 +5400,8 @@ string print_custom_statement(string Module, string PModule, int var3, string In
 										Resdata = returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",_," + to_string(Result) + ",_,_,_)"), 2);
 										*Next_intend = Intend;
 										ss << Intend;
-										ss << print_possible_return(PModule, ResData, ArrayName, " = ", "verilog", 0);
+										int ignored;
+										ss << print_possible_return(PModule, ResData, ArrayName, " = ", "verilog", &ignored);
 										ss << ArrayName;
 										ss << print_custom_array_index_parameters(PModule, Par_list, "verilog");
 										ss << ";" << endl;
@@ -6211,7 +6242,8 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 						{
 							if (HT.findfact("hdl_style(\"" + Hdl + "\")"))
 							{
-								ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, Hdl, 0);
+								int ignored;
+								ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, Hdl, &ignored);
 								ss << writevhdl(Hdl, Module_name, Left_name, Left_kind);
 								ss << " ";
 								ss << write_hdl_dep_operator_symbol(Op_string, Hdl);
@@ -6238,7 +6270,8 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
 					{
 						Res_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Res_type) + ",*)"), 3));
-						ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, "vhdl", 0);
+						int ignored;
+						ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, "vhdl", &ignored);
 						ss << "conv_std_logic_vector(CONV_INTEGER(";
 						ss << Left_name;
 						ss << ") ** CONV_INTEGER(";
@@ -6256,7 +6289,8 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
 					{
 						Res_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Res_type) + ",*)"), 3));
-						ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, "vhdl", 0);
+						int ignored;
+						ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, "vhdl", &ignored);
 						ss << "conv_std_logic_vector(CONV_INTEGER(";
 						ss << Left_name;
 						ss << ") * CONV_INTEGER(";
@@ -6274,7 +6308,8 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 					if (HT.findfact("type_def(" + to_string(Res_type) + ",*)"))
 					{
 						Res_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Res_type) + ",*)"), 3));
-						ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, "vhdl", 0);
+						int ignored;
+						ss << print_possible_return(Module_name, Res_name, Left_name, Assignment_string, "vhdl", &ignored);
 						ss << "conv_std_logic_vector(CONV_INTEGER(";
 						ss << Left_name;
 						ss << ") / CONV_INTEGER(";
@@ -6297,7 +6332,8 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 							if (HT.findfact("type_def(" + to_string(Right_type) + ",*)"))
 							{
 								Right_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Right_type) + ",*)"), 3));
-								ss << print_possible_return(Module_name, Res_name, Right_name, Assignment_string, "vhdl", 0);
+								int ignored;
+								ss << print_possible_return(Module_name, Res_name, Right_name, Assignment_string, "vhdl", &ignored);
 								ss << "conv_std_logic_vector(CONV_INTEGER(";
 								ss << Left_name << ") ";
 								ss << write_mod_rem_operator("vhdl", Op_string);
@@ -6320,7 +6356,8 @@ string type_op_triple(string Module_name, string Res_name, string Left_name, str
 								if (HT.findfact("type_def(" + to_string(Right_type) + ",*)"))
 								{
 									Right_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Right_type) + ",*)"), 3));
-									ss << print_possible_return(Module_name, Res_name, Right_name, Assignment_string, "vhdl", 0);
+									int ignored;
+									ss << print_possible_return(Module_name, Res_name, Right_name, Assignment_string, "vhdl", &ignored);
 									ss << "conv_std_logic_vector(CONV_INTEGER(";
 									ss << Left_name;
 									ss << ") ";
@@ -6590,7 +6627,8 @@ string writevhdl(string HDL, string Module_name, string Dname, string Kind)
 		if (HT.findfact("data_stmt(\"" + Module_name + "\",\"" + Dname + "\",*)"))
 		{
 			Type = stoi(returnpar(HT.findandreturn("data_stmt(\"" + Module_name + "\",\"" + Dname + "\",*)"), 4));
-			if (parent_type_is_integer(Type, 0))
+			int ignored;
+			if (parent_type_is_integer(Type, &ignored))
 			{
 				ss << Dname;
 				return ss.str();
@@ -6698,7 +6736,8 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 					if (HT.findfact("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_out\",_)"))
 					{
 						ResType = stoi(returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_out\",_)"), 4));
-						if (parent_type_is_integer(ResType, 0))
+						int ignored;
+						if (parent_type_is_integer(ResType, &ignored))
 						{
 							ss << ResData << Assignment_string << " (long long int) ";
 							*int1 = 1;
@@ -6708,7 +6747,8 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 					if (HT.findfact("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_inout\",_)"))
 					{
 						ResType = stoi(returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_inout\",_)"), 4));
-						if (parent_type_is_integer(ResType, 0))
+						int ignored;
+						if (parent_type_is_integer(ResType, &ignored))
 						{
 							ss << ResData << Assignment_string << " (long long int) ";
 							*int1 = 1;
@@ -6724,7 +6764,8 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 					{
 						if (Kind != "par_inout")
 						{
-							if (parent_type_is_integer(ResType, 0))
+							int ignored;
+							if (parent_type_is_integer(ResType, &ignored))
 							{
 								ss << ResData << Assignment_string << " (long long int) ";
 								*int1 = 1;
@@ -6732,7 +6773,8 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 							}
 						}
 					}
-					if (!parent_type_is_integer(ResType, 0))
+					int ignored;
+					if (!parent_type_is_integer(ResType, &ignored))
 					{
 						ss << ResData << Assignment_string;
 						*int1 = 1;
@@ -6744,7 +6786,8 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 					if (HT.findfact("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_out\",_)"))
 					{
 						ResType = stoi(returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_out\",_)"), 4));
-						if (parent_type_is_integer(ResType, 0))
+						int ignored;
+						if (parent_type_is_integer(ResType, &ignored))
 						{
 							ss << "*" << ResData << Assignment_string << " (long long int) ";
 							*int1 = 1;
@@ -6754,7 +6797,8 @@ string print_possible_return(string PModule, string ResData, string RightData, s
 					if (HT.findfact("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_inout\",_)"))
 					{
 						ResType = stoi(returnpar(HT.findandreturn("data_stmt(\"" + PModule + "\",\"" + ResData + "\",_,_,\"par_inout\",_)"), 4));
-						if (parent_type_is_integer(ResType, 0))
+						int ignored;
+						if (parent_type_is_integer(ResType, &ignored))
 						{
 							ss << "*" << ResData << Assignment_string << " (long long int) ";
 							*int1 = 1;
@@ -7373,7 +7417,8 @@ string print_range_type_in_c(int Type_entry)
 	if (HT.findfact("type_def(" + to_string(Type_entry) + ",_,_,_,_,\"single_t\",_,_,_)"))
 	{
 		Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",_,_,_,_,\"single_t\",_,_,_)"), 2);
-		if (parent_type_is_integer(Type_entry, 0))
+		int ignored;
+		if (parent_type_is_integer(Type_entry, &ignored))
 			ss << "typedef long long int " << Type_name << " ;" << endl;
 	}
 	return ss.str();
@@ -7439,7 +7484,8 @@ string print_c_array_type(int Type_entry)
 				Type_name = returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 2);
 				Dimmension = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 8));
 				Comp_type = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Type_entry) + ",_,_,\"user\",_,\"vectorarray_t\",_,_,_)"), 9));
-				if (parent_type_is_integer(Comp_type, 0))
+				int ignored;
+				if (parent_type_is_integer(Comp_type, &ignored))
 				{
 					if (Comp_type > 1)
 					{
@@ -7571,7 +7617,8 @@ string write_io_ports_core_cond(local_object Local, string HDL, string Tool, str
 	{
 		if (Module != Name)
 		{
-			if (!is_it_the_last_io(Module, "vhdl", In_entry, 0))
+			int ignored;
+			if (!is_it_the_last_io(Module, "vhdl", In_entry, &ignored))
 			{
 				ss << write_io_port(Local, HDL, Tool);
 				return ss.str();
@@ -9286,7 +9333,8 @@ string write_cus_block_process_io_variable(string Module_name, int Entry, string
 			Kind = returnpar(HT.findandreturn("data_stmt(\"" + Module_name + "\",_," + to_string(Entry) + ",_,_,_)"), 5);
 			if (it_is_io_parameter(Kind))
 			{
-				if (parent_type_is_integer(Type_entry, 0))
+				int ignored;
+				if (parent_type_is_integer(Type_entry, &ignored))
 				{
 					ss << "      VARIABLE " << Module_name << "_" << DName << "_var : ";
 					ss << write_cus_func_param_type(Module_name, "body", Type_entry, ";") << endl;
@@ -11379,7 +11427,8 @@ string write_local(local_object Local, string HDL, string Tool, string Suffix)
 					if (HT.findfact("type_def(_,\"" + Type_name + "\",_,_,_,_,_,_,2)"))
 					{
 						Type_size = stoi(returnpar(HT.findandreturn("type_def(_,\"" + Type_name + "\",_,_,_,_,_,_,2)"), 3));
-						log2n(Type_size, 1, 1, 0);
+						int ignored;
+						log2n(Type_size, 1, 1, &ignored);
 						ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
 						ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
 						ss << "     long long int " << Local_name << "_i ;" << endl;
@@ -11396,7 +11445,8 @@ string write_local(local_object Local, string HDL, string Tool, string Suffix)
 							Comp_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Comp_type) + ",_,_,_,_,\"single_t\",_,_,2)"), 3));
 							if (Comp_size > 1)
 							{
-								log2n(Type_size, 1, 1, 0); // for what? line: 15362
+								int ignored;
+								log2n(Type_size, 1, 1, &ignored); // for what? line: 15362
 								ss << "     " << Type_name << " *" << Local_name << " ;" << endl;
 								ss << "     " << Local_name << " = (" << Type_name << "*) malloc(sizeof(" << Type_name << "));" << endl;
 								ss << "     long long int " << Local_name << "_i ;" << endl;
@@ -11597,7 +11647,8 @@ string write_value(string Local_value, int Local_size, string Type_name, string 
 string write_type(int Type_number)
 {
 	stringstream ss;
-	if (parent_type_is_integer(Type_number, 0))
+	int ignored;
+	if (parent_type_is_integer(Type_number, &ignored))
 		ss << " long long int ";
 	else if (HT.findfact("type_def(" + to_string(Type_number) + ",*)"))
 		ss << returnpar(HT.findandreturn("type_def(" + to_string(Type_number) + ",*)"), 2);
@@ -16628,7 +16679,8 @@ string output_operation(string Module_name, int Operation, string HDL, string To
 										if (HT.findfact("data_stmt(\"" + Module_name + "\",_," + to_string(Right_op) + "," + to_string(Res_type) + ",_,_)"))
 										{
 											Right_name = stoi(returnpar(HT.findandreturn("data_stmt(\"" + Module_name + "\",_," + to_string(Right_op) + "," + to_string(Res_type) + ",_,_)"), 2));
-											ss << reset_multi_array(Res_name, Res_type, 1, &Dimension_depth, 0, 1);
+											int ignored;
+											ss << reset_multi_array(Res_name, Res_type, 1, &Dimension_depth, &ignored, 1);
 											if (Dimension_depth > 1)
 											{
 												ss << "        (* " << Res_name << ")";
@@ -17726,6 +17778,7 @@ void translate_operator_symbol(string Op_string, string* C_op_string, string* Cl
 string output_special_operation(string Module, int Operation, string HDL, string Tool)
 {
 	stringstream ss;
+	int ignored;
 	int Left_op, Result, Rd_width, Sd_with, Normal_op, Normal_source, Left_type, Left_size, Number_of_dim, First_comp, Rd_up_limit, 
 		Last_comp, Last_size, Last_low_bound, Sd_width, Sd_type, No_of_fields, Last_field_type, Type, Size, Rtype, Sd_up_limit,
 		Total_fields, Next_shift_offset, S1d_width, Right_op, S2d_width, Noperation, Ndata_entry, Base, Result_type, First_field_type,
@@ -17757,7 +17810,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 								{
 									Total_fields = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Rtype) + ",_," + to_string(Rd_width) + ",_,_,\"record_t\",_,_,_)"), 8));
 									Rd_up_limit = Rd_width - 1;
-									if (get_data_name(Module, Left_op, &Sd_name, 0))
+									if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 									{
 										Next_shift_offset = 0;
 										ss << write_assignment_to_a_record(Module, Operator, Sd_name, Rd_name, Total_fields, 0, Next_shift_offset, HDL);
@@ -17938,7 +17991,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 								if (HT.findfact("type_def(" + to_string(Rtype) + ",_," + to_string(Rd_width) + ",_,_,\"record_t\",_,_,_)"))
 								{
 									Rd_up_limit = Rd_width - 1;
-									if (get_data_name(Module, Left_op, &Sd_name, 0))
+									if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 									{
 										ss << Rd_name;
 										ss << print_object_bit_range(Rd_up_limit, 0, HDL);
@@ -18200,7 +18253,8 @@ string output_special_operation(string Module, int Operation, string HDL, string
 												{
 													Field_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(\"" + Module + "\"," + to_string(Left_op) + ",*)")), 1);
 													vector<int> emptv;
-													total_number_of_aggregate_fields(Module, Field_list, 0, 1, &Total_fields, 0, emptv, &Total_shift_list);
+													int ignored;
+													total_number_of_aggregate_fields(Module, Field_list, 0, 1, &Total_fields, &ignored, emptv, &Total_shift_list);
 													ss << type_aggregate_record_shifts(Module, Field_list, Total_fields, Total_shift_list);
 													ss << ";";
 													ss << write_special_comment(HDL) << endl;
@@ -18308,7 +18362,8 @@ string output_special_operation(string Module, int Operation, string HDL, string
 													{
 														Field_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(\"" + Module + "\"," + to_string(Left_op) + ",*)")), 1);
 														vector<int> emptv;
-														total_number_of_aggregate_fields(Module, Field_list, 0, 1, &Total_fields, 0, emptv, &Total_shift_list);
+														int ignored;
+														total_number_of_aggregate_fields(Module, Field_list, 0, 1, &Total_fields, &ignored, emptv, &Total_shift_list);
 														ss << type_aggregate_record_shifts(Module, Field_list, Total_fields, Total_shift_list);
 														ss << ";";
 														ss << write_special_comment(HDL) << endl;
@@ -18326,7 +18381,9 @@ string output_special_operation(string Module, int Operation, string HDL, string
 							}
 						}
 					}
-					if (!get_data_name(Module, Left_op, 0, 0))
+					
+					string signored;
+					if (!get_data_name(Module, Left_op, &signored, &ignored))
 					{
 						if (Left_op < 0)
 						{
@@ -18350,7 +18407,8 @@ string output_special_operation(string Module, int Operation, string HDL, string
 												{
 													Field_list = returnVec(makeInstanceOf(HT.findandreturn("rec_stmt(\"" + Module + "\"," + to_string(Left_op) + ",*)")), 1);
 													vector<int> emptv;
-													total_number_of_aggregate_fields(Module, Field_list, 0, 1, &Total_fields, 0, emptv, &Total_shift_list);
+													int ignored;
+													total_number_of_aggregate_fields(Module, Field_list, 0, 1, &Total_fields, &ignored, emptv, &Total_shift_list);
 													ss << type_aggregate_record_shifts(Module, Field_list, Total_fields, Total_shift_list);
 													ss << ";";
 													ss << write_special_comment(HDL) << endl;
@@ -18375,7 +18433,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 				{
 					if (Left_op < 0)
 					{
-						if (get_data_name(Module, Result, &Rd_name, 0))
+						if (get_data_name(Module, Result, &Rd_name, &ignored))
 						{
 							if (HT.findfact("data_stmt(\"" + Module + "\",\"" + Rd_name + "\"," + to_string(Result) + ",_,_,_)"))
 							{
@@ -18404,9 +18462,9 @@ string output_special_operation(string Module, int Operation, string HDL, string
 							Left_type = stoi(returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Left_op) + ",_,_,_)"), 4));
 							if (HT.findfact("type_def(" + to_string(Left_type) + ",_,_,_,_,\"record_t\",_,_,_)"))
 							{
-								if (get_data_name(Module, Result, &Rd_name, 0))
+								if (get_data_name(Module, Result, &Rd_name, &ignored))
 								{
-									if (get_data_name(Module, Left_op, &Sd_name, 0))
+									if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 									{
 										ss << Rd_name;
 										ss << " = " << Sd_name;
@@ -18443,7 +18501,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 								Num_of_elements = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Rd_type) + ",*)"), 8));
 								if (Rd_kind != "record_t")
 								{
-									if (get_data_name(Module, Left_op, &Sd_name, 0))
+									if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 									{
 										ss << Rd_name;
 										ss << " = " << Sd_name;
@@ -18455,7 +18513,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 								}
 								if (Rd_kind == "record_t")
 								{
-									if (get_data_name(Module, Left_op, &Sd_name, 0))
+									if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 									{
 										ss << write_special_comment(HDL) << endl;
 										Next_shift_offset = 0;
@@ -18466,7 +18524,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 								}
 							}
 						}
-						if (get_data_name(Module, Left_op, &Sd_name, 0))
+						if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 						{
 							if (HT.findfact("data_stmt(\"" + Module + "\",\"" + Sd_name + "\"," + to_string(Left_op) + ",*)"))
 							{
@@ -18491,11 +18549,11 @@ string output_special_operation(string Module, int Operation, string HDL, string
 				{
 					if (Rd_width > 1)
 					{
-						if (get_data_name(Module, Left_op, &S1d_name, 0))
+						if (get_data_name(Module, Left_op, &S1d_name, &ignored))
 						{
 							if (Right_op != 0)
 							{
-								if (get_data_name(Module, Right_op, &S2d_name, 0))
+								if (get_data_name(Module, Right_op, &S2d_name, &ignored))
 								{
 									ss << Rd_name << " = pow(" << S1d_name << ", " << S2d_name << ");";
 									ss << write_special_comment(HDL) << endl;
@@ -18515,11 +18573,11 @@ string output_special_operation(string Module, int Operation, string HDL, string
 					{
 						if (Rd_width > 1)
 						{
-							if (get_data_name(Module, Left_op, &S1d_name, 0))
+							if (get_data_name(Module, Left_op, &S1d_name, &ignored))
 							{
 								if (Right_op != 0)
 								{
-									if (get_data_name(Module, Right_op, &S2d_name, 0))
+									if (get_data_name(Module, Right_op, &S2d_name, &ignored))
 									{
 										ss << Rd_name << " = " << S1d_name << " " << Operator << " " << S2d_name << ";";
 										ss << write_special_comment(HDL) << endl;
@@ -18554,7 +18612,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 									if (Rd_width > 1)
 									{
 										Rd_up_limit = Rd_width - 1;
-										if (get_data_name(Module, Left_op, &Sd_name, 0))
+										if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 										{
 											ss << Rd_name;
 											ss << print_object_bit_range(Rd_up_limit, 0, HDL);
@@ -18582,7 +18640,7 @@ string output_special_operation(string Module, int Operation, string HDL, string
 									if (Rd_width > 1)
 									{
 										Rd_up_limit = Rd_width - 1;
-										if (get_data_name(Module, Left_op, &Sd_name, 0))
+										if (get_data_name(Module, Left_op, &Sd_name, &ignored))
 										{
 											ss << Rd_name;
 											ss << print_object_bit_range(Rd_up_limit, 0, HDL);
@@ -18797,11 +18855,11 @@ string output_special_operation(string Module, int Operation, string HDL, string
 					if (Rd_width > 1)
 					{
 						Rd_up_limit = Rd_width - 1;
-						if (get_data_name(Module, Left_op, &S1d_name, 0))
+						if (get_data_name(Module, Left_op, &S1d_name, &ignored))
 						{
 							if (Right_op != 0)
 							{
-								if (get_data_name(Module, Right_op, &S2d_name, 0))
+								if (get_data_name(Module, Right_op, &S2d_name, &ignored))
 								{
 									ss << Rd_name;
 									ss << print_object_bit_range(Rd_up_limit, 0, HDL);
@@ -18821,11 +18879,11 @@ string output_special_operation(string Module, int Operation, string HDL, string
 					if (Rd_width > 1)
 					{
 						Rd_up_limit = Rd_width - 1;
-						if (get_data_name(Module, Left_op, &S1d_name, 0))
+						if (get_data_name(Module, Left_op, &S1d_name, &ignored))
 						{
 							if (Right_op != 0)
 							{
-								if (get_data_name(Module, Right_op, &S2d_name, 0))
+								if (get_data_name(Module, Right_op, &S2d_name, &ignored))
 								{
 									ss << Rd_name;
 									ss << print_object_bit_range(Rd_up_limit, 0, HDL);
@@ -18845,11 +18903,11 @@ string output_special_operation(string Module, int Operation, string HDL, string
 					if (Rd_width > 1)
 					{
 						Rd_up_limit = Rd_width - 1;
-						if (get_data_name(Module, Left_op, &S1d_name, 0))
+						if (get_data_name(Module, Left_op, &S1d_name, &ignored))
 						{
 							if (Right_op != 0)
 							{
-								if (get_data_name(Module, Right_op, &S2d_name, 0))
+								if (get_data_name(Module, Right_op, &S2d_name, &ignored))
 								{
 									ss << Rd_name;
 									ss << print_object_bit_range(Rd_up_limit, 0, HDL);
@@ -19044,7 +19102,8 @@ string write_record_special_operation_core(string Module, int Result, int Down_l
 	{
 		get_data_name(Module, Par, &Par_name, &Par_width);
 		Up_limit = Down_limit + Par_width - 1;
-		get_data_name(Module, Result, &Rd_name, 0);
+		int ignored;
+		get_data_name(Module, Result, &Rd_name, &ignored);
 		ss << Rd_name << "(" << Up_limit << " DOWNTO " << Down_limit << ") <= " << Par_name << "; " << " -- produced by special (probably external memory IO) sequence operation " << endl;
 		ss << "            ";
 		*Next_down_limit = Up_limit + 1;
@@ -19053,7 +19112,8 @@ string write_record_special_operation_core(string Module, int Result, int Down_l
 	{
 		get_data_name(Module, Par, &Par_name, &Par_width);
 		Up_limit = Down_limit + Par_width - 1;
-		get_data_name(Module, Result, &Rd_name, 0);
+		int ignored;
+		get_data_name(Module, Result, &Rd_name, &ignored);
 		ss << Rd_name << "[" << Up_limit << ":" << Down_limit << "] <= " << Par_name << "; " << " //-- produced by special (probably external memory IO) sequence operation " << endl;
 		ss << "            ";
 		*Next_down_limit = Up_limit + 1;
@@ -19706,7 +19766,8 @@ string write_output_state_assignment(string Module_name, int State, int Op)
 			if (HT.findfact("special_op(\"" + Module_name + "\"," + to_string(Op) + ",*)"))
 			{
 				Result = stoi(returnpar(HT.findandreturn("special_op(\"" + Module_name + "\"," + to_string(Op) + ",*)"), 6));
-				if (get_data_name(Module_name, Result, &Result_name, 0))
+				int ignored;
+				if (get_data_name(Module_name, Result, &Result_name, &ignored))
 				{
 					str_int(&State_numb, State);
 					HT.concat("state_", State_numb, &State_name);
@@ -19762,7 +19823,8 @@ string write_output_state_assignment(string Module_name, int State, int Op)
 			if (HT.findfact("special_op(\"" + Module_name + "\"," + to_string(Op) + ",*)"))
 			{
 				Result = stoi(returnpar(HT.findandreturn("special_op(\"" + Module_name + "\"," + to_string(Op) + ",*)"), 6));
-				if (get_data_name(Module_name, Result, &Result_name, 0))
+				int ignored;
+				if (get_data_name(Module_name, Result, &Result_name, &ignored))
 				{
 					str_int(&State_numb, State);
 					HT.concat("state_", State_numb, &State_name);
@@ -19823,7 +19885,8 @@ string write_output_state_assignment(string Module_name, int State, int Op)
 		if (HT.findfact("special_op(\"" + Module_name + "\"," + to_string(Op) + ",*)"))
 		{
 			Result = stoi(returnpar(HT.findandreturn("special_op(\"" + Module_name + "\"," + to_string(Op) + ",*)"), 6));
-			if (get_data_name(Module_name, Result, &Result_name, 0))
+			int ignored;
+			if (get_data_name(Module_name, Result, &Result_name, &ignored))
 			{
 				str_int(&State_numb, State);
 				HT.concat("state_", State_numb, &State_name);
@@ -19973,7 +20036,8 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 								{
 									ss << WS;
 									ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
-									ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
+									int ignored;
+									ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, &ignored, &emptv, "vhdl");
 									ss << write_block_call(Called_module_name, 2, WS) << endl;
 									ss << write_cus_block_call_output_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS);
 									return ss.str();
@@ -20004,7 +20068,8 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 											{
 												ss << WS;
 												ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
-												ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
+												int ignored;
+												ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, &ignored, &emptv, "vhdl");
 												ss << write_block_call(Called_module_name, 2, WS) << endl;
 												ss << WS << Res_name << " <= " << Called_module_name << "_" << Called_module_name << "_var; -- default function output" << endl;
 												return ss.str();
@@ -20025,7 +20090,8 @@ string write_call(string WS, string Module_name, int State, int Next_state, int 
 											{
 												ss << WS;
 												ss << " ------ this is a call to custom block : " << Called_module_name << " -----" << endl;
-												ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, 0, &emptv, "vhdl");
+												int ignored;
+												ss << write_cus_block_call_input_var_assignments(Module_name, Called_module_name, 1, Actual_params, WS, &ignored, &emptv, "vhdl");
 												ss << write_block_call(Called_module_name, 2, WS) << endl;
 												ss << WS << Res_name << " <= " << Called_module_name << "_" << Called_module_name << "_var; -- default function output" << endl;
 												return ss.str();
@@ -22319,7 +22385,8 @@ string write_op_instance_unopt(int Entry)
 									HT.concat(Instance_name, "_in2", &In2_instance);
 									min_(Op_size, A_size, &Min_size);
 									find_minimum_size_of_routed_input(In1_instance, 1, Min_size, &Min_size1);
-									find_minimum_size_of_routed_input(In2_instance, 1, Min_size1, 0);
+									int ignored;
+									find_minimum_size_of_routed_input(In2_instance, 1, Min_size1, &ignored);
 									ss << write_continuous_assignment();
 									ss << write_hdl_dep_operator_symbol(Symbol1, HDL);
 									ss << " " << Instance_name << "_in2 ;" << endl;
@@ -25673,7 +25740,8 @@ string write_unc_next_state_transition(string Module, int int1, int Uncond_next_
 					Called_module = returnpar(HT.findandreturn("hierarchy_part(" + to_string(Called_entry) + ",_,_,\"libpart\",_,_,_)"), 2);
 					if (custom_block(Called_module))
 					{
-						next_is_loop_head(Module, Uncond_next_state, 0, &New_next_state);
+						int ignored;
+						next_is_loop_head(Module, Uncond_next_state, &ignored, &New_next_state);
 						ss << write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
 						return ss.str();
 					}
@@ -25693,7 +25761,8 @@ string write_unc_next_state_transition(string Module, int int1, int Uncond_next_
 		}
 		if (HT.findfact("hdl_style(\"c\")"))
 		{
-			next_is_loop_head(Module, Uncond_next_state, 0, &New_next_state);
+			int ignored;
+			next_is_loop_head(Module, Uncond_next_state, &ignored, &New_next_state);
 			ss << write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
 			return ss.str();
 		}
@@ -25738,7 +25807,8 @@ string write_unc_next_state_transition(string Module, int int1, int Uncond_next_
 		}
 		else
 		{
-			next_is_loop_head(Module, Uncond_next_state, 0, &New_next_state);
+			int ignored;
+			next_is_loop_head(Module, Uncond_next_state, &ignored, &New_next_state);
 			ss << write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
 		}
 	}
@@ -26586,7 +26656,8 @@ string write_calls_core(string WS, string Module, int State_entry, int Uncond_ne
 			if (Operator == 109)
 			{
 				increase_current_depth();
-				find_call_order(Module, State_entry, All_state_ops, List.front(), Entry, 1, 0, 0, &Str_order);
+				int ignored;
+				find_call_order(Module, State_entry, All_state_ops, List.front(), Entry, 1, 0, &ignored, &Str_order);
 				ss << write_call(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List.front(), HDL, Str_order);
 				*Next_entry = Entry + 1;
 				return ss.str();
