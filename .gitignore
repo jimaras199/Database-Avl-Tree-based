@@ -41,6 +41,14 @@
 *.log
 *.ods
 *.ods#
+*.DBA
+*.c
+*.vhd
+*.pdb
+*.ada
+*.prof
+*.mem
+*.bat
 
 # Manually ignoring
 .editorconfig
