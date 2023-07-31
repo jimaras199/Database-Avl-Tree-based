@@ -242,9 +242,9 @@ public:
 	friend void readnodes(AVLTree::Node* n, size_t hashv, bool* flag);
 	friend void readnodes(AVLTree::Node* n, size_t hashv, list<string>* ptrL);
 	friend void readnodes(AVLTree::Node* n, size_t hashv, forward_list<string>* ptrFL);
-	friend string readnodesreturn(AVLTree::Node* n, size_t hashv, bool* flag);
-	friend string readnodesreturn(AVLTree::Node* n, factUnderInspection* ptr, bool* flag);
-	friend string readnodesreturn(AVLTree::Node* n, factstar* ptr, bool* flag);
+	friend string readnodesreturn(AVLTree::Node* n, size_t hashv, bool* flag, string* result);
+	friend string readnodesreturn(AVLTree::Node* n, factUnderInspection* ptr, bool* flag, string* result);
+	friend string readnodesreturn(AVLTree::Node* n, factstar* ptr, bool* flag, string* result);
 };
 
 //====================PRIVATE CODES OF FUNCTIONS

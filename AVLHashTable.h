@@ -136,10 +136,9 @@ public:
 
 void HashTable::assertz(string Line)
 {
-	string factInput;
 	int		Treepos;
 	size_t  fullhash;
-	fullhash = (hash<string>{}(factInput));
+	fullhash = (hash<string>{}(Line));
 	Treepos = fullhash % N;
 	hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].Insert(hdlmaker_dbase[Treepos].Root, makeInstanceOf(Line), fullhash);
 	hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].balance(hdlmaker_dbase[Treepos].Root);
@@ -147,10 +146,9 @@ void HashTable::assertz(string Line)
 
 void HashTable::assertz(string Line, string db)
 {
-	string factInput;
 	int		Treepos;
 	size_t  fullhash;
-	fullhash = (hash<string>{}(factInput));
+	fullhash = (hash<string>{}(Line));
 	Treepos = fullhash % N;
 	if (db == "hdlmaker_dbase")
 	{
@@ -180,7 +178,17 @@ bool HashTable::findfact(string Line)
 			if (hdlmaker_dbase[i].NumNodes)
 			{
 				readnodes(hdlmaker_dbase[i].Root, ptrfs, ptrflg);
-				if (flag) return true;
+				if (flag) 
+					return true;
+			}
+		}
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (options_dbase[i].NumNodes)
+			{
+				readnodes(options_dbase[i].Root, ptrfs, ptrflg);
+				if (flag)
+					return true;
 			}
 		}
 	}
@@ -197,6 +205,14 @@ bool HashTable::findfact(string Line)
 				if (flag) return true;
 			}
 		}
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (options_dbase[i].NumNodes)
+			{
+				readnodes(options_dbase[i].Root, ptrfs, ptrflg);
+				if (flag) return true;
+			}
+		}
 	}
 	else
 	{
@@ -205,6 +221,11 @@ bool HashTable::findfact(string Line)
 		if (hdlmaker_dbase[Treepos].NumNodes)
 		{
 			readnodes(hdlmaker_dbase[Treepos].Root, Hash, ptrflg);
+			if (flag) return true;
+		}
+		if (options_dbase[Treepos].NumNodes)
+		{
+			readnodes(options_dbase[Treepos].Root, Hash, ptrflg);
 			if (flag) return true;
 		}
 	}
@@ -227,7 +248,18 @@ string HashTable::findandreturn(string Line)
 		{
 			if (hdlmaker_dbase[i].NumNodes)
 			{
-				res = readnodesreturn(hdlmaker_dbase[i].Root, ptrfs, ptrflg);
+				string resul = "";
+				res = readnodesreturn(hdlmaker_dbase[i].Root, ptrfs, ptrflg,&resul);
+				if (res != "")
+					return res;
+			}
+		}
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (options_dbase[i].NumNodes)
+			{
+				string resul = "";
+				res = readnodesreturn(options_dbase[i].Root, ptrfs, ptrflg, &resul);
 				if (res != "")
 					return res;
 			}
@@ -243,11 +275,23 @@ string HashTable::findandreturn(string Line)
 		{
 			if (hdlmaker_dbase[i].NumNodes)
 			{
-				res = readnodesreturn(hdlmaker_dbase[i].Root, ptrfs, ptrflg);
+				string resul = "";
+				res = readnodesreturn(hdlmaker_dbase[i].Root, ptrfs, ptrflg, &resul);
 				if (res != "")
 					return res;
 			}
 		}
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (options_dbase[i].NumNodes)
+			{
+				string resul = "";
+				res = readnodesreturn(options_dbase[i].Root, ptrfs, ptrflg, &resul);
+				if (res != "")
+					return res;
+			}
+		}
+
 		return "";
 	}
 	else
@@ -256,7 +300,15 @@ string HashTable::findandreturn(string Line)
 		Treepos = Hash % N;
 		if (hdlmaker_dbase[Treepos].NumNodes)
 		{
-			res = readnodesreturn(hdlmaker_dbase[Treepos].Root, Hash, ptrflg);
+			string resul = "";
+			res = readnodesreturn(hdlmaker_dbase[Treepos].Root, Hash, ptrflg, &resul);
+			if (res != "")
+				return res;
+		}
+		if (options_dbase[Treepos].NumNodes)
+		{
+			string resul = "";
+			res = readnodesreturn(options_dbase[Treepos].Root, Hash, ptrflg, &resul);
 			if (res != "")
 				return res;
 		}
@@ -1134,10 +1186,17 @@ string returnpar(string inputline, int pospar)
 				ALine = subl.substr(0, subl.find(co, 0));
 				if (pospar == index)
 				{
-					if (ALine.length() > 2)
-						if (pacl == ALine[ALine.length() - 2])
-							if (pacl == ALine[ALine.length() - 1])
-								ALine.resize(ALine.size() - 1);
+					//if (ALine.length() > 2)
+					//	if (pacl == ALine[ALine.length() - 2])
+					//		if (pacl == ALine[ALine.length() - 1])
+					//			ALine.resize(ALine.size() - 1);
+					if((subl.find(co, 0)) == subl.npos)
+						ALine.resize(ALine.size() - 1);
+					if ((ALine.find("\"", 0)) == 0)
+					{
+						ALine.resize(ALine.size() - 1);
+						ALine.erase(0, 1);
+					}
 					return ALine;
 				}
 				pos += ALine.length();
@@ -1560,7 +1619,7 @@ int return_par_of_sn(state_node* sn, int pos)
 {
 	int res{};
 	string ALine;
-	ALine = typeid(sn).name();
+	ALine = typeid(*sn).name();
 	ALine = ALine.substr(6);
 	
 	if (ALine == "jump")
@@ -1799,46 +1858,46 @@ void readnodes(AVLTree::Node* n, size_t hashv, bool* flag)
 }
 
 //checks for data using factstar and return the posisioned parameter
-string readnodesreturn(AVLTree::Node* n, factstar* ptr, bool* flag)
+string readnodesreturn(AVLTree::Node* n, factstar* ptr, bool* flag, string *res)
 {
 	if (matchfactsstar(n->Data, ptr))
 	{
-		return makeStringOf(n->Data);
 		*flag = true;
+		*res = makeStringOf(n->Data);
 	}
 	if (!(*flag) && n->Left != nullptr)
-		readnodes(n->Left, ptr, flag);
+		readnodesreturn(n->Left, ptr, flag,res);
 	if (!(*flag) && n->Right != nullptr)
-		readnodes(n->Right, ptr, flag);
-	return""; 
+		readnodesreturn(n->Right, ptr, flag,res);
+	return *res; 
 }
 
 //checks for data using factUnderInspection and return the posisioned parameter
-string readnodesreturn(AVLTree::Node* n, factUnderInspection* ptr, bool* flag)
+string readnodesreturn(AVLTree::Node* n, factUnderInspection* ptr, bool* flag, string* res)
 {
 	if (matchfactsSpec(n->Data, ptr))
 	{
-		return makeStringOf(n->Data);
 		*flag = true;
+		*res = makeStringOf(n->Data);
 	}
 	if (!(*flag) && n->Left != nullptr)
-		readnodes(n->Left, ptr, flag);
+		readnodesreturn(n->Left, ptr, flag, res);
 	if (!(*flag) && n->Right != nullptr)
-		readnodes(n->Right, ptr, flag);
-	return"";
+		readnodesreturn(n->Right, ptr, flag, res);
+	return *res;
 }
 
 //checks for data using GeneralFact and return the posisioned parameter
-string readnodesreturn(AVLTree::Node* n, size_t hashv, bool* flag)
+string readnodesreturn(AVLTree::Node* n, size_t hashv, bool* flag, string* res)
 {
 	if (n->HashV == hashv)
 	{
 		*flag = true;
-		return makeStringOf(n->Data);
+		*res = makeStringOf(n->Data);
 	}
-	if (n->HashV > hashv && !(*flag))
-		readnodes(n->Left, hashv, flag);
-	if (n->HashV < hashv && !(*flag))
-		readnodes(n->Right, hashv, flag);
-	return"";
+	if (n->HashV > hashv && !(*flag) && n->Left)
+		readnodesreturn(n->Left, hashv, flag, res);
+	if (n->HashV < hashv && !(*flag) && n->Right)
+		readnodesreturn(n->Right, hashv, flag, res);
+	return *res;
 }

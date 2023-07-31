@@ -27011,8 +27011,24 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 	ALine = typeid(*Treesfact).name();
 	ALine2 = typeid(*fact).name();
 
+	if (ALine == "class dataflow")
+	{
+		auto flag = false;
+	}
+
 	//check instead if the type of facts are different
-	if (ALine != ALine2)
+	if (ALine2 == "class state_node" )
+	{
+		if (ALine != "class ifthen" &&
+			ALine != "class jump" &&
+			ALine != "class subprogram_call" &&
+			ALine != "class return_cos" &&
+			ALine != "class dataflow")
+		{
+			return 0;
+		}
+	}
+	else if (ALine != ALine2)
 		return 0;
 	ALine = ALine.substr(6);
 	string ch = ALine.substr(0, 1);
@@ -27550,7 +27566,9 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			dataflow* ptr2 = dynamic_cast<dataflow*>(Treesfact);
 			state_node* ptr1 = dynamic_cast<state_node*>(fact);
 			state_node* ptr12 = dynamic_cast<state_node*>(Treesfact);
-			size_t siz = ptr->q.size();
+			size_t siz{};
+			if (ptr != nullptr)
+				siz = ptr->q.size();
 
 			if (p)
 			{
@@ -27853,10 +27871,15 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			ifthen* ptr2 = dynamic_cast<ifthen*>(Treesfact);
 			state_node* ptr1 = dynamic_cast<state_node*>(fact);
 			state_node* ptr12 = dynamic_cast<state_node*>(Treesfact);
-			size_t siz = ptr->q.size();
-			size_t siz2 = ptr->w.size();
-			size_t siz3 = ptr->e.size();
-
+			size_t siz{};
+			size_t siz2{};
+			size_t siz3{};
+			if (ptr != nullptr)
+			{
+				siz = ptr->q.size();
+				siz2 = ptr->w.size();
+				siz3 = ptr->e.size();
+			}
 			if (p)
 			{
 				switch (p)
@@ -27991,7 +28014,9 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			jump* ptr2 = dynamic_cast<jump*>(Treesfact);
 			state_node* ptr1 = dynamic_cast<state_node*>(fact);
 			state_node* ptr12 = dynamic_cast<state_node*>(Treesfact);
-			size_t siz = ptr->q.size();
+			size_t siz{};
+			if (ptr != nullptr)
+				siz = ptr->q.size();
 
 			if (p)
 			{
@@ -29209,8 +29234,9 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 			return_cos* ptr2 = dynamic_cast<return_cos*>(Treesfact);
 			state_node* ptr1 = dynamic_cast<state_node*>(fact);
 			state_node* ptr12 = dynamic_cast<state_node*>(Treesfact);
-
-			size_t siz = ptr->q.size();
+			size_t siz{};
+			if (ptr != nullptr)
+				siz = ptr->q.size();
 
 			if (p)
 			{
@@ -29438,7 +29464,9 @@ size_t matchfactsstar(GeneralFact* Treesfact, factstar* obj)
 		subprogram_call* ptr2 = dynamic_cast<subprogram_call*>(Treesfact);
 		state_node* ptr1 = dynamic_cast<state_node*>(fact);
 		state_node* ptr12 = dynamic_cast<state_node*>(Treesfact);
-		size_t siz = ptr->q.size();
+		size_t siz{};
+		if (ptr != nullptr)
+			siz = ptr->q.size();
 
 		if (p)
 		{
