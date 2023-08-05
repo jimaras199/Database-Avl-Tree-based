@@ -1876,8 +1876,7 @@ void add_local_conditionally(string Module_name, vector<local_object> In_local_l
 					vector<local_object> Next_local_list{};
 					local_object Local;
 					local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Module_name + "\"," + to_string(In_local_entry) + ",\"" + Kind + "\",\"" + Object_name + "\"," + to_string(OrderNo) + ",\"" + Ltype + "\",\"" + Tkind + "\"," + to_string(Osize) + ",\"" + Ovalue + "\")")));
-					Local = *ptr;
-					append_local(In_local_list, Local, &Next_local_list);
+					append_local(In_local_list, *ptr, &Next_local_list);
 					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
 					return;
 				}
@@ -1889,8 +1888,7 @@ void add_local_conditionally(string Module_name, vector<local_object> In_local_l
 					vector<local_object> Next_local_list{};
 					local_object Local1;
 					local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Module_name + "\"," + to_string(In_local_entry) + ",\"" + Kind + "\",\"" + Object_name + "\"," + to_string(OrderNo) + ",\"" + Ltype + "\",\"" + Tkind + "\"," + to_string(Osize) + ",\"" + Ovalue + "\")")));
-					Local1 = *ptr;
-					append_local(In_local_list, Local1, &Next_local_list);
+					append_local(In_local_list, *ptr, &Next_local_list);
 					get_and_append_local(Module_name, Next_local_list, Next_local_entry, Out_list, Last_entry);
 					return;
 				}
@@ -24019,8 +24017,7 @@ string write_aux_verilog_task_output_param(string Module, string Called_module_n
 			if (HT.findfact("local_object(\"" + Module + "\",_,_,_," + to_string(Actual) + ",_,_,_,_)"))
 			{
 				local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Module + "\",_,_,_," + to_string(Actual) + ",_,_,_,_)")));
-				In_local = *ptr;
-				convert_local_for_verilog_task_outputs(In_local, &Out_local);
+				convert_local_for_verilog_task_outputs(*ptr, &Out_local);
 				ss << write_local(Out_local, "verilog", "synergy", "_tmpout");
 			}
 		}
@@ -24082,8 +24079,7 @@ string write_aux_output_if_it_is_function(string str, string Called_module_name)
 	if (HT.findfact("local_object(\"" + Called_module_name + "\",_,_,\"" + Called_module_name + "\",_,_,_,_,_)"))
 	{
 		local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Called_module_name + "\",_,_,\"" + Called_module_name + "\",_,_,_,_,_)")));
-		In_local = *ptr;
-		convert_local_for_verilog_task_outputs(In_local, &Out_local);
+		convert_local_for_verilog_task_outputs(*ptr, &Out_local);
 		ss << write_local(Out_local, "verilog", "synergy", "_tmpout");
 	}
 	return ss.str();
@@ -24637,8 +24633,7 @@ string print_io_port_conditional(string Module, string Called_module_name, int C
 								if (HT.findfact("local_object(\"" + Called_module_name + "\"," + to_string(Data_entry) + ",\"" + New_kind + "\",\"" + IO_name + "\"," + to_string(Data_entry) + ",\"" + Data_type + "\",\"" + Local_built + "\"," + to_string(Local_size) + ",\"" + Data_value + "\")"))
 								{
 									local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Called_module_name + "\"," + to_string(Data_entry) + ",\"" + New_kind + "\",\"" + IO_name + "\"," + to_string(Data_entry) + ",\"" + Data_type + "\",\"" + Local_built + "\"," + to_string(Local_size) + ",\"" + Data_value + "\")")));
-									Local = *ptr;
-									ss << write_io_port_conditional_with_pass(Pass, Local, HDL, "synergy");
+									ss << write_io_port_conditional_with_pass(Pass, *ptr, HDL, "synergy");
 									HT.assertz("printed_formal_ios_of_called_module(\"" + Module + "\"," + to_string(Module_entry) + "," + to_string(Called_module_entry) + ",\"" + Parameter_name + "\")");
 									return ss.str();
 								}
@@ -24677,8 +24672,7 @@ string print_io_port_conditional(string Module, string Called_module_name, int C
 						if (HT.findfact("local_object(\"" + Called_module_name + "\"," + to_string(Data_entry) + ",\"" + New_kind + "\",\"" + IO_name + "\"," + to_string(Data_entry) + ",\"" + Data_type + "\",\"" + Local_built + "\"," + to_string(Local_size) + ",\"" + Data_value + "\")"))
 						{
 							local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Called_module_name + "\"," + to_string(Data_entry) + ",\"" + New_kind + "\",\"" + IO_name + "\"," + to_string(Data_entry) + ",\"" + Data_type + "\",\"" + Local_built + "\"," + to_string(Local_size) + ",\"" + Data_value + "\")")));
-							Local = *ptr;
-							ss << write_io_port_conditional_with_pass(Pass, Local, HDL, "synergy");
+							ss << write_io_port_conditional_with_pass(Pass, *ptr, HDL, "synergy");
 							Next_order = Order + 1;
 							ss << print_io_port_conditional(Module, Called_module_name, Called_module_entry, Data_entry, Next_order, Max_order, Data_kind,
 								   Parameter_name, Data_entry, Data_type, Local_built, Local_size, Data_value, HDL);
@@ -26939,8 +26933,7 @@ string set_inputs(string Module_name, int In_entry, string HDL, string Tool)
 	if (HT.findfact("local_object(\"" + Module_name + "\"," + to_string(In_entry) + ",*)"))
 	{
 		local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Module_name + "\"," + to_string(In_entry) + ",*)")));
-		Local = *ptr;
-		ss << set_input(Local, HDL, Tool);
+		ss << set_input(*ptr, HDL, Tool);
 		Next_entry = In_entry + 1;
 		ss << set_inputs(Module_name, Next_entry, HDL, Tool);
 	}
@@ -27414,8 +27407,7 @@ string read_outputs(string Module_name, int In_entry, string HDL, string Tool)
 	if (HT.findfact("local_object(\"" + Module_name + "\"," + to_string(In_entry) + ",*)"))
 	{
 		local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Module_name + "\"," + to_string(In_entry) + ",*)")));
-		Local = *ptr;
-		ss << read_output(Local, HDL, Tool);
+		ss << read_output(*ptr, HDL, Tool);
 		Next_entry = In_entry + 1;
 		ss << read_outputs(Module_name, Next_entry, HDL, Tool);
 	}
@@ -27861,8 +27853,7 @@ string store_arrays(string Module_name, int In_entry, string HDL, string Tool)
 	if (HT.findfact("local_object(\"" + Module_name + "\"," + to_string(In_entry) + ",*)"))
 	{
 		local_object* ptr = dynamic_cast<local_object*>(makeInstanceOf(HT.findandreturn("local_object(\"" + Module_name + "\"," + to_string(In_entry) + ",*)")));
-		Local = *ptr;
-		ss << store_array(Local, HDL, Tool);
+		ss << store_array(*ptr, HDL, Tool);
 		Next_entry = In_entry + 1;
 		ss << store_arrays(Module_name, Next_entry, HDL, Tool);
 	}
