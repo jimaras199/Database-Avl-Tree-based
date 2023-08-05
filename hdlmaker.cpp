@@ -24200,7 +24200,6 @@ void write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int 
 									HT.retractall("variable_has_been_listed(\"" + Module_name + "\",*)");
 									HT.retractall("hdl_io_pass(*)");
 									HT.assertz("hdl_io_pass(2)");
-									HT.save("memory_content.txt");
 									File2 << write_parcs_interface(Module_name, 1, HDL, Tool) << endl;
 									File2 << write_content_header(Module_name, HDL, Tool) << endl;
 									File2 << print_states_type(Last_parcs_state) << endl;
@@ -24208,6 +24207,7 @@ void write_parcs_hdl(string Module_name, int int1, string HDL, string Tool, int 
 									HT.retractall("added_aux_call_ios1(\"" + Module_name + "\",*)");
 									File2 << write_standard_call_signals(Schedule, Module_name, 1);
 									File2 << write_dp_signal_declarations();
+
 									File2 << write_content_body_header(Module_name, HDL, Tool, Schedule) << endl;
 									File2 << write_fsm_header(Module_name, 1, HDL, Tool);
 									File2 << reset_locals(Module_name, Schedule, 1, HDL, Tool) << endl;
@@ -25154,6 +25154,9 @@ string write_opted_states(string Module, string New_schedule, int State_entry, s
 				}
 			}
 		}
+		Next_entry = State_entry + 1;
+		ss << write_opted_states(Module, New_schedule, Next_entry, HDL, Tool);
+
 	}
 	return ss.str();
 }
@@ -25361,7 +25364,7 @@ void does_it_target_ifthen(string Module, int Operation)
 void does_it_contain_a_call(string Module, vector<int> List, int* Contains_call, int* Call_op)
 {
 	int Operator;
-	if (!List.empty())
+	if (List.empty())
 	{
 		*Contains_call = 0;
 		*Call_op = 0;
@@ -25834,12 +25837,9 @@ string write_unc_next_state_transition(string Module, int int1, int Uncond_next_
 				return ss.str();
 			}
 		}
-		else
-		{
-			int ignored;
-			next_is_loop_head(Module, Uncond_next_state, &ignored, &New_next_state);
-			ss << write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
-		}
+		int ignored;
+		next_is_loop_head(Module, Uncond_next_state, &ignored, &New_next_state);
+		ss << write_unconditional_next_state(Module, Uncond_next_state, New_next_state);
 	}
 	return ss.str();
 }
@@ -26397,164 +26397,108 @@ string write_conditional_operation(string WS, string Module, int Op, string HDL,
 	int Conditional_variable, Conditional_transition_entry_number, True_next_state, False_next_state, Cond1, Contains_callT, Call_operationT,
 		Contains_callF, Call_operationF, Var_type, Var_size;
 	vector<int> True_ops, False_ops, True_cond_execs, False_cond_execs, Operations_list;
-	if (Op != 0)
+	if (Op == 0)
 	{
-		if (Tool == "synergy")
+		return ss.str();
+	}
+	if (Tool == "synergy")
+	{
+		if (HDL == "vhdl")
 		{
-			if (HDL == "vhdl")
+			if (HT.findfact("new_schedule(*)"))
 			{
-				if (HT.findfact("new_schedule(*)"))
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"))
 				{
-					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
-					if (HT.findfact("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"))
+					Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"), 4));
+					True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 1);
+					False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 2);
+					True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 3);
+					False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 4);
+					HT.concat(WS, " ", &NWS);
+					if (HT.findfact("state(\"" + Module + "\",\"" + Schedule + "\"," + to_string(State) + ",*)")) // added the State reference in addition compared to original hdlmaker.pro to target the specific state fact avoiding the unexpected occurence.
 					{
-						Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"), 4));
-						True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 1);
-						False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 2);
-						True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 3);
-						False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 4);
-						HT.concat(WS, " ", &NWS);
-						if (HT.findfact("state(" + Module + "," + Schedule + ",*)"))
+						Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\"," + to_string(State) + ",*)"), 6));
+						Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\"," + to_string(State) + ",*)")), 1);
+						if (HT.findfact("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"))
 						{
-							Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)"), 6));
-							Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)")), 1);
-							if (HT.findfact("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"))
+							True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
+							False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
+							if (HT.findfact("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",1,\"const\",_)"))
 							{
-								True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
-								False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
-								if (HT.findfact("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",1,\"const\",_)"))
-								{
-									Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",1,\"const\",_)"), 2);
-									ss << WS << "IF " << Var_name << " THEN " << endl;
-									read_ifthen_chain_end_operations_written_fact(&Cond1);
-									HT.retractall("found_call_operator(\"" + Module + "\",*)");
-									ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
-									does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
-									set_current_depth(0);
-									ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
-									ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
-									ss << WS << "ELSE " << endl;
-									HT.retractall("found_call_operator(\"" + Module + "\",*)");
-									ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
-									does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
-									set_current_depth(0);
-									ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
-									ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
-									set_ifthen_chain_end_operations_written_fact(1);
-									ss << WS << "END IF;" << endl;
-									return ss.str();
-								}
-								if (HT.findfact("data_stmt(\"" + Module + "\",_,"+to_string(Conditional_variable)+",_,_,_)"))
-								{
-									Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
-									Var_type = stoi(returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 4));
-									Kind = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 5);
-									if (HT.findfact("type_def(" + to_string(Var_type) + ",_,1,_,_,_,_,_,_)"))
-									{
-										if (Kind != "const")
-										{
-											ss << WS << "IF " << Var_name << " = '1' THEN " << endl;
-											read_ifthen_chain_end_operations_written_fact(&Cond1);
-											HT.retractall("found_call_operator(\"" + Module + "\",*)");
-											ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
-											does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
-											set_current_depth(0);
-											ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
-											ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
-											ss << WS << "ELSE " << endl;
-											HT.retractall("found_call_operator(\"" + Module + "\",*)");
-											ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
-											does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
-											set_current_depth(0);
-											ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
-											ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
-											set_ifthen_chain_end_operations_written_fact(1);
-											ss << WS << "END IF;" << endl;
-											return ss.str();
-										}
-									}
-									if (HT.findfact("type_def(" + to_string(Var_type) + ",*)"))
-									{
-										Var_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Var_type) + ",*)"), 3));
-										if (Var_size > 1)
-										{
-											ss << WS << "IF " << Var_name << " /= 0 THEN " << endl;
-											read_ifthen_chain_end_operations_written_fact(&Cond1);
-											HT.retractall("found_call_operator(\"" + Module + "\",*)");
-											ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
-											does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
-											set_current_depth(0);
-											ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
-											ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
-											ss << WS << "ELSE " << endl;
-											HT.retractall("found_call_operator(\"" + Module + "\",*)");
-											ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
-											does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
-											set_current_depth(0);
-											ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
-											ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
-											set_ifthen_chain_end_operations_written_fact(1);
-											ss << WS << "END IF;" << endl;
-											return ss.str();
-										}
-									}
-								}
+								Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",1,\"const\",_)"), 2);
+								ss << WS << "IF " << Var_name << " THEN " << endl;
+								read_ifthen_chain_end_operations_written_fact(&Cond1);
+								HT.retractall("found_call_operator(\"" + Module + "\",*)");
+								ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
+								does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+								set_current_depth(0);
+								ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
+								ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
+								ss << WS << "ELSE " << endl;
+								HT.retractall("found_call_operator(\"" + Module + "\",*)");
+								ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
+								does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+								set_current_depth(0);
+								ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
+								ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
+								set_ifthen_chain_end_operations_written_fact(1);
+								ss << WS << "END IF;" << endl;
+								return ss.str();
 							}
-						}
-					}
-				}
-			}
-			if (HDL == "verilog")
-			{
-				if (HT.findfact("new_schedule(*)"))
-				{
-					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
-					if (HT.findfact("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"))
-					{
-						Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"), 4));
-						True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 1);
-						False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 2);
-						True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 3);
-						False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 4);
-						HT.concat(WS, " ", &NWS);
-						if (HT.findfact("state(\"" + Module + "\",\"" + Schedule + "\",*)"))
-						{
-							Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)"), 6));
-							Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)")), 1);
-							if (HT.findfact("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"))
+							if (HT.findfact("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"))
 							{
-								True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
-								False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
-								if (HT.findfact("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"))
+								Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
+								Var_type = stoi(returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 4));
+								Kind = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 5);
+								if (HT.findfact("type_def(" + to_string(Var_type) + ",_,1,_,_,_,_,_,_)"))
 								{
-									Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
-									ss << WS;
-									ss << "if (" << Var_name << ") " << endl;
-									HT.concat(NWS, " ", &NWS1);
-									ss << NWS;
-									ss << "begin" << endl;
-									read_ifthen_chain_end_operations_written_fact(&Cond1);
-									HT.retractall("found_call_operator(\"" + Module + "\",*)");
-									ss << conditionally_write_parcs_operations(NWS1, Module, True_ops, "verilog", "synergy", State, Cond1);
-									does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
-									set_current_depth(0);
-									ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "verilog", 1);
-									ss << write_conditional_operations(NWS1, Module, True_cond_execs, "verilog", "synergy", State);
-									ss << NWS;
-									ss << "end" << endl;
-									ss << WS << "else " << endl;
-									ss << NWS;
-									ss << "begin" << endl;
-									HT.retractall("found_call_operator(\"" + Module + "\",*)");
-									ss << write_parcs_operations(NWS, Module, False_ops, "verilog", "synergy", State);
-									does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
-									set_current_depth(0);
-									ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "verilog", 1);
-									ss << write_conditional_operations(NWS, Module, False_cond_execs, "verilog", "synergy", State);
-									set_ifthen_chain_end_operations_written_fact(1);
-									ss << NWS;
-									ss << "end" << endl;
-									return ss.str();
+									if (Kind != "const")
+									{
+										ss << WS << "IF " << Var_name << " = '1' THEN " << endl;
+										read_ifthen_chain_end_operations_written_fact(&Cond1);
+										HT.retractall("found_call_operator(\"" + Module + "\",*)");
+										ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
+										does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+										set_current_depth(0);
+										ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
+										ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
+										ss << WS << "ELSE " << endl;
+										HT.retractall("found_call_operator(\"" + Module + "\",*)");
+										ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
+										does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+										set_current_depth(0);
+										ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
+										ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
+										set_ifthen_chain_end_operations_written_fact(1);
+										ss << WS << "END IF;" << endl;
+										return ss.str();
+									}
+								}
+								if (HT.findfact("type_def(" + to_string(Var_type) + ",*)"))
+								{
+									Var_size = stoi(returnpar(HT.findandreturn("type_def(" + to_string(Var_type) + ",*)"), 3));
+									if (Var_size > 1)
+									{
+										ss << WS << "IF " << Var_name << " /= 0 THEN " << endl;
+										read_ifthen_chain_end_operations_written_fact(&Cond1);
+										HT.retractall("found_call_operator(\"" + Module + "\",*)");
+										ss << conditionally_write_parcs_operations(NWS, Module, True_ops, "vhdl", "synergy", State, Cond1);
+										does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+										set_current_depth(0);
+										ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "vhdl", 1);
+										ss << write_conditional_operations(NWS, Module, True_cond_execs, "vhdl", "synergy", State);
+										ss << WS << "ELSE " << endl;
+										HT.retractall("found_call_operator(\"" + Module + "\",*)");
+										ss << write_parcs_operations(NWS, Module, False_ops, "vhdl", "synergy", State);
+										does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+										set_current_depth(0);
+										ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "vhdl", 1);
+										ss << write_conditional_operations(NWS, Module, False_cond_execs, "vhdl", "synergy", State);
+										set_ifthen_chain_end_operations_written_fact(1);
+										ss << WS << "END IF;" << endl;
+										return ss.str();
+									}
 								}
 							}
 						}
@@ -26562,57 +26506,114 @@ string write_conditional_operation(string WS, string Module, int Op, string HDL,
 				}
 			}
 		}
-		if (Tool == "gnu")
+		if (HDL == "verilog")
 		{
-			if (HDL == "c")
+			if (HT.findfact("new_schedule(*)"))
 			{
-				if (HT.findfact("new_schedule(*)"))
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"))
 				{
-					Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
-					if (HT.findfact("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"))
+					Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"), 4));
+					True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 1);
+					False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 2);
+					True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 3);
+					False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 4);
+					HT.concat(WS, " ", &NWS);
+					if (HT.findfact("state(\"" + Module + "\",\"" + Schedule + "\",*)"))
 					{
-						Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"), 4));
-						True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 1);
-						False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 2);
-						True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 3);
-						False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 4);
-						HT.concat(WS, " ", &NWS);
-						if (HT.findfact("state(\"" + Module + "\",\"" + Schedule + "\",*)"))
+						Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)"), 6));
+						Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)")), 1);
+						if (HT.findfact("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"))
 						{
-							Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)"), 6));
-							Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)")), 1);
-							if (HT.findfact("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"))
+							True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
+							False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
+							if (HT.findfact("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"))
 							{
-								True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
-								False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
-								HT.concat(WS, " ", NWS);
-								if (HT.findfact("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"))
-								{
-									Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
-									ss << WS;
-									ss << "if (" << Var_name << ") " << endl;
-									HT.concat(NWS, " ", NWS1);
-									ss << NWS;
-									ss << "{" << endl;
-									read_ifthen_chain_end_operations_written_fact(&Cond1);
-									ss << conditionally_write_parcs_operations(NWS1, Module, True_ops, "c", "gnu", State, Cond1);
-									does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
-									ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "c", 1);
-									ss << write_conditional_operations(NWS1, Module, True_cond_execs, "c", "gnu", State);
-									ss << NWS;
-									ss << "}" << endl;
-									ss << WS << "else " << endl;
-									ss << NWS;
-									ss << "{" << endl;
-									ss << write_parcs_operations(NWS, Module, False_ops, "c", "gnu", State);
-									does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
-									ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "c", 1);
-									ss << write_conditional_operations(NWS, Module, False_cond_execs, "c", "gnu", State);
-									set_ifthen_chain_end_operations_written_fact(1);
-									ss << NWS;
-									ss << "}" << endl;
-									return ss.str();
-								}
+								Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
+								ss << WS;
+								ss << "if (" << Var_name << ") " << endl;
+								HT.concat(NWS, " ", &NWS1);
+								ss << NWS;
+								ss << "begin" << endl;
+								read_ifthen_chain_end_operations_written_fact(&Cond1);
+								HT.retractall("found_call_operator(\"" + Module + "\",*)");
+								ss << conditionally_write_parcs_operations(NWS1, Module, True_ops, "verilog", "synergy", State, Cond1);
+								does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+								set_current_depth(0);
+								ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "verilog", 1);
+								ss << write_conditional_operations(NWS1, Module, True_cond_execs, "verilog", "synergy", State);
+								ss << NWS;
+								ss << "end" << endl;
+								ss << WS << "else " << endl;
+								ss << NWS;
+								ss << "begin" << endl;
+								HT.retractall("found_call_operator(\"" + Module + "\",*)");
+								ss << write_parcs_operations(NWS, Module, False_ops, "verilog", "synergy", State);
+								does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+								set_current_depth(0);
+								ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "verilog", 1);
+								ss << write_conditional_operations(NWS, Module, False_cond_execs, "verilog", "synergy", State);
+								set_ifthen_chain_end_operations_written_fact(1);
+								ss << NWS;
+								ss << "end" << endl;
+								return ss.str();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if (Tool == "gnu")
+	{
+		if (HDL == "c")
+		{
+			if (HT.findfact("new_schedule(*)"))
+			{
+				Schedule = returnpar(HT.findandreturn("new_schedule(*)"), 1);
+				if (HT.findfact("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"))
+				{
+					Conditional_variable = stoi(returnpar(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)"), 4));
+					True_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 1);
+					False_ops = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 2);
+					True_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 3);
+					False_cond_execs = returnVec(makeInstanceOf(HT.findandreturn("conditional_operations(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Op) + ",*)")), 4);
+					HT.concat(WS, " ", &NWS);
+					if (HT.findfact("state(\"" + Module + "\",\"" + Schedule + "\",*)"))
+					{
+						Conditional_transition_entry_number = stoi(returnpar(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)"), 6));
+						Operations_list = returnVec(makeInstanceOf(HT.findandreturn("state(\"" + Module + "\",\"" + Schedule + "\",*)")), 1);
+						if (HT.findfact("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"))
+						{
+							True_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 7));
+							False_next_state = stoi(returnpar(HT.findandreturn("conditional_transitions(\"" + Module + "\",\"" + Schedule + "\"," + to_string(Conditional_transition_entry_number) + ",*)"), 8));
+							HT.concat(WS, " ", NWS);
+							if (HT.findfact("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"))
+							{
+								Var_name = returnpar(HT.findandreturn("data_stmt(\"" + Module + "\",_," + to_string(Conditional_variable) + ",_,_,_)"), 2);
+								ss << WS;
+								ss << "if (" << Var_name << ") " << endl;
+								HT.concat(NWS, " ", NWS1);
+								ss << NWS;
+								ss << "{" << endl;
+								read_ifthen_chain_end_operations_written_fact(&Cond1);
+								ss << conditionally_write_parcs_operations(NWS1, Module, True_ops, "c", "gnu", State, Cond1);
+								does_it_contain_a_call(Module, True_ops, &Contains_callT, &Call_operationT);
+								ss << write_calls(NWS, Module, State, True_next_state, Contains_callT, Operations_list, True_ops, "c", 1);
+								ss << write_conditional_operations(NWS1, Module, True_cond_execs, "c", "gnu", State);
+								ss << NWS;
+								ss << "}" << endl;
+								ss << WS << "else " << endl;
+								ss << NWS;
+								ss << "{" << endl;
+								ss << write_parcs_operations(NWS, Module, False_ops, "c", "gnu", State);
+								does_it_contain_a_call(Module, True_ops, &Contains_callF, &Call_operationF);
+								ss << write_calls(NWS, Module, State, False_next_state, Contains_callF, Operations_list, False_ops, "c", 1);
+								ss << write_conditional_operations(NWS, Module, False_cond_execs, "c", "gnu", State);
+								set_ifthen_chain_end_operations_written_fact(1);
+								ss << NWS;
+								ss << "}" << endl;
+								return ss.str();
 							}
 						}
 					}
@@ -26653,12 +26654,18 @@ string write_calls(string WS, string Module, int State_entry, int Uncond_next_st
 {
 	stringstream ss;
 	int Next_entry;
-	if (!List.empty() || int1 != 0)
+	if (List.empty())
 	{
-		ss << write_calls_core(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List, HDL, Entry, &Next_entry);
-		List.erase(List.begin());
-		ss << write_calls(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List, HDL, Next_entry);
+		return ss.str();
 	}
+	if (int1 == 0)
+	{
+		return ss.str();
+	}
+	ss << write_calls_core(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List, HDL, Entry, &Next_entry);
+	List.erase(List.begin());
+	ss << write_calls(WS, Module, State_entry, Uncond_next_state, 1, All_state_ops, List, HDL, Next_entry);
+
 	return ss.str();
 }
 
