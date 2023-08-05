@@ -49,6 +49,8 @@
 *.prof
 *.mem
 *.bat
+*.qpf
+*.qsf
 
 # Manually ignoring
 .editorconfig

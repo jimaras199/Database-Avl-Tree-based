@@ -14,16 +14,19 @@ bool check4spec(string inputline);
 
 class HashTable
 {
+	std::vector<AVLTree>	factbase;
 	std::vector<AVLTree>	hdlmaker_dbase;
 	std::vector<AVLTree>	options_dbase;
 public:
 
 	HashTable()
 	{
+		factbase.reserve(N);
 		hdlmaker_dbase.reserve(N);
 		options_dbase.reserve(N);
 		for (int i = 0; i < N; i++)
 		{
+			factbase.push_back(AVLTree());
 			hdlmaker_dbase.push_back(AVLTree());
 			options_dbase.push_back(AVLTree());
 		}
@@ -140,8 +143,8 @@ void HashTable::assertz(string Line)
 	size_t  fullhash;
 	fullhash = (hash<string>{}(Line));
 	Treepos = fullhash % N;
-	hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].Insert(hdlmaker_dbase[Treepos].Root, makeInstanceOf(Line), fullhash);
-	hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].balance(hdlmaker_dbase[Treepos].Root);
+	factbase[Treepos].Root = factbase[Treepos].Insert(factbase[Treepos].Root, makeInstanceOf(Line), fullhash);
+	factbase[Treepos].Root = factbase[Treepos].balance(factbase[Treepos].Root);
 }
 
 void HashTable::assertz(string Line, string db)
@@ -175,6 +178,15 @@ bool HashTable::findfact(string Line)
 		factstar* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
+			if (factbase[i].NumNodes)
+			{
+				readnodes(factbase[i].Root, ptrfs, ptrflg);
+				if (flag)
+					return true;
+			}
+		}
+		for (int i = N - 1; i >= 0; i--)
+		{
 			if (hdlmaker_dbase[i].NumNodes)
 			{
 				readnodes(hdlmaker_dbase[i].Root, ptrfs, ptrflg);
@@ -199,6 +211,14 @@ bool HashTable::findfact(string Line)
 		factUnderInspection* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
+			if (factbase[i].NumNodes)
+			{
+				readnodes(factbase[i].Root, ptrfs, ptrflg);
+				if (flag) return true;
+			}
+		}
+		for (int i = N - 1; i >= 0; i--)
+		{
 			if (hdlmaker_dbase[i].NumNodes)
 			{
 				readnodes(hdlmaker_dbase[i].Root, ptrfs, ptrflg);
@@ -218,6 +238,11 @@ bool HashTable::findfact(string Line)
 	{
 		size_t Hash = (hash<string>{}(Line));
 		Treepos = Hash % N;
+		if (factbase[Treepos].NumNodes)
+		{
+			readnodes(factbase[Treepos].Root, Hash, ptrflg);
+			if (flag) return true;
+		}
 		if (hdlmaker_dbase[Treepos].NumNodes)
 		{
 			readnodes(hdlmaker_dbase[Treepos].Root, Hash, ptrflg);
@@ -244,6 +269,16 @@ string HashTable::findandreturn(string Line)
 		factstar fs;
 		fs = makefactstar(Line);
 		factstar* ptrfs = &fs;
+		for (int i = N - 1; i >= 0; i--)
+		{
+			if (factbase[i].NumNodes)
+			{
+				string resul = "";
+				res = readnodesreturn(factbase[i].Root, ptrfs, ptrflg, &resul);
+				if (res != "")
+					return res;
+			}
+		}
 		for (int i = N - 1; i >= 0; i--)
 		{
 			if (hdlmaker_dbase[i].NumNodes)
@@ -273,6 +308,16 @@ string HashTable::findandreturn(string Line)
 		factUnderInspection* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
+			if (factbase[i].NumNodes)
+			{
+				string resul = "";
+				res = readnodesreturn(factbase[i].Root, ptrfs, ptrflg, &resul);
+				if (res != "")
+					return res;
+			}
+		}
+		for (int i = N - 1; i >= 0; i--)
+		{
 			if (hdlmaker_dbase[i].NumNodes)
 			{
 				string resul = "";
@@ -298,6 +343,13 @@ string HashTable::findandreturn(string Line)
 	{
 		size_t Hash = (hash<string>{}(Line));
 		Treepos = Hash % N;
+		if (factbase[Treepos].NumNodes)
+		{
+			string resul = "";
+			res = readnodesreturn(factbase[Treepos].Root, Hash, ptrflg, &resul);
+			if (res != "")
+				return res;
+		}
 		if (hdlmaker_dbase[Treepos].NumNodes)
 		{
 			string resul = "";
@@ -322,7 +374,7 @@ void HashTable::retractall(string Line)
 	bool* ptrdup = &duplicate;
 	size_t Factcount = 0, FactcountTree = 0, Treepos = 0;
 	for (int k = 0; k < N; k++)
-		FactcountTree += hdlmaker_dbase[k].NumNodes;
+		FactcountTree += factbase[k].NumNodes;
 
 	if (!FactcountTree) 
 	{
@@ -332,9 +384,9 @@ void HashTable::retractall(string Line)
 	{
 		for (int i = N - 1; i >= 0; i--)
 		{
-			if (hdlmaker_dbase[i].NumNodes)
+			if (factbase[i].NumNodes)
 			{
-				hdlmaker_dbase[i].~AVLTree();
+				factbase[i].~AVLTree();
 			}
 		}
 	}
@@ -345,13 +397,13 @@ void HashTable::retractall(string Line)
 		factstar* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
-			if (hdlmaker_dbase[i].NumNodes)
+			if (factbase[i].NumNodes)
 			{
 				while (!duplicate)//check for duplicate
 				{
 					*ptrdup = true;
-					hdlmaker_dbase[i].Root = hdlmaker_dbase[i].delNode(hdlmaker_dbase[i].Root, ptrfs, ptrdup);
-					hdlmaker_dbase[i].Root = hdlmaker_dbase[i].balance(hdlmaker_dbase[i].Root);
+					factbase[i].Root = factbase[i].delNode(factbase[i].Root, ptrfs, ptrdup);
+					factbase[i].Root = factbase[i].balance(factbase[i].Root);
 				}
 				*ptrdup = false;
 			}
@@ -364,13 +416,13 @@ void HashTable::retractall(string Line)
 		factUnderInspection* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
-			if (hdlmaker_dbase[i].NumNodes)
+			if (factbase[i].NumNodes)
 			{
 				while (!duplicate)//check for duplicate
 				{
 					*ptrdup = true;
-					hdlmaker_dbase[i].Root = hdlmaker_dbase[i].delNode(hdlmaker_dbase[i].Root, ptrfs, ptrdup);
-					hdlmaker_dbase[i].Root = hdlmaker_dbase[i].balance(hdlmaker_dbase[i].Root);
+					factbase[i].Root = factbase[i].delNode(factbase[i].Root, ptrfs, ptrdup);
+					factbase[i].Root = factbase[i].balance(factbase[i].Root);
 				}
 				*ptrdup = false;
 			}
@@ -383,8 +435,8 @@ void HashTable::retractall(string Line)
 		while (!duplicate)//check for duplicate
 		{
 			*ptrdup = true;
-			hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].delNode(hdlmaker_dbase[Treepos].Root, Hash, ptrdup);
-			hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].balance(hdlmaker_dbase[Treepos].Root);
+			factbase[Treepos].Root = factbase[Treepos].delNode(factbase[Treepos].Root, Hash, ptrdup);
+			factbase[Treepos].Root = factbase[Treepos].balance(factbase[Treepos].Root);
 		}
 		*ptrdup = false;
 	}
@@ -543,7 +595,7 @@ void HashTable::retract(string Line)
 	bool* ptrdup = &duplicate;
 	size_t Factcount = 0, FactcountTree = 0, Treepos = 0;
 	for (int k = 0; k < N; k++)
-		FactcountTree += hdlmaker_dbase[k].NumNodes;
+		FactcountTree += factbase[k].NumNodes;
 
 	if (!FactcountTree)
 	{
@@ -553,9 +605,9 @@ void HashTable::retract(string Line)
 	{
 		for (int i = N - 1; i >= 0; i--)
 		{
-			if (hdlmaker_dbase[i].NumNodes)
+			if (factbase[i].NumNodes)
 			{
-				hdlmaker_dbase[i].~AVLTree();
+				factbase[i].~AVLTree();
 			}
 		}
 	}
@@ -566,10 +618,10 @@ void HashTable::retract(string Line)
 		factstar* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
-			if (hdlmaker_dbase[i].NumNodes)
+			if (factbase[i].NumNodes)
 			{
-				hdlmaker_dbase[i].Root = hdlmaker_dbase[i].delNode(hdlmaker_dbase[i].Root, ptrfs, ptrdup);
-				hdlmaker_dbase[i].Root = hdlmaker_dbase[i].balance(hdlmaker_dbase[i].Root);
+				factbase[i].Root = factbase[i].delNode(factbase[i].Root, ptrfs, ptrdup);
+				factbase[i].Root = factbase[i].balance(factbase[i].Root);
 			}
 		}
 	}
@@ -580,10 +632,10 @@ void HashTable::retract(string Line)
 		factUnderInspection* ptrfs = &fs;
 		for (int i = N - 1; i >= 0; i--)
 		{
-			if (hdlmaker_dbase[i].NumNodes)
+			if (factbase[i].NumNodes)
 			{
-				hdlmaker_dbase[i].Root = hdlmaker_dbase[i].delNode(hdlmaker_dbase[i].Root, ptrfs, ptrdup);
-				hdlmaker_dbase[i].Root = hdlmaker_dbase[i].balance(hdlmaker_dbase[i].Root);
+				factbase[i].Root = factbase[i].delNode(factbase[i].Root, ptrfs, ptrdup);
+				factbase[i].Root = factbase[i].balance(factbase[i].Root);
 			}
 		}
 	}
@@ -591,8 +643,8 @@ void HashTable::retract(string Line)
 	{
 		size_t Hash = (hash<string>{}(Line));
 		Treepos = Hash % N;
-		hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].delNode(hdlmaker_dbase[Treepos].Root, Hash, ptrdup);
-		hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].balance(hdlmaker_dbase[Treepos].Root);
+		factbase[Treepos].Root = factbase[Treepos].delNode(factbase[Treepos].Root, Hash, ptrdup);
+		factbase[Treepos].Root = factbase[Treepos].balance(factbase[Treepos].Root);
 	}
 }
 
@@ -733,8 +785,8 @@ void HashTable::consult(string Line)
 		{
 			fullhash = (hash<string>{}(AllLines[i]));
 			Treepos = fullhash % N;
-			hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].Insert(hdlmaker_dbase[Treepos].Root, makeInstanceOf(AllLines[i]), fullhash);
-			hdlmaker_dbase[Treepos].Root = hdlmaker_dbase[Treepos].balance(hdlmaker_dbase[Treepos].Root);
+			factbase[Treepos].Root = factbase[Treepos].Insert(factbase[Treepos].Root, makeInstanceOf(AllLines[i]), fullhash);
+			factbase[Treepos].Root = factbase[Treepos].balance(factbase[Treepos].Root);
 		}
 	}
 }
@@ -797,8 +849,17 @@ void HashTable::save(string filename)
 		
 		for (int i = 0; i < N; i++)
 		{
+			factbase[i].storeToVector(factbase[i].Root, ptr);
+		}
+		for (int i = 0; i < N; i++)
+		{
 			hdlmaker_dbase[i].storeToVector(hdlmaker_dbase[i].Root, ptr);
 		}
+		for (int i = 0; i < N; i++)
+		{
+			options_dbase[i].storeToVector(options_dbase[i].Root, ptr);
+		}
+
 
 		sort(AllLines.begin(), AllLines.end());
 
@@ -1682,8 +1743,8 @@ string nce_str(vector< nested_conditional_end> v)
 // returns the second parameter of global_declarations
 int last_from_global_declarations(GeneralFact* obj)
 {
-		global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
-		return ptr->w;
+	global_declarations* ptr = dynamic_cast<global_declarations*>(obj);
+	return ptr->w;
 }
 
 // returns the first parameter of global_declarations

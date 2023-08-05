@@ -357,44 +357,44 @@ typename AVLTree::Node* AVLTree::Release(Node* r)
 	return r;
 }
 
-typename AVLTree::Node* AVLTree::delNode(Node* r , size_t Hash, bool* ptrdup)
+typename AVLTree::Node* AVLTree::delNode(Node* r, size_t Hash, bool* ptrdup)
 {
 	if (r == nullptr) return nullptr;
 	if (Hash < r->HashV) r->Left = delNode(r->Left, Hash, ptrdup);
 	else if (Hash > r->HashV) r->Right = delNode(r->Right, Hash, ptrdup);
 	else if (r->Left == nullptr && r->Right == nullptr)
-		{
-			*ptrdup = false;
-			delete r;
-			r = nullptr;
-			NumNodes--;
-		}
-		else if (r->Left == nullptr)
-		{
-			*ptrdup = false;
-			Node* n = r;
-			r = r->Right;
-			delete n;
-			NumNodes--;
-		}
-		else if (r->Right == nullptr)
-		{
-			*ptrdup = false;
-			Node* n = r;
-			r = r->Left;
-			delete n;
-			NumNodes--;
-		}
-		else
-		{
-			*ptrdup = false;
-			Node* n = FindMin(r->Right);
-			string tmp = makeStringOf(n->Data);
-			delete r->Data;
-			r->Data = makeInstanceOf(tmp);
-			r->HashV = n->HashV;
-			r->Right = delNode(r->Right, n->HashV, ptrdup);
-		}	
+	{
+		*ptrdup = false;
+		delete r;
+		r = nullptr;
+		NumNodes--;
+	}
+	else if (r->Left == nullptr)
+	{
+		*ptrdup = false;
+		Node* n = r;
+		r = r->Right;
+		delete n;
+		NumNodes--;
+	}
+	else if (r->Right == nullptr)
+	{
+		*ptrdup = false;
+		Node* n = r;
+		r = r->Left;
+		delete n;
+		NumNodes--;
+	}
+	else
+	{
+		*ptrdup = false;
+		Node* n = FindMin(r->Right);
+		string tmp = makeStringOf(n->Data);
+		delete r->Data;
+		r->Data = makeInstanceOf(tmp);
+		r->HashV = n->HashV;
+		r->Right = delNode(r->Right, n->HashV, ptrdup);
+	}
 	return r;
 }
 
