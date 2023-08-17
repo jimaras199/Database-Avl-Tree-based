@@ -44,6 +44,7 @@
 *.DBA
 *.c
 *.vhd
+*.sv
 *.pdb
 *.ada
 *.prof
