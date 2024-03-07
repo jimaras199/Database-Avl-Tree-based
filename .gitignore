@@ -37,11 +37,32 @@
 *.vcxproj
 *.filters
 *.user
-*.cpp
+%*.cpp
 *.log
+*.ods
+*.ods#
+*.DBA
+*.c
+*.vhd
+*.sv
+*.pdb
+*.ada
+*.prof
+*.mem
+*.bat
+*.qpf
+*.qsf
 
 # Manually ignoring
 .editorconfig
 .vs/
 Debug/
 x64/
+rsa/
+pytharr/
+hdlmaker.pro
+test_functions.cpp
+clock.cpp
+.tmp.driveupload/
+desktop.ini
+bup_status_11-04-2023/
